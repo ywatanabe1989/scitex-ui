@@ -10,8 +10,8 @@ class PackageDocsSidebar:
     Fetches package data from a JSON API and renders a grouped,
     clickable sidebar. Reusable by any SciTeX app.
 
-    TypeScript entry: scitex_ui/ts/components/package-docs-sidebar/index.ts
-    CSS: scitex_ui/css/package-docs-sidebar.css
+    TypeScript entry: scitex_ui/ts/app/package-docs-sidebar/index.ts
+    CSS: scitex_ui/css/app/package-docs-sidebar.css
     API: /apps/docs/api/packages/
     """
 
@@ -19,8 +19,8 @@ class PackageDocsSidebar:
     version = "0.1.0"
     description = "Navigable sidebar for Python package documentation"
     api_endpoint = "/apps/docs/api/packages/"
-    ts_entry = "scitex_ui/ts/components/package-docs-sidebar/index"
-    css_file = "scitex_ui/css/package-docs-sidebar.css"
+    ts_entry = "scitex_ui/ts/app/package-docs-sidebar/index"
+    css_file = "scitex_ui/css/app/package-docs-sidebar.css"
 
 
 register_component(PackageDocsSidebar.name, PackageDocsSidebar)

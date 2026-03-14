@@ -31,16 +31,22 @@ SciTeX UI provides a library of reusable TypeScript + CSS components designed fo
 
 Each component ships with:
 - **TypeScript source** — framework-agnostic, vanilla DOM API
-- **CSS styles** — scoped via BEM-like class prefixes (`stx-pkg-sidebar__*`)
-- **Python metadata** — version, API endpoints, file paths
+- **CSS styles** — scoped via BEM-like class prefixes (`stx-shell-*`, `stx-app-*`)
+- **Python metadata** — version, file paths, descriptions
 
 ### Current Components
 
-| Component | Description | Entry Point |
-|-----------|-------------|-------------|
-| **PackageDocsSidebar** | Navigable sidebar for browsing SciTeX package documentation | `scitex_ui/ts/components/package-docs-sidebar/index` |
+Components are organized into two categories:
 
-<p align="center"><sub><b>Table 1.</b> Available UI components. Each component is registered in the Python metadata registry and provides TypeScript + CSS static assets.</sub></p>
+| Category | Component | Prefix | Description |
+|----------|-----------|--------|-------------|
+| Shell | **ThemeProvider** | `stx-shell-` | Light/dark theme manager with semantic color tokens |
+| Shell | **AppShell** | `stx-shell-` | Workspace layout with collapsible sidebar and accent colors |
+| Shell | **StatusBar** | `stx-shell-` | Bottom status bar with left/center/right sections |
+| App | **FileBrowser** | `stx-app-` | Tree view for navigating file hierarchies |
+| App | **PackageDocsSidebar** | `stx-app-` | Navigable sidebar for Python package documentation |
+
+<p align="center"><sub><b>Table 1.</b> Available UI components. Shell components provide workspace framing; App components are for in-app use. Each is registered in the Python metadata registry.</sub></p>
 
 ## Installation
 
@@ -84,11 +90,25 @@ print(sidebar.css_file)   # CSS stylesheet path
 ### TypeScript Usage
 
 ```typescript
-import { PackageDocsSidebar } from "scitex_ui/ts/components/package-docs-sidebar";
+// Workspace shell
+import { ThemeProvider } from "scitex_ui/ts/shell/theme-provider";
+import { AppShell } from "scitex_ui/ts/shell/app-shell";
+import { StatusBar } from "scitex_ui/ts/shell/status-bar";
 
-const sidebar = new PackageDocsSidebar({
-  container: "#sidebar",
-  onPackageSelect: (pkg) => console.log(`Selected: ${pkg.pip_name}`),
+const theme = new ThemeProvider();
+const shell = new AppShell({
+  container: "#app",
+  accent: "writer",        // Preset accent color
+  collapsible: true,
+});
+const statusBar = new StatusBar({ container: "#status" });
+
+// In-app components
+import { FileBrowser } from "scitex_ui/ts/app/file-browser";
+
+const browser = new FileBrowser({
+  container: "#files",
+  onFileSelect: (node) => console.log(node.path),
 });
 ```
 

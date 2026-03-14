@@ -1,35 +1,73 @@
 #!/usr/bin/env python3
 """Tests for component metadata definitions."""
 
-from scitex_ui.components._package_docs_sidebar import PackageDocsSidebar
+from pathlib import Path
+
+import scitex_ui
 from scitex_ui._registry import get_component
+from scitex_ui._components._app_shell import AppShell
+from scitex_ui._components._file_browser import FileBrowser
+from scitex_ui._components._package_docs_sidebar import PackageDocsSidebar
+from scitex_ui._components._status_bar import StatusBar
+from scitex_ui._components._theme_provider import ThemeProvider
+
+PKG_DIR = Path(scitex_ui.__file__).parent
+
+
+def _check_metadata(cls):
+    """Verify common metadata fields and file existence."""
+    assert cls.name
+    assert cls.version == "0.1.0"
+    assert cls.description
+    assert cls.ts_entry
+    assert cls.css_file
+
+    # Registered in registry
+    assert get_component(cls.name) is cls
+
+    # CSS file exists
+    css_path = PKG_DIR / "static" / cls.css_file
+    assert css_path.exists(), f"CSS not found: {css_path}"
+
+    # TS entry exists
+    ts_path = PKG_DIR / "static" / (cls.ts_entry + ".ts")
+    assert ts_path.exists(), f"TS entry not found: {ts_path}"
 
 
 class TestPackageDocsSidebar:
-    def test_metadata_fields(self):
-        assert PackageDocsSidebar.name == "package-docs-sidebar"
-        assert PackageDocsSidebar.version == "0.1.0"
-        assert PackageDocsSidebar.description
+    def test_metadata_and_files(self):
+        _check_metadata(PackageDocsSidebar)
         assert PackageDocsSidebar.api_endpoint
-        assert PackageDocsSidebar.ts_entry
-        assert PackageDocsSidebar.css_file
 
-    def test_registered_in_registry(self):
-        result = get_component("package-docs-sidebar")
-        assert result is PackageDocsSidebar
 
-    def test_css_file_exists(self):
-        from pathlib import Path
-        import scitex_ui
+class TestThemeProvider:
+    def test_metadata_and_files(self):
+        _check_metadata(ThemeProvider)
 
-        pkg_dir = Path(scitex_ui.__file__).parent
-        css_path = pkg_dir / "static" / PackageDocsSidebar.css_file
-        assert css_path.exists(), f"CSS file not found: {css_path}"
 
-    def test_ts_entry_exists(self):
-        from pathlib import Path
-        import scitex_ui
+class TestAppShell:
+    def test_metadata_and_files(self):
+        _check_metadata(AppShell)
 
-        pkg_dir = Path(scitex_ui.__file__).parent
-        ts_path = pkg_dir / "static" / (PackageDocsSidebar.ts_entry + ".ts")
-        assert ts_path.exists(), f"TS entry not found: {ts_path}"
+
+class TestFileBrowser:
+    def test_metadata_and_files(self):
+        _check_metadata(FileBrowser)
+
+
+class TestStatusBar:
+    def test_metadata_and_files(self):
+        _check_metadata(StatusBar)
+
+
+class TestAllComponentsRegistered:
+    def test_five_components_registered(self):
+        names = scitex_ui.list_components()
+        expected = {
+            "app-shell",
+            "file-browser",
+            "package-docs-sidebar",
+            "status-bar",
+            "theme-provider",
+        }
+        assert expected.issubset(set(names))

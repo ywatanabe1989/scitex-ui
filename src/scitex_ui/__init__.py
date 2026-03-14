@@ -9,9 +9,13 @@ Python API provides component metadata and registration.
 
 __version__ = "0.1.0"
 
-from ._registry import get_component, list_components, register_component
-from . import components as _components  # noqa: F401 — triggers registration
+from ._registry import get_component, list_components
+from ._registry import register_component as _register_component
+from . import _components  # noqa: F401 — triggers registration
 
-__all__ = ["get_component", "list_components", "register_component"]
+# Advanced: re-export for custom component authors
+register_component = _register_component
+
+__all__ = ["get_component", "list_components"]
 
 # EOF

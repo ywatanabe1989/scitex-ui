@@ -16,7 +16,7 @@ Registry
 Components
 ----------
 
-.. automodule:: scitex_ui.components._package_docs_sidebar
+.. automodule:: scitex_ui._components._package_docs_sidebar
    :members:
    :undoc-members:
    :show-inheritance:

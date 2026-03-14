@@ -12,10 +12,13 @@ class TestPublicAPI:
     def test_exports(self):
         assert hasattr(scitex_ui, "get_component")
         assert hasattr(scitex_ui, "list_components")
+
+    def test_register_component_accessible(self):
+        # Available but not in __all__ (advanced use)
         assert hasattr(scitex_ui, "register_component")
 
     def test_all_contains_expected(self):
-        expected = {"get_component", "list_components", "register_component"}
+        expected = {"get_component", "list_components"}
         assert expected == set(scitex_ui.__all__)
 
     def test_list_components_includes_sidebar(self):
