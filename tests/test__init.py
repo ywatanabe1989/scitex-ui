@@ -27,6 +27,12 @@ class TestPublicAPI:
         assert (static_dir / "ts").is_dir()
         assert (static_dir / "css").is_dir()
 
+    def test_css_primitives_exist(self):
+        css_dir = scitex_ui.get_static_dir() / "css" / "primitives"
+        assert css_dir.is_dir()
+        for name in ("spacing.css", "z-index.css", "typography.css"):
+            assert (css_dir / name).is_file(), f"Missing {name}"
+
     def test_list_components_includes_sidebar(self):
         components = scitex_ui.list_components()
         assert "package-docs-sidebar" in components
