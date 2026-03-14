@@ -34,9 +34,32 @@ Each component ships with:
 - **CSS styles** — scoped via BEM-like class prefixes (`stx-shell-*`, `stx-app-*`)
 - **Python metadata** — version, file paths, descriptions
 
-### Current Components
+### Architecture
 
-Components are organized into two categories:
+```mermaid
+graph TB
+    subgraph shell ["Shell (stx-shell-*) — Workspace Frame"]
+        theme["ThemeProvider<br/>Light/Dark + Tokens"]
+        appshell["AppShell<br/>Sidebar + Content"]
+        statusbar["StatusBar<br/>L | C | R Sections"]
+    end
+
+    subgraph app ["App (stx-app-*) — In-App Components"]
+        filebrowser["FileBrowser<br/>Tree Navigation"]
+        pkgsidebar["PackageDocsSidebar<br/>Package Browser"]
+    end
+
+    base{{"BaseComponent<br/>Container + Events + Lifecycle"}}
+
+    appshell -->|extends| base
+    statusbar -->|extends| base
+    filebrowser -->|extends| base
+    pkgsidebar -->|extends| base
+```
+
+<p align="center"><sub><b>Figure 1.</b> Component architecture. Shell components provide workspace framing (theme, layout, status bar). App components are reusable in-app widgets. All extend BaseComponent for shared container resolution, event dispatch, and lifecycle management.</sub></p>
+
+### Current Components
 
 | Category | Component | Prefix | Description |
 |----------|-----------|--------|-------------|
