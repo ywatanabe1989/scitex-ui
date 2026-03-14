@@ -1,0 +1,72 @@
+/* PackageDocsSidebar — shared component styles */
+
+.stx-pkg-sidebar {
+  padding: 4px 0;
+}
+
+.stx-pkg-sidebar__group-header {
+  padding: 8px 10px 4px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted, #8b949e);
+}
+
+.stx-pkg-sidebar__item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  color: var(--text-secondary, #c9d1d9);
+  text-decoration: none;
+  font-size: 12px;
+  border-right: 2px solid transparent;
+  transition:
+    background 0.1s,
+    color 0.1s;
+  cursor: pointer;
+}
+
+.stx-pkg-sidebar__item:hover {
+  background: var(--workspace-bg-hover, rgba(177, 186, 196, 0.08));
+  color: var(--text-primary, #e6edf3);
+  text-decoration: none;
+}
+
+.stx-pkg-sidebar__item--active {
+  background: var(--workspace-bg-hover, #1c2128);
+  color: var(--text-primary, #e6edf3);
+  border-right-color: var(--accent-blue, #58a6ff);
+}
+
+.stx-pkg-sidebar__item i {
+  width: 14px;
+  text-align: center;
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+.stx-pkg-sidebar__label {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stx-pkg-sidebar__version {
+  font-size: 10px;
+  color: var(--text-muted, #8b949e);
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+}
+
+.stx-pkg-sidebar__loading,
+.stx-pkg-sidebar__error {
+  padding: 12px;
+  font-size: 12px;
+  color: var(--text-muted, #8b949e);
+}
+
+.stx-pkg-sidebar__error {
+  color: var(--text-danger, #f85149);
+}

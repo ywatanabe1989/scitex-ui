@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "scitex-ui"
+version = "0.1.0"
+description = "Shared frontend UI components for the SciTeX ecosystem"
+readme = "README.md"
+license = {text = "AGPL-3.0"}
+requires-python = ">=3.10"
+authors = [{name = "Yusuke Watanabe"}]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Framework :: Django",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: TypeScript",
+    "License :: OSI Approved :: GNU Affero General Public License v3",
+]
+
+[project.urls]
+Repository = "https://github.com/ywatanabe1989/scitex-ui"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+scitex_ui = ["static/**/*"]
