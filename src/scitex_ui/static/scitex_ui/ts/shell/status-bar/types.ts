@@ -20,4 +20,6 @@ export interface StatusBarConfig extends BaseComponentConfig {
     center?: StatusItem[];
     right?: StatusItem[];
   };
+  /** Show a theme toggle button in the right section (default: false) */
+  showThemeToggle?: boolean;
 }

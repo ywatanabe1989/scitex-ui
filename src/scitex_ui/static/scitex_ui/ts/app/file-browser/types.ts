@@ -9,6 +9,12 @@ export interface FileNode {
   path: string;
   type: "file" | "directory";
   children?: FileNode[];
+  /** Whether a companion image exists (e.g. PNG for a YAML recipe) */
+  has_image?: boolean;
+  /** Whether this file is currently selected/active in the editor */
+  is_current?: boolean;
+  /** App-specific metadata (passed through, not rendered by default) */
+  meta?: Record<string, unknown>;
 }
 
 export interface FileBrowserConfig extends BaseComponentConfig {
@@ -22,4 +28,8 @@ export interface FileBrowserConfig extends BaseComponentConfig {
   extensions?: string[] | null;
   /** Show hidden files (default: false) */
   showHidden?: boolean;
+  /** Show image badge indicator for files with has_image=true (default: true) */
+  showImageBadge?: boolean;
+  /** Show file count in header (default: false) */
+  showFileCount?: boolean;
 }

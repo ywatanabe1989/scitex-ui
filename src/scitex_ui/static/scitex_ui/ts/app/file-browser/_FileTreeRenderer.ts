@@ -32,6 +32,15 @@ export function renderTree(
   onToggleDir: (path: string) => void,
 ): void {
   container.innerHTML = "";
+
+  if (config.showFileCount) {
+    const count = countFiles(nodes);
+    const header = document.createElement("div");
+    header.className = `${CLS}__header`;
+    header.textContent = `${count} file${count !== 1 ? "s" : ""}`;
+    container.appendChild(header);
+  }
+
   const nav = document.createElement("nav");
   nav.className = CLS;
 
@@ -92,6 +101,10 @@ function renderNodes(
       icon.className = getFileIcon(node.name);
       item.appendChild(icon);
 
+      if (node.is_current) {
+        item.classList.add(`${CLS}__item--active`);
+      }
+
       item.addEventListener("click", (e) => {
         e.stopPropagation();
         parent
@@ -106,6 +119,19 @@ function renderNodes(
     label.className = `${CLS}__label`;
     label.textContent = node.name;
     item.appendChild(label);
+
+    if (
+      node.type === "file" &&
+      node.has_image &&
+      config.showImageBadge !== false
+    ) {
+      const badge = document.createElement("span");
+      badge.className = `${CLS}__badge`;
+      badge.textContent = "PNG";
+      badge.title = "Has companion image";
+      item.appendChild(badge);
+    }
+
     parent.appendChild(item);
 
     if (
@@ -143,6 +169,15 @@ function getFileIcon(filename: string): string {
     pdf: "fas fa-file-pdf",
   };
   return map[ext ?? ""] ?? "fas fa-file";
+}
+
+function countFiles(nodes: FileNode[]): number {
+  let count = 0;
+  for (const node of nodes) {
+    if (node.type === "file") count++;
+    if (node.children) count += countFiles(node.children);
+  }
+  return count;
 }
 
 export function setActive(container: HTMLElement, path: string): void {

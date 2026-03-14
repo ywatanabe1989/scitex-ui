@@ -47,8 +47,14 @@ export class FileBrowser extends BaseComponent<FileBrowserConfig> {
     setActive(this.container, path);
   }
 
+  /** Get paths of currently expanded directories. */
   getExpanded(): string[] {
     return [...this.expandedDirs];
+  }
+
+  /** Get total file count (excludes directories). */
+  getFileCount(): number {
+    return this.countFiles(this.data);
   }
 
   expandDir(path: string): void {
@@ -106,6 +112,15 @@ export class FileBrowser extends BaseComponent<FileBrowserConfig> {
         }
       },
     );
+  }
+
+  private countFiles(nodes: FileNode[]): number {
+    let count = 0;
+    for (const node of nodes) {
+      if (node.type === "file") count++;
+      if (node.children) count += this.countFiles(node.children);
+    }
+    return count;
   }
 
   private findNode(path: string, nodes?: FileNode[]): FileNode | null {
