@@ -34,6 +34,12 @@
   --workspace-border-active: #777675;
   --workspace-bg-hover: rgba(0, 0, 0, 0.04);
   --workspace-bg-active: rgba(0, 0, 0, 0.08);
+  --workspace-slider-hover: #777675;
+  --workspace-slider-active: #5f5e5d;
+  --workspace-ruler-bg: #e0dfdd;
+  --workspace-ruler-border: #d0cfcd;
+  --workspace-text-primary: #24292f;
+  --workspace-text-secondary: #57606a;
 
   /* --- Icons --- */
   --workspace-icon-primary: #6b6b6b;
@@ -48,8 +54,16 @@
   --status-error: #a67373;
   --status-info: #6b7280;
 
+  /* --- Icon Size Scale --- */
+  --icon-xs: 12px;
+  --icon-sm: 14px;
+  --icon-md: 16px;
+  --icon-lg: 20px;
+  --icon-xl: 24px;
+  --icon-2xl: 32px;
+
   /* --- UI Sizing --- */
-  --ui-nav-icon-size: 20px;
+  --ui-nav-icon-size: var(--icon-lg);
   --ui-collapsed-pane-width: 48px;
 
   /* --- Preset App Accent Colors --- */
@@ -75,6 +89,16 @@
   --app-accent-tools-tint: rgba(90, 122, 90, 0.07);
   --app-accent-store: #7a5a6a;
   --app-accent-store-tint: rgba(122, 90, 106, 0.07);
+  --app-accent-home: #6a5a8a;
+  --app-accent-home-tint: rgba(106, 90, 138, 0.07);
+  --app-accent-discovery: #3a6a7a;
+  --app-accent-discovery-tint: rgba(58, 106, 122, 0.07);
+  --app-accent-example: #8a6030;
+  --app-accent-example-tint: rgba(138, 96, 48, 0.07);
+  --app-accent-notebook: #4a7a3a;
+  --app-accent-notebook-tint: rgba(74, 122, 58, 0.07);
+  --app-accent-apps: #7a5a6a;
+  --app-accent-apps-tint: rgba(122, 90, 106, 0.07);
 
   /* --- Custom App Accent (user/creator override) --- */
   --stx-app-accent: var(--app-accent-color);
@@ -105,6 +129,12 @@
   --workspace-border-active: #6e7681;
   --workspace-bg-hover: rgba(177, 186, 196, 0.08);
   --workspace-bg-active: rgba(177, 186, 196, 0.12);
+  --workspace-slider-hover: #6e7681;
+  --workspace-slider-active: #8b949e;
+  --workspace-ruler-bg: #161b22;
+  --workspace-ruler-border: #21262d;
+  --workspace-text-primary: #e6edf3;
+  --workspace-text-secondary: #8b949e;
 
   --workspace-icon-primary: #8b949e;
   --workspace-icon-secondary: #8b949e;
@@ -137,6 +167,16 @@
   --app-accent-tools-tint: rgba(138, 184, 138, 0.08);
   --app-accent-store: #b88a9a;
   --app-accent-store-tint: rgba(184, 138, 154, 0.08);
+  --app-accent-home: #9a8ab8;
+  --app-accent-home-tint: rgba(154, 138, 184, 0.08);
+  --app-accent-discovery: #5a9ab8;
+  --app-accent-discovery-tint: rgba(90, 154, 184, 0.08);
+  --app-accent-example: #c08850;
+  --app-accent-example-tint: rgba(192, 136, 80, 0.08);
+  --app-accent-notebook: #7a9a6a;
+  --app-accent-notebook-tint: rgba(122, 154, 106, 0.08);
+  --app-accent-apps: #b88a9a;
+  --app-accent-apps-tint: rgba(184, 138, 154, 0.08);
 }
 
 /* --- Custom Accent Override ---
