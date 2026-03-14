@@ -1,0 +1,149 @@
+/* =============================================================================
+ * SciTeX Theme — Semantic Color Tokens
+ * =============================================================================
+ * Single source of truth for the SciTeX design system.
+ * Activate via: <html data-theme="light"> or <html data-theme="dark">
+ * ============================================================================= */
+
+:root,
+[data-theme="light"] {
+  /* --- Text --- */
+  --text-primary: #333333;
+  --text-secondary: #4a4a4a;
+  --text-muted: #777777;
+  --text-inverse: #f8f7f5;
+
+  /* --- Background --- */
+  --bg-page: #faf9f7;
+  --bg-surface: #f8f7f5;
+  --bg-muted: #f3f2f0;
+
+  /* --- Border --- */
+  --border-default: #999999;
+  --border-muted: #c0c0c0;
+
+  /* --- Workspace --- */
+  --workspace-bg-primary: #f5f4f2;
+  --workspace-bg-secondary: #efeeed;
+  --workspace-bg-tertiary: #e8e7e5;
+  --workspace-bg-elevated: #fdfcfa;
+  --workspace-bg-monaco: #fdfcfa;
+  --workspace-border-subtle: #dddcda;
+  --workspace-border-default: #c0bfbd;
+  --workspace-border-hover: #999897;
+  --workspace-border-active: #777675;
+  --workspace-bg-hover: rgba(0, 0, 0, 0.04);
+  --workspace-bg-active: rgba(0, 0, 0, 0.08);
+
+  /* --- Icons --- */
+  --workspace-icon-primary: #6b6b6b;
+  --workspace-icon-secondary: #6b6b6b;
+  --workspace-icon-muted: #9a9a9a;
+  --workspace-icon-hover: #4a4a4a;
+  --workspace-icon-active: #3d3d3d;
+
+  /* --- Status --- */
+  --status-success: #5a9a7e;
+  --status-warning: #b8956a;
+  --status-error: #a67373;
+  --status-info: #6b7280;
+
+  /* --- UI Sizing --- */
+  --ui-nav-icon-size: 20px;
+  --ui-collapsed-pane-width: 48px;
+
+  /* --- Preset App Accent Colors --- */
+  --app-accent-color: transparent;
+  --app-accent-tint: transparent;
+  --app-accent-writer: #a07040;
+  --app-accent-writer-tint: rgba(160, 112, 64, 0.07);
+  --app-accent-scholar: #3d7a5e;
+  --app-accent-scholar-tint: rgba(61, 122, 94, 0.07);
+  --app-accent-visualizer: #2e7070;
+  --app-accent-visualizer-tint: rgba(46, 112, 112, 0.07);
+  --app-accent-console: #3e6080;
+  --app-accent-console-tint: rgba(62, 96, 128, 0.07);
+  --app-accent-clew: #8a6a4a;
+  --app-accent-clew-tint: rgba(138, 106, 74, 0.07);
+  --app-accent-figrecipe: #7c5cbf;
+  --app-accent-figrecipe-tint: rgba(124, 92, 191, 0.07);
+  --app-accent-docs: #4a6a9a;
+  --app-accent-docs-tint: rgba(74, 106, 154, 0.07);
+  --app-accent-hub: #6a5a8a;
+  --app-accent-hub-tint: rgba(106, 90, 138, 0.07);
+  --app-accent-tools: #5a7a5a;
+  --app-accent-tools-tint: rgba(90, 122, 90, 0.07);
+  --app-accent-store: #7a5a6a;
+  --app-accent-store-tint: rgba(122, 90, 106, 0.07);
+
+  /* --- Custom App Accent (user/creator override) --- */
+  --stx-app-accent: var(--app-accent-color);
+  --stx-app-accent-tint: var(--app-accent-tint);
+}
+
+[data-theme="dark"] {
+  --text-primary: #e6edf3;
+  --text-secondary: #c9d1d9;
+  --text-muted: #8b949e;
+  --text-inverse: #161b22;
+
+  --bg-page: #0d1117;
+  --bg-surface: #161b22;
+  --bg-muted: #21262d;
+
+  --border-default: #30363d;
+  --border-muted: #21262d;
+
+  --workspace-bg-primary: #0d1117;
+  --workspace-bg-secondary: #161b22;
+  --workspace-bg-tertiary: #1c2128;
+  --workspace-bg-elevated: #21262d;
+  --workspace-bg-monaco: #0d1117;
+  --workspace-border-subtle: #21262d;
+  --workspace-border-default: #30363d;
+  --workspace-border-hover: #484f58;
+  --workspace-border-active: #6e7681;
+  --workspace-bg-hover: rgba(177, 186, 196, 0.08);
+  --workspace-bg-active: rgba(177, 186, 196, 0.12);
+
+  --workspace-icon-primary: #8b949e;
+  --workspace-icon-secondary: #8b949e;
+  --workspace-icon-muted: #6e7681;
+  --workspace-icon-hover: #c9d1d9;
+  --workspace-icon-active: #e6edf3;
+
+  --status-success: #6ba89a;
+  --status-warning: #d4a87a;
+  --status-error: #c08888;
+  --status-info: #9ca3af;
+
+  --app-accent-writer: #d4a87a;
+  --app-accent-writer-tint: rgba(212, 168, 122, 0.08);
+  --app-accent-scholar: #6ba89a;
+  --app-accent-scholar-tint: rgba(107, 168, 154, 0.08);
+  --app-accent-visualizer: #6ab0b0;
+  --app-accent-visualizer-tint: rgba(106, 176, 176, 0.08);
+  --app-accent-console: #7a9ab8;
+  --app-accent-console-tint: rgba(122, 154, 184, 0.08);
+  --app-accent-clew: #b89070;
+  --app-accent-clew-tint: rgba(184, 144, 112, 0.08);
+  --app-accent-figrecipe: #a07ae0;
+  --app-accent-figrecipe-tint: rgba(160, 122, 224, 0.08);
+  --app-accent-docs: #7a9ac8;
+  --app-accent-docs-tint: rgba(122, 154, 200, 0.08);
+  --app-accent-hub: #9a8ab8;
+  --app-accent-hub-tint: rgba(154, 138, 184, 0.08);
+  --app-accent-tools: #8ab88a;
+  --app-accent-tools-tint: rgba(138, 184, 138, 0.08);
+  --app-accent-store: #b88a9a;
+  --app-accent-store-tint: rgba(184, 138, 154, 0.08);
+}
+
+/* --- Custom Accent Override ---
+ * Apps set --stx-app-accent via data attribute or JS:
+ *   <div data-app-accent-custom="#7c5cbf">
+ *   shell.setAccentColor('#7c5cbf')
+ */
+[data-app-accent-custom] {
+  --stx-app-accent: attr(data-app-accent-custom);
+}

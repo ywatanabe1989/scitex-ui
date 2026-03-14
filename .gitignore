@@ -2,6 +2,7 @@
 ### Source: /home/ywatanabe/.git-templates/.gitignore-templates/Custom/Specific.gitignore ###
 # Please add files here
 
+
 ### Source: /home/ywatanabe/.git-templates/.gitignore-templates/Custom/Claude.gitignore ###
 docs/to_claude
 docs/from_agents
@@ -657,3 +658,8 @@ flycheck_*.el
 
 ### Source: /home/ywatanabe/.git-templates/.gitignore-templates/Custom/SLURM.gitignore ###
 slurm_logs
+
+### Project-specific: force-track assets ###
+!docs/*.png
+!docs/sphinx/requirements.txt
+!examples/**/*.txt
