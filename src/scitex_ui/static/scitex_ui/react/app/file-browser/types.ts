@@ -1,0 +1,35 @@
+/**
+ * Type definitions for the FileBrowser React component.
+ * Mirrors: ts/app/file-browser/types.ts
+ */
+
+import type { BaseProps } from "../../_base/types";
+
+export interface FileNode {
+  name: string;
+  path: string;
+  type: "file" | "directory";
+  children?: FileNode[];
+  has_image?: boolean;
+  is_current?: boolean;
+  meta?: Record<string, unknown>;
+}
+
+export interface FileBrowserProps extends BaseProps {
+  /** File tree data */
+  data?: FileNode[];
+  /** API endpoint to fetch file tree */
+  apiUrl?: string;
+  /** Called when user clicks a file */
+  onFileSelect?: (node: FileNode) => void;
+  /** Called when user toggles a directory */
+  onDirectoryToggle?: (node: FileNode, expanded: boolean) => void;
+  /** File extensions to show (null = all) */
+  extensions?: string[] | null;
+  /** Show hidden files (default: false) */
+  showHidden?: boolean;
+  /** Show image badge for files with has_image (default: true) */
+  showImageBadge?: boolean;
+  /** Show file count header (default: false) */
+  showFileCount?: boolean;
+}
