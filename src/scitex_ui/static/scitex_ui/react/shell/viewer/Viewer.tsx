@@ -93,14 +93,15 @@ const ImageView: React.FC<{
   );
 };
 
-/* ── Text Viewer (will integrate Monaco in future) ─────────────── */
+/* ── Text Viewer — Monaco editor from CDN ──────────────────────── */
+import { MonacoView } from "./MonacoView";
+
 const TextView: React.FC<{
   content: string;
   language: string;
-}> = ({ content }) => (
-  <pre className={`${CLS}__text`}>
-    <code>{content}</code>
-  </pre>
+  filePath: string;
+}> = ({ content, filePath }) => (
+  <MonacoView content={content} filePath={filePath} readOnly />
 );
 
 /* ── CSV Table Viewer (ported from CsvViewer.ts fallback) ──────── */
@@ -249,7 +250,11 @@ export const Viewer: React.FC<ViewerProps> = ({
           <ImageView src={getFileUrl(filePath, true)} fileName={fileName} />
         )}
         {fileType === "text" && textContent !== null && (
-          <TextView content={textContent} language={language} />
+          <TextView
+            content={textContent}
+            language={language}
+            filePath={filePath}
+          />
         )}
         {fileType === "csv" && textContent !== null && (
           <CsvView content={textContent} />
