@@ -40,6 +40,11 @@
 
 .stx-app-file-browser__item--directory {
   font-weight: 500;
+  color: var(--text-primary);
+}
+
+.stx-app-file-browser__item--directory > .stx-app-file-browser__label {
+  color: var(--text-primary);
 }
 
 /* --- Indentation --- */
@@ -74,7 +79,7 @@
 }
 
 .stx-app-file-browser__item--directory > i {
-  color: var(--workspace-icon-primary, #6b6b6b);
+  color: var(--file-tree-folder-icon, #e8a838);
 }
 
 .stx-app-file-browser__chevron {
