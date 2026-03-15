@@ -60,13 +60,21 @@ class TestStatusBar:
         _check_metadata(StatusBar)
 
 
+class TestResizer:
+    def test_metadata_and_files(self):
+        from scitex_ui._components._resizer import Resizer
+
+        _check_metadata(Resizer)
+
+
 class TestAllComponentsRegistered:
-    def test_five_components_registered(self):
+    def test_six_components_registered(self):
         names = scitex_ui.list_components()
         expected = {
             "app-shell",
             "file-browser",
             "package-docs-sidebar",
+            "resizer",
             "status-bar",
             "theme-provider",
         }
