@@ -40,11 +40,11 @@
 
 .stx-app-file-browser__item--directory {
   font-weight: 500;
-  color: var(--text-primary);
 }
 
+/* Folder names — blue like Emacs dired (ported from scitex-cloud wft-folder) */
 .stx-app-file-browser__item--directory > .stx-app-file-browser__label {
-  color: var(--text-primary);
+  color: #6cb6ff;
 }
 
 /* --- Indentation --- */
@@ -78,8 +78,9 @@
   color: var(--workspace-icon-muted, #9a9a9a);
 }
 
-.stx-app-file-browser__item--directory > i {
-  color: var(--file-tree-folder-icon, #e8a838);
+/* Hide folder/file icons — simplified look (ported from scitex-cloud .wft-icon) */
+.stx-app-file-browser__item > i:not(.stx-app-file-browser__chevron) {
+  display: none;
 }
 
 .stx-app-file-browser__chevron {
