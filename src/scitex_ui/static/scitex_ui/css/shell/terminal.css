@@ -1,0 +1,29 @@
+/* =============================================================================
+ * SciTeX Shell — Terminal
+ * =============================================================================
+ * Prefix: stx-shell-terminal
+ * ============================================================================= */
+
+.stx-shell-terminal {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.stx-shell-terminal__container {
+  flex: 1;
+  min-height: 0;
+}
+
+.stx-shell-terminal__loading,
+.stx-shell-terminal__error {
+  padding: 16px;
+  font-size: 13px;
+  color: var(--text-muted, #6c7086);
+}
+
+.stx-shell-terminal__error {
+  color: var(--status-error, #f38ba8);
+}

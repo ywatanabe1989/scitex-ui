@@ -1,0 +1,165 @@
+/* =============================================================================
+ * SciTeX Shell — Workspace (universal app frame)
+ * =============================================================================
+ * Prefix: stx-workspace
+ * Requires: shell/theme.css
+ * ============================================================================= */
+
+.stx-workspace {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  background: var(--workspace-bg-primary, #1e1e2e);
+  color: var(--text-primary, #cdd6f4);
+}
+
+/* --- Resizers --- */
+
+.stx-workspace__resizer--vertical {
+  width: 2px;
+  cursor: col-resize;
+  background: var(--border-subtle, rgba(255, 255, 255, 0.06));
+  flex-shrink: 0;
+}
+
+.stx-workspace__resizer--vertical:hover {
+  background: var(--stx-app-accent, #7c5cbf);
+}
+
+.stx-workspace__resizer--horizontal {
+  height: 2px;
+  cursor: row-resize;
+  background: var(--border-subtle, rgba(255, 255, 255, 0.06));
+  flex-shrink: 0;
+}
+
+.stx-workspace__resizer--horizontal:hover {
+  background: var(--stx-app-accent, #7c5cbf);
+}
+
+/* --- Chat Panel --- */
+
+.stx-workspace__chat-panel {
+  width: 300px;
+  min-width: 40px;
+  display: flex;
+  flex-direction: column;
+  background: var(--workspace-bg-secondary, #181825);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.stx-workspace__chat-panel--collapsed {
+  width: 40px;
+}
+
+/* --- File Tree Panel --- */
+
+.stx-workspace__tree-panel {
+  width: 250px;
+  min-width: 40px;
+  display: flex;
+  flex-direction: column;
+  background: var(--workspace-bg-secondary, #181825);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.stx-workspace__tree-panel--collapsed {
+  width: 40px;
+}
+
+.stx-workspace__tree-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted, #6c7086);
+  border-bottom: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.06));
+}
+
+.stx-workspace__tree-header span {
+  flex: 1;
+}
+
+/* --- Main Content --- */
+
+.stx-workspace__main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.stx-workspace__app-content {
+  flex: 1;
+  overflow: auto;
+  min-height: 0;
+}
+
+/* --- Terminal Panel --- */
+
+.stx-workspace__terminal-panel {
+  height: 250px;
+  display: flex;
+  flex-direction: column;
+  background: var(--workspace-bg-secondary, #181825);
+  flex-shrink: 0;
+}
+
+.stx-workspace__terminal-panel--collapsed {
+  height: 32px;
+}
+
+.stx-workspace__terminal-header {
+  flex-shrink: 0;
+}
+
+.stx-workspace__terminal-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 12px;
+  border: none;
+  background: var(--workspace-bg-tertiary, #11111b);
+  color: var(--text-muted, #6c7086);
+  font-size: 12px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.stx-workspace__terminal-toggle:hover {
+  color: var(--text-primary, #cdd6f4);
+}
+
+/* --- Shared Panel Controls --- */
+
+.stx-workspace__panel-toggle,
+.stx-workspace__panel-collapse {
+  background: none;
+  border: none;
+  color: var(--text-muted, #6c7086);
+  cursor: pointer;
+  padding: 4px;
+  font-size: 12px;
+}
+
+.stx-workspace__panel-toggle:hover,
+.stx-workspace__panel-collapse:hover {
+  color: var(--text-primary, #cdd6f4);
+}
+
+.stx-workspace__panel-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 12px 0;
+}

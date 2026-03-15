@@ -1,4 +1,16 @@
-// Shell components (React) — to be added gradually
-// Shell components remain vanilla TS for now since they're
-// used by Django templates directly. React versions will be
-// added here as apps adopt React.
+// Shell components (React)
+export { Workspace } from "./workspace";
+export type {
+  WorkspaceProps,
+  TerminalBackend,
+  ChatBackend,
+  ChatChunk,
+  ChatMessage,
+  FileTreeBackend,
+} from "./workspace";
+
+export { Terminal } from "./terminal";
+export type { TerminalProps } from "./terminal";
+
+export { Chat } from "./chat";
+export type { ChatProps } from "./chat";

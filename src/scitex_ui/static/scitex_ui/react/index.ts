@@ -13,8 +13,8 @@
 // App components
 export * from "./app";
 
-// Shell components (placeholder — added as React versions are created)
-// export * from "./shell";
+// Shell components
+export * from "./shell";
 
 // Base types
 export type { BaseProps } from "./_base";

@@ -1,0 +1,137 @@
+/* =============================================================================
+ * SciTeX Shell — Chat
+ * =============================================================================
+ * Prefix: stx-shell-chat
+ * ============================================================================= */
+
+.stx-shell-chat {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.stx-shell-chat__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted, #6c7086);
+  border-bottom: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.06));
+  flex-shrink: 0;
+}
+
+.stx-shell-chat__clear {
+  background: none;
+  border: none;
+  color: var(--text-muted, #6c7086);
+  cursor: pointer;
+  font-size: 11px;
+  padding: 2px 4px;
+}
+
+.stx-shell-chat__clear:hover {
+  color: var(--status-error, #f38ba8);
+}
+
+/* --- Messages --- */
+
+.stx-shell-chat__messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stx-shell-chat__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 8px;
+  color: var(--text-muted, #6c7086);
+  font-size: 13px;
+}
+
+.stx-shell-chat__empty i {
+  font-size: 32px;
+  opacity: 0.3;
+}
+
+.stx-shell-chat__message {
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.5;
+  max-width: 90%;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+.stx-shell-chat__message--user {
+  background: var(--stx-app-accent, #7c5cbf);
+  color: #ffffff;
+  align-self: flex-end;
+  border-bottom-right-radius: 2px;
+}
+
+.stx-shell-chat__message--assistant {
+  background: var(--workspace-bg-tertiary, #11111b);
+  color: var(--text-primary, #cdd6f4);
+  align-self: flex-start;
+  border-bottom-left-radius: 2px;
+}
+
+/* --- Input --- */
+
+.stx-shell-chat__input-area {
+  display: flex;
+  gap: 4px;
+  padding: 8px;
+  border-top: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.06));
+  flex-shrink: 0;
+}
+
+.stx-shell-chat__input {
+  flex: 1;
+  background: var(--workspace-bg-tertiary, #11111b);
+  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.1));
+  border-radius: 6px;
+  padding: 8px 12px;
+  color: var(--text-primary, #cdd6f4);
+  font-size: 13px;
+  font-family: inherit;
+  resize: none;
+  outline: none;
+}
+
+.stx-shell-chat__input:focus {
+  border-color: var(--stx-app-accent, #7c5cbf);
+}
+
+.stx-shell-chat__send {
+  background: var(--stx-app-accent, #7c5cbf);
+  border: none;
+  border-radius: 6px;
+  color: #ffffff;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.stx-shell-chat__send:hover {
+  opacity: 0.9;
+}
+
+.stx-shell-chat__send:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
