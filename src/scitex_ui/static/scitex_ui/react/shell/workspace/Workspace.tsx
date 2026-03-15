@@ -69,11 +69,14 @@ export const Workspace: React.FC<WorkspaceProps> = ({
   onFileSelect,
   onFileDrop,
   onFileContextAction,
+  getFileUrl: _getFileUrl,
   children,
   className,
   style,
 }) => {
   const [consoleTab, setConsoleTab] = useState<ConsoleTab>("console");
+  // Viewer pane state (WIP — will show file previews)
+  const [_selectedFile, _setSelectedFile] = useState<string | null>(null);
   const [treeData, setTreeData] = useState<FileNode[]>([]);
 
   // Centralized panel state for curtain propagation
@@ -83,6 +86,8 @@ export const Workspace: React.FC<WorkspaceProps> = ({
     loadPanelState(consoleKey, 380),
   );
   const [tree, setTree] = useState(() => loadPanelState(treeKey, 240));
+  const viewerKey = `${appName}-viewer-width`;
+  const [_viewer, _setViewer] = useState(() => loadPanelState(viewerKey, 300));
 
   // Persist on change
   useEffect(() => {
@@ -91,6 +96,9 @@ export const Workspace: React.FC<WorkspaceProps> = ({
   useEffect(() => {
     savePanelState(treeKey, tree);
   }, [tree, treeKey]);
+  useEffect(() => {
+    savePanelState(viewerKey, _viewer);
+  }, [_viewer, viewerKey]);
 
   // Dragging refs
   const dragging = useRef<"console" | "tree" | null>(null);
@@ -416,6 +424,14 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                     </div>
                   ))}
               </div>
+              {/* Status inside console panel */}
+              <div className={`${CLS}__console-status`}>
+                <i
+                  className="fas fa-circle"
+                  style={{ fontSize: 8, color: "var(--status-success)" }}
+                />{" "}
+                Connected
+              </div>
             </>
           )}
         </div>
@@ -467,18 +483,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
         </div>
       </div>
 
-      {/* ── Status Bar ────────────────────────────────────────── */}
-      <div className={`${CLS}__status-bar`}>
-        <span className={`${CLS}__status-item`}>
-          <i
-            className="fas fa-circle"
-            style={{ fontSize: 8, color: "var(--status-success)" }}
-          />{" "}
-          Connected
-        </span>
-        <div style={{ flex: 1 }} />
-        <span className={`${CLS}__status-item`}>{appName}</span>
-      </div>
+      {/* Status bar removed — "Connected" is now inside console panel */}
     </div>
   );
 };

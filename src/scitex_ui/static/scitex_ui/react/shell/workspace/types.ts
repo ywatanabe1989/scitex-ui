@@ -79,6 +79,8 @@ export interface WorkspaceProps extends BaseProps {
     action: "new" | "rename" | "delete" | "duplicate" | "copy-path",
     node: FileNode,
   ) => void;
+  /** Build URL for file content (enables Viewer pane) */
+  getFileUrl?: (path: string, raw?: boolean) => string;
 
   /** App content (rendered in main area) */
   children: React.ReactNode;
