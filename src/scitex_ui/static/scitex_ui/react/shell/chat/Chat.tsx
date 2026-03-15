@@ -1,5 +1,9 @@
 /**
  * Chat — AI chat panel with streaming responses.
+ * Uses scitex-ai-* CSS classes matching scitex-cloud global_ai_panel.html DOM.
+ *
+ * Renders as a fragment (no wrapper div). The parent (Workspace) supplies
+ * the .scitex-ai-view wrapper so there is no nested duplication.
  *
  * Usage:
  *   import { Chat } from '@scitex/ui/react/shell/chat';
@@ -10,15 +14,13 @@ import React, { useState, useRef, useCallback, useEffect } from "react";
 import type { ChatProps } from "./types";
 import type { ChatMessage } from "../workspace/types";
 
-const CLS = "stx-shell-chat";
-
 export const Chat: React.FC<ChatProps> = ({
   backend,
-  placeholder = "Ask AI agent...",
+  placeholder = "Ask anything",
   initialMessages,
   storageKey,
-  className,
-  style,
+  className: _className,
+  style: _style,
 }) => {
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
     if (initialMessages) return initialMessages;
@@ -127,64 +129,113 @@ export const Chat: React.FC<ChatProps> = ({
     setMessages([]);
   }, []);
 
+  // Render as fragment — parent (Workspace) provides the .scitex-ai-view wrapper
   return (
-    <div className={`${CLS} ${className ?? ""}`} style={style}>
-      <div className={`${CLS}__header`}>
-        <span>AI Chat</span>
-        <button
-          className={`${CLS}__clear`}
-          onClick={clearMessages}
-          title="Clear chat"
-        >
-          <i className="fas fa-trash" />
+    <>
+      {/* Sessions bar — new chat button + session chips + actions */}
+      <div className="scitex-ai-sessions-bar">
+        <button className="scitex-ai-new-chat" title="New chat">
+          <i className="fas fa-plus" />
         </button>
+        <div className="scitex-ai-sessions-list" />
+        <div className="scitex-ai-panel-actions">
+          <button
+            className="scitex-ai-action-btn"
+            onClick={clearMessages}
+            title="Clear chat"
+          >
+            <i className="fas fa-trash-alt" />
+          </button>
+        </div>
       </div>
 
-      <div className={`${CLS}__messages`}>
+      {/* Messages */}
+      <div className="scitex-ai-messages">
         {messages.length === 0 && (
-          <div className={`${CLS}__empty`}>
+          <div className="scitex-ai-empty">
             <i className="fas fa-robot" />
-            <p>Ask anything about your project</p>
+            <span>Ask anything about SciTeX.</span>
+            <span>
+              I can take actions: stats, plots, literature, and your current
+              work.
+            </span>
           </div>
         )}
         {messages.map((msg, i) => (
           <div
             key={i}
-            className={`${CLS}__message ${CLS}__message--${msg.role}`}
+            className={`scitex-ai-msg ${msg.role === "user" ? "user" : "assistant"}`}
           >
-            <div className={`${CLS}__message-content`}>
-              {msg.content ||
-                (streaming && i === messages.length - 1 ? "..." : "")}
-            </div>
+            {msg.content ||
+              (streaming && i === messages.length - 1 ? (
+                <span className="scitex-ai-typing">Thinking</span>
+              ) : (
+                ""
+              ))}
           </div>
         ))}
         <div ref={messagesEndRef} />
       </div>
 
-      <div className={`${CLS}__input-area`}>
-        <textarea
-          ref={inputRef}
-          className={`${CLS}__input`}
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder={placeholder}
-          rows={1}
-          disabled={streaming}
-        />
+      {/* Input area */}
+      <div className="scitex-ai-input-area" style={{ position: "relative" }}>
+        <span className="scitex-ai-model-badge" />
+        <div className="scitex-ai-image-previews" />
+        <div className="scitex-ai-input-wrap">
+          <textarea
+            ref={inputRef}
+            className="scitex-ai-input"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder={placeholder}
+            rows={1}
+            disabled={streaming}
+          />
+          {/* Camera — placeholder, non-functional */}
+          <button
+            className="scitex-ai-input-btn"
+            title="Attach image"
+            disabled
+            aria-disabled="true"
+          >
+            <i className="fas fa-camera" />
+          </button>
+          {/* Sketch — placeholder, non-functional */}
+          <button
+            className="scitex-ai-input-btn"
+            title="Draw sketch"
+            disabled
+            aria-disabled="true"
+          >
+            <i className="fas fa-pen" />
+          </button>
+          {/* Mic — placeholder, non-functional */}
+          <button
+            className="scitex-ai-mic"
+            title="Voice input"
+            disabled
+            aria-disabled="true"
+          >
+            <i className="fas fa-microphone" />
+          </button>
+          {/* Gear / settings — placeholder */}
+          <button
+            className="scitex-ai-input-btn scitex-ai-gear-btn"
+            title="Chat settings"
+            disabled
+            aria-disabled="true"
+          >
+            <i className="fas fa-cog" />
+          </button>
+        </div>
+        {/* Hidden send button (kept for JS compatibility) */}
         <button
-          className={`${CLS}__send`}
+          className="scitex-ai-send"
           onClick={sendMessage}
           disabled={streaming || !input.trim()}
-          title="Send (Enter)"
-        >
-          <i
-            className={
-              streaming ? "fas fa-spinner fa-spin" : "fas fa-paper-plane"
-            }
-          />
-        </button>
+        />
       </div>
-    </div>
+    </>
   );
 };

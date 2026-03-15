@@ -2,19 +2,24 @@
  * Workspace — universal shell for all SciTeX apps.
  * Ported from scitex-cloud. Layout:
  *   Console/Chat | FileTree | Viewer | AppContent
+ *
+ * Console/Chat panel uses scitex-ai-* CSS classes matching scitex-cloud
+ * global_ai_panel.html DOM structure exactly.
  */
 
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import type { WorkspaceProps } from "./types";
 import type { FileNode } from "../../app/file-browser/types";
 import { FileBrowser } from "../../app/file-browser";
 import { Chat } from "../chat";
 import { Terminal } from "../terminal";
 import { Viewer } from "../viewer";
-import { usePanelState, COLLAPSE_WIDTH, MIN_WIDTH } from "./usePanelState";
+import { usePanelState, COLLAPSE_WIDTH } from "./usePanelState";
+import { useResizers } from "./useResizers";
 
 const CLS = "stx-workspace";
-type ConsoleTab = "console" | "chat";
+/** Mode matching scitex-cloud data-mode values */
+type ConsoleMode = "console" | "chat";
 
 export const Workspace: React.FC<WorkspaceProps> = ({
   appName,
@@ -31,7 +36,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
   className,
   style,
 }) => {
-  const [consoleTab, setConsoleTab] = useState<ConsoleTab>("console");
+  const [mode, setMode] = useState<ConsoleMode>("console");
   const [treeData, setTreeData] = useState<FileNode[]>([]);
   const [viewerFile, setViewerFile] = useState<string | null>(null);
 
@@ -39,14 +44,8 @@ export const Workspace: React.FC<WorkspaceProps> = ({
   const [tree, setTree] = usePanelState(`${appName}-tree-width`, 240);
   const [viewer, setViewer] = usePanelState(`${appName}-viewer-width`, 300);
 
-  // Dragging refs for curtain propagation
-  const dragging = useRef<string | null>(null);
-  const dragStartX = useRef(0);
-  const dragStartConsole = useRef(0);
-  const dragStartTree = useRef(0);
-  const propagating = useRef(false);
-  const propagateStartX = useRef(0);
-  const propagateStartWidth = useRef(0);
+  const { onConsoleResizerDown, onTreeResizerDown, onViewerResizerDown } =
+    useResizers(console_, tree, viewer, setConsole, setTree, setViewer);
 
   useEffect(() => {
     if (accentColor) {
@@ -69,209 +68,6 @@ export const Workspace: React.FC<WorkspaceProps> = ({
     }
   }, [fileTreeBackend]);
 
-  const disableTransitions = () => {
-    document
-      .querySelectorAll<HTMLElement>(
-        `.${CLS}__console-panel, .${CLS}__tree-panel`,
-      )
-      .forEach((el) => {
-        el.style.transition = "none";
-      });
-  };
-  const enableTransitions = () => {
-    document
-      .querySelectorAll<HTMLElement>(
-        `.${CLS}__console-panel, .${CLS}__tree-panel`,
-      )
-      .forEach((el) => {
-        el.style.transition = "";
-      });
-  };
-
-  /** Console resizer — propagates RIGHT to tree */
-  const onConsoleResizerDown = useCallback(
-    (e: React.MouseEvent) => {
-      e.preventDefault();
-      dragging.current = "console";
-      propagating.current = false;
-      dragStartX.current = e.clientX;
-      dragStartConsole.current = console_.collapsed
-        ? COLLAPSE_WIDTH
-        : console_.width;
-      dragStartTree.current = tree.collapsed ? COLLAPSE_WIDTH : tree.width;
-      if (console_.collapsed) {
-        setConsole((s) => ({ ...s, collapsed: false, width: MIN_WIDTH }));
-        dragStartConsole.current = MIN_WIDTH;
-      }
-      disableTransitions();
-      document.body.style.cursor = "col-resize";
-      document.body.style.userSelect = "none";
-
-      const onMove = (ev: MouseEvent) => {
-        if (dragging.current !== "console") return;
-        const delta = ev.clientX - dragStartX.current;
-        const newW = dragStartConsole.current + delta;
-        if (newW < COLLAPSE_WIDTH) {
-          setConsole((s) => ({
-            ...s,
-            collapsed: true,
-            prevWidth: dragStartConsole.current,
-          }));
-          if (!propagating.current) {
-            propagating.current = true;
-            propagateStartX.current = ev.clientX;
-            propagateStartWidth.current = dragStartTree.current;
-          }
-          if (propagating.current) {
-            const propW =
-              propagateStartWidth.current +
-              (ev.clientX - propagateStartX.current);
-            if (propW < COLLAPSE_WIDTH) {
-              setTree((s) => ({
-                ...s,
-                collapsed: true,
-                prevWidth: propagateStartWidth.current,
-              }));
-            } else {
-              setTree((s) => ({
-                ...s,
-                collapsed: false,
-                width: Math.min(propW, 500),
-              }));
-            }
-          }
-          return;
-        }
-        propagating.current = false;
-        setConsole((s) => ({
-          ...s,
-          collapsed: false,
-          width: Math.max(MIN_WIDTH, Math.min(600, newW)),
-        }));
-      };
-      const onUp = () => {
-        dragging.current = null;
-        propagating.current = false;
-        document.removeEventListener("mousemove", onMove);
-        document.removeEventListener("mouseup", onUp);
-        document.body.style.cursor = "";
-        document.body.style.userSelect = "";
-        enableTransitions();
-      };
-      document.addEventListener("mousemove", onMove);
-      document.addEventListener("mouseup", onUp);
-    },
-    [console_, tree, setConsole, setTree],
-  );
-
-  /** Tree resizer — propagates LEFT to console */
-  const onTreeResizerDown = useCallback(
-    (e: React.MouseEvent) => {
-      e.preventDefault();
-      dragging.current = "tree";
-      propagating.current = false;
-      dragStartX.current = e.clientX;
-      dragStartTree.current = tree.collapsed ? COLLAPSE_WIDTH : tree.width;
-      dragStartConsole.current = console_.collapsed
-        ? COLLAPSE_WIDTH
-        : console_.width;
-      if (tree.collapsed) {
-        setTree((s) => ({ ...s, collapsed: false, width: MIN_WIDTH }));
-        dragStartTree.current = MIN_WIDTH;
-      }
-      disableTransitions();
-      document.body.style.cursor = "col-resize";
-      document.body.style.userSelect = "none";
-
-      const onMove = (ev: MouseEvent) => {
-        if (dragging.current !== "tree") return;
-        const delta = ev.clientX - dragStartX.current;
-        const newW = dragStartTree.current + delta;
-        if (newW < COLLAPSE_WIDTH) {
-          setTree((s) => ({
-            ...s,
-            collapsed: true,
-            prevWidth: dragStartTree.current,
-          }));
-          if (!propagating.current) {
-            propagating.current = true;
-            propagateStartX.current = ev.clientX;
-            propagateStartWidth.current = dragStartConsole.current;
-          }
-          if (propagating.current) {
-            const propW =
-              propagateStartWidth.current +
-              (ev.clientX - propagateStartX.current);
-            if (propW < COLLAPSE_WIDTH) {
-              setConsole((s) => ({
-                ...s,
-                collapsed: true,
-                prevWidth: propagateStartWidth.current,
-              }));
-            } else {
-              setConsole((s) => ({
-                ...s,
-                collapsed: false,
-                width: Math.max(MIN_WIDTH, Math.min(600, propW)),
-              }));
-            }
-          }
-          return;
-        }
-        propagating.current = false;
-        setTree((s) => ({
-          ...s,
-          collapsed: false,
-          width: Math.max(MIN_WIDTH, Math.min(500, newW)),
-        }));
-      };
-      const onUp = () => {
-        dragging.current = null;
-        propagating.current = false;
-        document.removeEventListener("mousemove", onMove);
-        document.removeEventListener("mouseup", onUp);
-        document.body.style.cursor = "";
-        document.body.style.userSelect = "";
-        enableTransitions();
-      };
-      document.addEventListener("mousemove", onMove);
-      document.addEventListener("mouseup", onUp);
-    },
-    [tree, console_, setTree, setConsole],
-  );
-
-  /** Simple resizer for viewer panel */
-  const onViewerResizerDown = useCallback(
-    (e: React.MouseEvent) => {
-      e.preventDefault();
-      const startX = e.clientX;
-      const startW = viewer.collapsed ? COLLAPSE_WIDTH : viewer.width;
-      document.body.style.cursor = "col-resize";
-      document.body.style.userSelect = "none";
-      const onMove = (ev: MouseEvent) => {
-        const newW = startW + (ev.clientX - startX);
-        if (newW < COLLAPSE_WIDTH) {
-          setViewer((s) => ({ ...s, collapsed: true, prevWidth: startW }));
-        } else {
-          setViewer((s) => ({
-            ...s,
-            collapsed: false,
-            width: Math.max(MIN_WIDTH, Math.min(600, newW)),
-          }));
-        }
-      };
-      const onUp = () => {
-        document.removeEventListener("mousemove", onMove);
-        document.removeEventListener("mouseup", onUp);
-        document.body.style.cursor = "";
-        document.body.style.userSelect = "";
-      };
-      document.addEventListener("mousemove", onMove);
-      document.addEventListener("mouseup", onUp);
-    },
-    [viewer, setViewer],
-  );
-
   const expandConsole = useCallback(() => {
     setConsole((s) => ({
       ...s,
@@ -279,6 +75,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
       width: s.prevWidth > COLLAPSE_WIDTH ? s.prevWidth : 380,
     }));
   }, [setConsole]);
+
   const expandTree = useCallback(() => {
     setTree((s) => ({
       ...s,
@@ -286,6 +83,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
       width: s.prevWidth > COLLAPSE_WIDTH ? s.prevWidth : 240,
     }));
   }, [setTree]);
+
   const expandViewer = useCallback(() => {
     setViewer((s) => ({
       ...s,
@@ -318,7 +116,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
       data-app={appName}
     >
       <div className={`${CLS}__columns`}>
-        {/* ── Console/Chat ────────────────────────────────── */}
+        {/* ── Console/Chat Panel (scitex-ai-* DOM) ──────────── */}
         <div
           className={`${CLS}__console-panel${console_.collapsed ? ` ${CLS}__panel--collapsed` : ""}`}
           style={{ width: cW }}
@@ -331,56 +129,38 @@ export const Workspace: React.FC<WorkspaceProps> = ({
             </div>
           ) : (
             <>
-              <div className={`${CLS}__console-tabs`}>
-                <button
-                  className={`${CLS}__console-tab${consoleTab === "console" ? ` ${CLS}__console-tab--active` : ""}`}
-                  onClick={() => setConsoleTab("console")}
-                >
-                  <i className="fas fa-terminal" /> Console
-                </button>
-                <button
-                  className={`${CLS}__console-tab${consoleTab === "chat" ? ` ${CLS}__console-tab--active` : ""}`}
-                  onClick={() => setConsoleTab("chat")}
-                >
-                  <i className="fas fa-comment" /> Chat
-                </button>
-                <div style={{ flex: 1 }} />
-                <button
-                  className={`${CLS}__console-status-btn`}
-                  title="Layout"
-                  style={{ marginRight: 4 }}
-                >
-                  <i className="fas fa-th" />
-                </button>
-              </div>
-              {/* Terminal session tabs (matching scitex-cloud) */}
-              {consoleTab === "console" && (
-                <div className={`${CLS}__terminal-tabs`}>
+              {/* Header: mode toggle (Console | Chat) */}
+              <div className="scitex-ai-panel-header">
+                <div className="scitex-ai-mode-toggle">
                   <button
-                    className={`${CLS}__terminal-tab-new`}
-                    title="New terminal"
+                    className={`scitex-ai-mode-btn${mode === "console" ? " active" : ""}`}
+                    data-mode="console"
+                    title="Terminal"
+                    onClick={() => setMode("console")}
                   >
-                    +
+                    <i className="fas fa-terminal" />
+                    Console
                   </button>
                   <button
-                    className={`${CLS}__terminal-tab ${CLS}__terminal-tab--active`}
+                    className={`scitex-ai-mode-btn${mode === "chat" ? " active" : ""}`}
+                    data-mode="chat"
+                    title="AI Chat"
+                    onClick={() => setMode("chat")}
                   >
-                    T1
+                    <i className="fas fa-robot" />
+                    Chat
                   </button>
                 </div>
-              )}
-              <div className={`${CLS}__console-content`}>
-                {consoleTab === "console" &&
-                  (terminalBackend ? (
-                    <Terminal backend={terminalBackend} />
-                  ) : (
-                    <div className={`${CLS}__placeholder`}>
-                      <i className="fas fa-terminal" />
-                      <p>No terminal backend</p>
-                    </div>
-                  ))}
-                {consoleTab === "chat" &&
-                  (chatBackend ? (
+              </div>
+
+              {/* Body: views toggled by mode */}
+              <div className="scitex-ai-body">
+                {/* ── Chat view ────────────────────────────── */}
+                <div
+                  id="scitex-ai-chat-view"
+                  className={`scitex-ai-view${mode === "chat" ? " active" : ""}`}
+                >
+                  {chatBackend ? (
                     <Chat
                       backend={chatBackend}
                       storageKey={`${appName}-chat-messages`}
@@ -390,36 +170,106 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                       <i className="fas fa-comment" />
                       <p>No chat backend</p>
                     </div>
-                  ))}
-              </div>
-              <div className={`${CLS}__console-status`}>
-                <i
-                  className="fas fa-circle"
-                  style={{ fontSize: 8, color: "var(--status-success)" }}
-                />{" "}
-                Connected
-                <div className={`${CLS}__console-status-actions`}>
-                  <button
-                    className={`${CLS}__console-status-btn`}
-                    title="Terminal"
+                  )}
+                </div>
+
+                {/* ── Console/Terminal view ─────────────────── */}
+                <div
+                  id="scitex-ai-console-view"
+                  className={`scitex-ai-view${mode === "console" ? " active" : ""}`}
+                  data-view="console"
+                >
+                  {/* Console tabs bar */}
+                  <div className="scitex-ai-console-tabs-bar">
+                    <button
+                      className="scitex-ai-console-new-tab"
+                      title="New terminal"
+                    >
+                      <i className="fas fa-plus" />
+                    </button>
+                    <div
+                      id="scitex-ai-console-tabs-list"
+                      className="scitex-ai-console-tabs-list"
+                    />
+                  </div>
+
+                  {/* Terminal content */}
+                  <div
+                    id="scitex-ai-console-terminal"
+                    className="scitex-ai-console-terminal"
                   >
-                    <i className="fas fa-terminal" />
-                  </button>
-                  <button
-                    className={`${CLS}__console-status-btn`}
-                    title="Microphone"
+                    {terminalBackend ? (
+                      <Terminal backend={terminalBackend} />
+                    ) : (
+                      <div className={`${CLS}__placeholder`}>
+                        <i className="fas fa-terminal" />
+                        <p>No terminal backend</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Console toolbar */}
+                  <div
+                    className="scitex-ai-console-toolbar"
+                    style={{ position: "relative" }}
                   >
-                    <i className="fas fa-microphone" />
-                  </button>
-                  <button className={`${CLS}__console-status-btn`} title="Edit">
-                    <i className="fas fa-pen" />
-                  </button>
-                  <button
-                    className={`${CLS}__console-status-btn`}
-                    title="Settings"
-                  >
-                    <i className="fas fa-gear" />
-                  </button>
+                    <span
+                      id="scitex-ai-console-status"
+                      className="scitex-ai-console-status"
+                    />
+                    <div className="scitex-ai-console-toolbar-btns">
+                      {/* Auto-accept toggle */}
+                      <button
+                        id="scitex-ai-auto-accept"
+                        className="scitex-ai-input-btn scitex-ai-auto-accept-btn"
+                        title="Auto-Accept"
+                        disabled
+                        aria-disabled="true"
+                      >
+                        <i className="fas fa-robot" />
+                      </button>
+                      {/* Camera — placeholder */}
+                      <button
+                        id="scitex-ai-console-camera"
+                        className="scitex-ai-input-btn"
+                        title="Webcam capture"
+                        disabled
+                        aria-disabled="true"
+                      >
+                        <i className="fas fa-camera" />
+                      </button>
+                      {/* Sketch — placeholder */}
+                      <button
+                        id="scitex-ai-console-sketch"
+                        className="scitex-ai-input-btn"
+                        title="Draw sketch"
+                        disabled
+                        aria-disabled="true"
+                      >
+                        <i className="fas fa-pen" />
+                      </button>
+                      {/* Mic — placeholder */}
+                      <button
+                        id="scitex-ai-console-mic"
+                        className="scitex-ai-input-btn"
+                        title="Voice input"
+                        disabled
+                        aria-disabled="true"
+                      >
+                        <i className="fas fa-microphone" />
+                      </button>
+                      {/* Gear / settings — placeholder */}
+                      <button
+                        id="scitex-ai-console-gear"
+                        className="scitex-ai-input-btn scitex-ai-gear-btn"
+                        title="Console settings"
+                        disabled
+                        aria-disabled="true"
+                      >
+                        <i className="fas fa-cog" />
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </>
