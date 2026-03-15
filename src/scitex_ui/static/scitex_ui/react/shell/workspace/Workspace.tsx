@@ -1,18 +1,13 @@
 /**
  * Workspace — universal shell for all SciTeX apps.
  *
- * Provides: AI chat (left), file tree (middle), app content (right),
- * terminal (bottom). All panels are optional and resizable.
+ * Layout: Console/Chat (left) | File Tree (mid) | App Content (right)
+ *
+ * The Console panel has two tabs: Console (terminal) and Chat (AI).
+ * No top navbar in standalone mode. App selector only in cloud mode.
  *
  * Usage:
- *   import { Workspace } from '@scitex/ui/react/shell/workspace';
- *   <Workspace
- *     appName="figrecipe"
- *     terminalBackend={localBackend}
- *     chatBackend={directBackend}
- *     fileTreeBackend={localFileTree}
- *     onFileSelect={(node) => loadRecipe(node.path)}
- *   >
+ *   <Workspace appName="figrecipe" terminalBackend={...} fileTreeBackend={...}>
  *     <MyAppContent />
  *   </Workspace>
  */
@@ -25,6 +20,8 @@ import { Chat } from "../chat";
 import { Terminal } from "../terminal";
 
 const CLS = "stx-workspace";
+
+type ConsoleTab = "console" | "chat";
 
 export const Workspace: React.FC<WorkspaceProps> = ({
   appName,
@@ -39,18 +36,14 @@ export const Workspace: React.FC<WorkspaceProps> = ({
   className,
   style,
 }) => {
-  const [chatCollapsed, setChatCollapsed] = useState(() => {
-    try {
-      return localStorage.getItem(`${appName}-chat-collapsed`) === "true";
-    } catch {
-      return false;
-    }
-  });
+  const [consoleTab, setConsoleTab] = useState<ConsoleTab>("console");
+  const [consoleCollapsed, setConsoleCollapsed] = useState(false);
   const [treeCollapsed, setTreeCollapsed] = useState(false);
-  const [terminalCollapsed, setTerminalCollapsed] = useState(true);
   const [treeData, setTreeData] = useState<FileNode[]>([]);
 
-  // Set accent color CSS variable
+  const hasConsole = !!(terminalBackend || chatBackend);
+
+  // Set accent color
   useEffect(() => {
     if (accentColor) {
       document.documentElement.style.setProperty(
@@ -73,22 +66,11 @@ export const Workspace: React.FC<WorkspaceProps> = ({
     }
   }, [fileTreeBackend]);
 
-  // Persist chat collapse state
-  useEffect(() => {
-    try {
-      localStorage.setItem(`${appName}-chat-collapsed`, String(chatCollapsed));
-    } catch {
-      /* noop */
-    }
-  }, [appName, chatCollapsed]);
-
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault();
       const path = e.dataTransfer.getData("text/plain");
-      if (path && onFileDrop) {
-        onFileDrop(path, "app");
-      }
+      if (path && onFileDrop) onFileDrop(path, "app");
     },
     [onFileDrop],
   );
@@ -104,33 +86,81 @@ export const Workspace: React.FC<WorkspaceProps> = ({
       style={style}
       data-app={appName}
     >
-      {/* AI Chat Panel (left) */}
-      {chatBackend && (
+      {/* ── Column 1: Console/Chat Panel ──────────────────────── */}
+      {hasConsole && (
         <>
           <div
-            className={`${CLS}__chat-panel${chatCollapsed ? ` ${CLS}__chat-panel--collapsed` : ""}`}
+            className={`${CLS}__console-panel${consoleCollapsed ? ` ${CLS}__console-panel--collapsed` : ""}`}
           >
-            {chatCollapsed ? (
-              <button
-                className={`${CLS}__panel-toggle`}
-                onClick={() => setChatCollapsed(false)}
-                title="Show AI Chat"
-              >
-                <i className="fas fa-robot" />
-              </button>
+            {consoleCollapsed ? (
+              <div className={`${CLS}__console-collapsed`}>
+                {terminalBackend && (
+                  <button
+                    className={`${CLS}__collapsed-tab`}
+                    onClick={() => {
+                      setConsoleCollapsed(false);
+                      setConsoleTab("console");
+                    }}
+                    title="Console"
+                  >
+                    <i className="fas fa-terminal" />
+                  </button>
+                )}
+                {chatBackend && (
+                  <button
+                    className={`${CLS}__collapsed-tab`}
+                    onClick={() => {
+                      setConsoleCollapsed(false);
+                      setConsoleTab("chat");
+                    }}
+                    title="Chat"
+                  >
+                    <i className="fas fa-comment" />
+                  </button>
+                )}
+              </div>
             ) : (
               <>
-                <button
-                  className={`${CLS}__panel-collapse`}
-                  onClick={() => setChatCollapsed(true)}
-                  title="Hide AI Chat"
-                >
-                  <i className="fas fa-chevron-left" />
-                </button>
-                <Chat
-                  backend={chatBackend}
-                  storageKey={`${appName}-chat-messages`}
-                />
+                {/* Tab bar */}
+                <div className={`${CLS}__console-tabs`}>
+                  {terminalBackend && (
+                    <button
+                      className={`${CLS}__console-tab${consoleTab === "console" ? ` ${CLS}__console-tab--active` : ""}`}
+                      onClick={() => setConsoleTab("console")}
+                    >
+                      <i className="fas fa-terminal" /> Console
+                    </button>
+                  )}
+                  {chatBackend && (
+                    <button
+                      className={`${CLS}__console-tab${consoleTab === "chat" ? ` ${CLS}__console-tab--active` : ""}`}
+                      onClick={() => setConsoleTab("chat")}
+                    >
+                      <i className="fas fa-comment" /> Chat
+                    </button>
+                  )}
+                  <div style={{ flex: 1 }} />
+                  <button
+                    className={`${CLS}__console-collapse`}
+                    onClick={() => setConsoleCollapsed(true)}
+                    title="Collapse"
+                  >
+                    <i className="fas fa-chevron-left" />
+                  </button>
+                </div>
+
+                {/* Content */}
+                <div className={`${CLS}__console-content`}>
+                  {consoleTab === "console" && terminalBackend && (
+                    <Terminal backend={terminalBackend} />
+                  )}
+                  {consoleTab === "chat" && chatBackend && (
+                    <Chat
+                      backend={chatBackend}
+                      storageKey={`${appName}-chat-messages`}
+                    />
+                  )}
+                </div>
               </>
             )}
           </div>
@@ -138,7 +168,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
         </>
       )}
 
-      {/* File Tree Panel (middle) */}
+      {/* ── Column 2: File Tree Panel ─────────────────────────── */}
       {fileTreeBackend && (
         <>
           <div
@@ -148,7 +178,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
               <i className="fas fa-folder" />
               <span>Files</span>
               <button
-                className={`${CLS}__panel-collapse`}
+                className={`${CLS}__panel-btn`}
                 onClick={() => setTreeCollapsed(!treeCollapsed)}
               >
                 <i
@@ -169,40 +199,26 @@ export const Workspace: React.FC<WorkspaceProps> = ({
         </>
       )}
 
-      {/* Main Content Area */}
-      <div className={`${CLS}__main`}>
-        {/* App content */}
-        <div
-          className={`${CLS}__app-content`}
-          onDrop={handleDrop}
-          onDragOver={handleDragOver}
-        >
-          {children}
-        </div>
+      {/* ── Column 3: App Content ─────────────────────────────── */}
+      <div
+        className={`${CLS}__app-content`}
+        onDrop={handleDrop}
+        onDragOver={handleDragOver}
+      >
+        {children}
+      </div>
 
-        {/* Terminal (bottom) */}
-        {terminalBackend && (
-          <>
-            <div className={`${CLS}__resizer ${CLS}__resizer--horizontal`} />
-            <div
-              className={`${CLS}__terminal-panel${terminalCollapsed ? ` ${CLS}__terminal-panel--collapsed` : ""}`}
-            >
-              <div className={`${CLS}__terminal-header`}>
-                <button
-                  className={`${CLS}__terminal-toggle`}
-                  onClick={() => setTerminalCollapsed(!terminalCollapsed)}
-                >
-                  <i className="fas fa-terminal" />
-                  <span>Terminal</span>
-                  <i
-                    className={`fas fa-chevron-${terminalCollapsed ? "up" : "down"}`}
-                  />
-                </button>
-              </div>
-              {!terminalCollapsed && <Terminal backend={terminalBackend} />}
-            </div>
-          </>
-        )}
+      {/* ── Status Bar ────────────────────────────────────────── */}
+      <div className={`${CLS}__status-bar`}>
+        <span className={`${CLS}__status-item`}>
+          <i
+            className="fas fa-circle"
+            style={{ fontSize: 8, color: "#a6e3a1" }}
+          />{" "}
+          Connected
+        </span>
+        <div style={{ flex: 1 }} />
+        <span className={`${CLS}__status-item`}>{appName}</span>
       </div>
     </div>
   );
