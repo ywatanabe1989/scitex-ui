@@ -67,12 +67,20 @@ class TestResizer:
         _check_metadata(Resizer)
 
 
+class TestMediaViewer:
+    def test_metadata_and_files(self):
+        from scitex_ui._components._media_viewer import MediaViewer
+
+        _check_metadata(MediaViewer)
+
+
 class TestAllComponentsRegistered:
-    def test_six_components_registered(self):
+    def test_seven_components_registered(self):
         names = scitex_ui.list_components()
         expected = {
             "app-shell",
             "file-browser",
+            "media-viewer",
             "package-docs-sidebar",
             "resizer",
             "status-bar",
