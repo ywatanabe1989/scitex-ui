@@ -86,6 +86,15 @@ const FileItem: React.FC<FileItemProps> = ({
         className={`${CLS}__item${isDir ? ` ${CLS}__item--directory` : ""}${isActive ? ` ${CLS}__item--active` : ""}`}
         data-depth={Math.min(depth, 5)}
         data-path={node.path}
+        draggable={!isDir}
+        onDragStart={
+          isDir
+            ? undefined
+            : (e) => {
+                e.dataTransfer.setData("text/plain", node.path);
+                e.dataTransfer.effectAllowed = "copy";
+              }
+        }
         onClick={(e) => {
           e.stopPropagation();
           if (isDir) {

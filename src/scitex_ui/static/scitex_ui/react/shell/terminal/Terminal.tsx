@@ -84,16 +84,25 @@ export const Terminal: React.FC<TerminalProps> = ({
         }
 
         const fitAddon = new FitAddon();
+        // Read theme colors from CSS custom properties
+        const cs = getComputedStyle(document.documentElement);
+        const bg =
+          cs.getPropertyValue("--workspace-bg-primary").trim() || "#0d1117";
+        const fg = cs.getPropertyValue("--text-primary").trim() || "#e6edf3";
+        const sel =
+          cs.getPropertyValue("--workspace-bg-active").trim() ||
+          "rgba(177,186,196,0.12)";
+
         const term = new XTerminal({
           cursorBlink: true,
           fontSize,
           fontFamily,
           scrollback,
           theme: {
-            background: "#1e1e2e",
-            foreground: "#cdd6f4",
-            cursor: "#f5e0dc",
-            selectionBackground: "#585b70",
+            background: bg,
+            foreground: fg,
+            cursor: fg,
+            selectionBackground: sel,
           },
         });
 
