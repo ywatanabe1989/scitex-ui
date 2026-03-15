@@ -1,0 +1,94 @@
+/**
+ * File Browser — Context Menu
+ * Ported verbatim from scitex-cloud workspace-files-tree/context-menu.css
+ */
+
+.wft-context-menu {
+  background: var(--color-canvas-overlay, #2d333b);
+  border: 1px solid var(--workspace-border-default, rgba(110, 118, 129, 0.3));
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  padding: 4px 0;
+  min-width: 180px;
+  z-index: 10000;
+  font-size: 12px;
+}
+
+.wft-context-item {
+  display: flex;
+  align-items: center;
+  padding: 6px 12px;
+  cursor: pointer;
+  color: var(--color-fg-default, #e6edf3);
+  transition: background-color 0.1s ease;
+}
+
+.wft-context-item:hover {
+  background: var(--color-accent-subtle, rgba(47, 129, 247, 0.15));
+}
+
+.wft-context-item.disabled {
+  color: var(--color-fg-muted, #768390);
+  cursor: not-allowed;
+}
+
+.wft-context-item.disabled:hover {
+  background: transparent;
+}
+
+.wft-context-icon {
+  width: 20px;
+  text-align: center;
+  margin-right: 8px;
+  color: var(--color-fg-muted, #768390);
+}
+
+.wft-context-item:hover .wft-context-icon {
+  color: var(--color-accent-fg, #58a6ff);
+}
+
+.wft-context-label {
+  flex: 1;
+}
+
+.wft-context-shortcut {
+  color: var(--color-fg-muted, #768390);
+  font-size: 11px;
+  margin-left: 16px;
+}
+
+.wft-context-separator {
+  height: 1px;
+  background: var(--workspace-border-default, rgba(110, 118, 129, 0.3));
+  margin: 4px 8px;
+}
+
+/* Icon colors for specific actions */
+.wft-context-item.context-new-file .wft-context-icon {
+  color: var(--color-accent-fg, #58a6ff);
+}
+
+.wft-context-item.context-new-folder .wft-context-icon {
+  color: var(--color-success-fg, #3fb950);
+}
+
+.wft-context-item.context-rename .wft-context-icon {
+  color: var(--color-attention-fg, #d29922);
+}
+
+.wft-context-item.context-duplicate .wft-context-icon {
+  color: var(--color-done-fg, #a371f7);
+}
+
+.wft-context-item.context-delete .wft-context-icon {
+  color: var(--color-danger-fg, #f85149);
+}
+
+/* Hover states — maintain icon colors */
+.wft-context-item.context-new-file:hover .wft-context-icon,
+.wft-context-item.context-new-folder:hover .wft-context-icon,
+.wft-context-item.context-rename:hover .wft-context-icon,
+.wft-context-item.context-duplicate:hover .wft-context-icon,
+.wft-context-item.context-delete:hover .wft-context-icon {
+  /* Keep the same color on hover */
+}

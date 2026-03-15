@@ -1,6 +1,7 @@
 /**
  * Type definitions for the FileBrowser React component.
  * Mirrors: ts/app/file-browser/types.ts
+ * Extended to match scitex-cloud TreeItem for full API compatibility.
  */
 
 import type { BaseProps } from "../../_base/types";
@@ -12,6 +13,15 @@ export interface FileNode {
   children?: FileNode[];
   has_image?: boolean;
   is_current?: boolean;
+  /** Symlink support — mirrors scitex-cloud TreeItem */
+  is_symlink?: boolean;
+  symlink_target?: string;
+  /** Git status — mirrors scitex-cloud TreeItem */
+  git_status?: {
+    status: string; // M, A, D, ??
+    staged: boolean;
+  };
+  mtime?: number;
   meta?: Record<string, unknown>;
 }
 
