@@ -8,7 +8,10 @@
 .stx-app-file-browser {
   padding: 4px 0;
   font-size: 13px;
+  font-family: "JetBrains Mono", Monaco, Menlo, Consolas, monospace;
   user-select: none;
+  overflow-y: auto;
+  flex: 1;
 }
 
 .stx-app-file-browser__item {

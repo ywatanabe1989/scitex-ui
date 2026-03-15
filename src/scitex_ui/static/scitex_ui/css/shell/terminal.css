@@ -17,7 +17,9 @@
 .stx-shell-terminal__container {
   flex: 1;
   min-height: 0;
+  height: 100%;
   padding: 4px;
+  overflow: hidden;
 }
 
 .stx-shell-terminal__loading,
@@ -31,8 +33,9 @@
   color: var(--status-error);
 }
 
-/* xterm.js overrides to match workspace theme */
+/* xterm.js overrides — must fill container height */
 .stx-shell-terminal .xterm {
+  height: 100%;
   padding: 4px;
 }
 

@@ -79,9 +79,9 @@ export const Workspace: React.FC<WorkspaceProps> = ({
   const consoleKey = `${appName}-console-width`;
   const treeKey = `${appName}-tree-width`;
   const [console_, setConsole] = useState(() =>
-    loadPanelState(consoleKey, 300),
+    loadPanelState(consoleKey, 380),
   );
-  const [tree, setTree] = useState(() => loadPanelState(treeKey, 250));
+  const [tree, setTree] = useState(() => loadPanelState(treeKey, 240));
 
   // Persist on change
   useEffect(() => {
