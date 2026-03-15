@@ -49,4 +49,6 @@ export interface FileBrowserProps extends BaseProps {
     action: "new" | "rename" | "delete" | "duplicate" | "copy-path",
     node: FileNode,
   ) => void;
+  /** Sort mode — 'name' (A-Z) or 'mtime' (newest first). Ported from scitex-cloud SortToggle */
+  sortMode?: "name" | "mtime";
 }

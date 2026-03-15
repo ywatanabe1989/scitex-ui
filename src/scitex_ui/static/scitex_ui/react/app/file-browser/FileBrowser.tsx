@@ -112,6 +112,7 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({
   showFileCount = false,
   searchable = false,
   onContextAction,
+  sortMode = "name",
   className,
   style,
 }) => {
@@ -298,6 +299,7 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({
               searchMatches={searchMatches}
               searchAncestors={searchAncestors}
               searchActive={searchActive}
+              sortMode={sortMode}
             />
           )}
         </div>

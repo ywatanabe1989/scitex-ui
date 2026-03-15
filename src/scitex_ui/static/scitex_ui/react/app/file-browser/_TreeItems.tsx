@@ -24,6 +24,8 @@ interface SharedProps {
   searchMatches?: Set<string>;
   searchAncestors?: Set<string>;
   searchActive?: boolean;
+  /** Sort mode — 'name' (A-Z) or 'mtime' (newest first) */
+  sortMode?: "name" | "mtime";
 }
 
 /* ──────────────────────────────────────────────────────────── */
@@ -45,6 +47,7 @@ const FolderItem: React.FC<FolderItemProps> = ({
   searchMatches,
   searchAncestors,
   searchActive,
+  sortMode,
 }) => {
   const isExpanded = expanded.has(node.path);
   const hasChildren = !!(node.children && node.children.length > 0);
@@ -107,6 +110,7 @@ const FolderItem: React.FC<FolderItemProps> = ({
             searchMatches={searchMatches}
             searchAncestors={searchAncestors}
             searchActive={searchActive}
+            sortMode={sortMode}
           />
         </div>
       )}
@@ -133,6 +137,7 @@ export const TreeItems: React.FC<TreeItemsProps> = ({
   searchMatches,
   searchAncestors,
   searchActive,
+  sortMode = "name",
 }) => {
   const filtered = nodes.filter((n) => {
     if (!showHidden && n.name.startsWith(".")) return false;
@@ -143,10 +148,16 @@ export const TreeItems: React.FC<TreeItemsProps> = ({
     return true;
   });
 
-  // Alphabetical sort — mirrors scitex-cloud sortItems() "name" mode
-  const sorted = [...filtered].sort((a, b) =>
-    a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
-  );
+  // Sort — mirrors scitex-cloud sortItems() with name/mtime modes
+  const sorted = [...filtered].sort((a, b) => {
+    if (sortMode === "mtime") {
+      // Newest first — directories still before files
+      if (a.type !== b.type) return a.type === "directory" ? -1 : 1;
+      return (b.mtime ?? 0) - (a.mtime ?? 0);
+    }
+    // Default: alphabetical (case-insensitive)
+    return a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
+  });
 
   return (
     <>
@@ -164,6 +175,7 @@ export const TreeItems: React.FC<TreeItemsProps> = ({
             searchMatches={searchMatches}
             searchAncestors={searchAncestors}
             searchActive={searchActive}
+            sortMode={sortMode}
           />
         ) : (
           <FileItem

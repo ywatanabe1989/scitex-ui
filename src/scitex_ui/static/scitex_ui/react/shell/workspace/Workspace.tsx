@@ -39,6 +39,12 @@ export const Workspace: React.FC<WorkspaceProps> = ({
   const [mode, setMode] = useState<ConsoleMode>("console");
   const [treeData, setTreeData] = useState<FileNode[]>([]);
   const [viewerFile, setViewerFile] = useState<string | null>(null);
+  const [sortMode, setSortMode] = useState<"name" | "mtime">(() => {
+    return (
+      (localStorage.getItem("scitex-file-sort-mode") as "name" | "mtime") ||
+      "name"
+    );
+  });
 
   const [console_, setConsole] = usePanelState(`${appName}-console-width`, 380);
   const [tree, setTree] = usePanelState(`${appName}-tree-width`, 240);
@@ -297,13 +303,25 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                 <span className="stx-shell-sidebar__title">Files</span>
                 <div className="stx-shell-sidebar__header-actions">
                   <button
-                    className="sort-toggle"
-                    title="Sort by recent (newest first)"
+                    className={`sort-toggle${sortMode === "mtime" ? " active" : ""}`}
+                    title={
+                      sortMode === "mtime"
+                        ? "Sort by name (A-Z)"
+                        : "Sort by recent (newest first)"
+                    }
                     onClick={() => {
-                      /* TODO: toggle sort mode */
+                      const next = sortMode === "name" ? "mtime" : "name";
+                      setSortMode(next);
+                      localStorage.setItem("scitex-file-sort-mode", next);
                     }}
                   >
-                    <i className="fas fa-sort-alpha-down" />
+                    <i
+                      className={
+                        sortMode === "mtime"
+                          ? "fas fa-clock"
+                          : "fas fa-sort-alpha-down"
+                      }
+                    />
                   </button>
                 </div>
               </div>
@@ -317,6 +335,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                 showFileCount
                 showImageBadge
                 searchable
+                sortMode={sortMode}
               />
             </>
           )}
