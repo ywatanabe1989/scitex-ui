@@ -8,13 +8,21 @@
  * ============================================================================= */
 
 .stx-workspace {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  grid-template-columns: 1fr;
   height: 100vh;
   width: 100vw;
   overflow: hidden;
   background: var(--workspace-bg-primary);
   color: var(--text-primary);
+}
+
+.stx-workspace__columns {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 
 /* --- Resizers --- */
