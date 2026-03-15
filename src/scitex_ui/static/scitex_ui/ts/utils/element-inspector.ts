@@ -20,7 +20,6 @@ class ElementInspector {
   private debugCollector: DebugInfoCollector;
   private selectionManager: SelectionManager;
   private notificationManager: NotificationManager;
-  private pageStructureExporter: PageStructureExporter;
   private consoleCollector: ConsoleCollector;
 
   constructor() {
@@ -45,10 +44,8 @@ class ElementInspector {
     // Set element scanner reference for depth-aware selection
     this.selectionManager.setElementScanner(this.elementScanner);
 
-    // Page structure exporter needs notification manager
-    this.pageStructureExporter = new PageStructureExporter(
-      this.notificationManager,
-    );
+    // Page structure exporter — self-registers, no need to store reference
+    new PageStructureExporter(this.notificationManager);
 
     // Console collector for debug snapshots
     this.consoleCollector = new ConsoleCollector(this.notificationManager);
