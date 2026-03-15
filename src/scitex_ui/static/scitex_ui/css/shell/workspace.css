@@ -30,23 +30,31 @@
 /* --- Resizers (ported from scitex-cloud panel-resizer.css) --- */
 
 .stx-workspace__resizer--vertical {
-  width: 4px;
+  width: 2px;
   cursor: col-resize;
-  background: var(--workspace-border-subtle);
+  background: var(--workspace-border-default);
   flex-shrink: 0;
-  transition:
-    background 200ms,
-    width 200ms;
+  transition: background 200ms;
   position: relative;
+  z-index: 10;
+}
+
+/* Expanded hit area — ±12px on each side (26px total) */
+.stx-workspace__resizer--vertical::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -12px;
+  right: -12px;
 }
 
 .stx-workspace__resizer--vertical:hover {
-  width: 4px;
-  background: var(--workspace-slider-hover);
+  background: var(--workspace-icon-primary, var(--workspace-slider-hover));
 }
 
 .stx-workspace__resizer--vertical:active {
-  background: var(--stx-app-accent, var(--workspace-slider-active));
+  background: var(--stx-app-accent, var(--workspace-icon-primary));
 }
 
 /* --- Console/Chat Panel (Column 1) --- */
