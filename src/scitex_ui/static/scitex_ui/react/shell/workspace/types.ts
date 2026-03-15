@@ -74,6 +74,11 @@ export interface WorkspaceProps extends BaseProps {
   onFileSelect?: (node: FileNode) => void;
   /** Called when file is dropped onto app area */
   onFileDrop?: (path: string, target: string) => void;
+  /** Called on file tree right-click action */
+  onFileContextAction?: (
+    action: "new" | "rename" | "delete" | "duplicate" | "copy-path",
+    node: FileNode,
+  ) => void;
 
   /** App content (rendered in main area) */
   children: React.ReactNode;

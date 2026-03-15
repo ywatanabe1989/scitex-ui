@@ -68,6 +68,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
   highlightExtensions: _highlightExtensions,
   onFileSelect,
   onFileDrop,
+  onFileContextAction,
   children,
   className,
   style,
@@ -443,6 +444,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
               <FileBrowser
                 data={treeData}
                 onFileSelect={onFileSelect}
+                onContextAction={onFileContextAction}
                 showFileCount
                 showImageBadge
                 searchable
