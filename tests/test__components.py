@@ -95,8 +95,15 @@ class TestDropdown:
         _check_metadata(Dropdown)
 
 
+class TestTooltip:
+    def test_metadata_and_files(self):
+        from scitex_ui._components._tooltip import Tooltip
+
+        _check_metadata(Tooltip)
+
+
 class TestAllComponentsRegistered:
-    def test_ten_components_registered(self):
+    def test_eleven_components_registered(self):
         names = scitex_ui.list_components()
         expected = {
             "app-shell",
@@ -109,5 +116,6 @@ class TestAllComponentsRegistered:
             "resizer",
             "status-bar",
             "theme-provider",
+            "tooltip",
         }
         assert expected.issubset(set(names))

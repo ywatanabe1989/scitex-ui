@@ -11,3 +11,4 @@ from ._package_docs_sidebar import PackageDocsSidebar  # noqa: F401
 from ._resizer import Resizer  # noqa: F401
 from ._status_bar import StatusBar  # noqa: F401
 from ._theme_provider import ThemeProvider  # noqa: F401
+from ._tooltip import Tooltip  # noqa: F401
