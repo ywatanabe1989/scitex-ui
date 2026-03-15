@@ -217,7 +217,18 @@
   opacity: 0.4;
 }
 
-/* --- App Content (Column 3, flex) --- */
+/* --- Viewer Panel (Column 3) --- */
+
+.stx-workspace__viewer-panel {
+  display: flex;
+  flex-direction: column;
+  background: var(--workspace-bg-secondary);
+  overflow: hidden;
+  flex-shrink: 0;
+  transition: width 0.2s ease;
+}
+
+/* --- App Content (Column 4, flex) --- */
 
 .stx-workspace__app-content {
   flex: 1;

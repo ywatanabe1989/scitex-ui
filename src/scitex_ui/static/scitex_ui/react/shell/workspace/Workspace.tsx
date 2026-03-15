@@ -1,18 +1,7 @@
 /**
  * Workspace — universal shell for all SciTeX apps.
- *
- * Ported from scitex-cloud's workspace-panel-resizer + stx-shell-sidebar.
- *
- * Layout: Console/Chat (left) | File Tree (mid) | App Content (right)
- *         ────────────── Status Bar ──────────────
- *
- * Interactions (matching scitex-cloud):
- * - Drag resizer = smooth curtain resize
- * - Smart collapse: panel collapses instantly when dragged below threshold
- * - Curtain propagation: drag delta cascades to adjacent panel (domino)
- * - Collapsed panels show vertical icon + label
- * - Click collapsed panel to expand
- * - localStorage persistence for width + collapse state
+ * Ported from scitex-cloud. Layout:
+ *   Console/Chat | FileTree | Viewer | AppContent
  */
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
@@ -21,43 +10,11 @@ import type { FileNode } from "../../app/file-browser/types";
 import { FileBrowser } from "../../app/file-browser";
 import { Chat } from "../chat";
 import { Terminal } from "../terminal";
+import { Viewer } from "../viewer";
+import { usePanelState, COLLAPSE_WIDTH, MIN_WIDTH } from "./usePanelState";
 
 const CLS = "stx-workspace";
-const COLLAPSE_WIDTH = 48;
-const MIN_WIDTH = 80;
-
 type ConsoleTab = "console" | "chat";
-
-/** Centralized resize state for curtain propagation between panels */
-interface PanelState {
-  width: number;
-  collapsed: boolean;
-  prevWidth: number;
-}
-
-function loadPanelState(key: string, defaultWidth: number): PanelState {
-  try {
-    const savedW = localStorage.getItem(key);
-    const savedC = localStorage.getItem(key + ":collapsed");
-    const w = savedW ? parseInt(savedW, 10) : defaultWidth;
-    return {
-      width: w >= MIN_WIDTH ? w : defaultWidth,
-      collapsed: savedC === "true",
-      prevWidth: defaultWidth,
-    };
-  } catch {
-    return { width: defaultWidth, collapsed: false, prevWidth: defaultWidth };
-  }
-}
-
-function savePanelState(key: string, state: PanelState) {
-  try {
-    if (!state.collapsed && state.width > COLLAPSE_WIDTH) {
-      localStorage.setItem(key, state.width.toString());
-    }
-    localStorage.setItem(key + ":collapsed", state.collapsed.toString());
-  } catch {}
-}
 
 export const Workspace: React.FC<WorkspaceProps> = ({
   appName,
@@ -69,39 +26,21 @@ export const Workspace: React.FC<WorkspaceProps> = ({
   onFileSelect,
   onFileDrop,
   onFileContextAction,
-  getFileUrl: _getFileUrl,
+  getFileUrl,
   children,
   className,
   style,
 }) => {
   const [consoleTab, setConsoleTab] = useState<ConsoleTab>("console");
-  // Viewer pane state (WIP — will show file previews)
-  const [_selectedFile, _setSelectedFile] = useState<string | null>(null);
   const [treeData, setTreeData] = useState<FileNode[]>([]);
+  const [viewerFile, setViewerFile] = useState<string | null>(null);
 
-  // Centralized panel state for curtain propagation
-  const consoleKey = `${appName}-console-width`;
-  const treeKey = `${appName}-tree-width`;
-  const [console_, setConsole] = useState(() =>
-    loadPanelState(consoleKey, 380),
-  );
-  const [tree, setTree] = useState(() => loadPanelState(treeKey, 240));
-  const viewerKey = `${appName}-viewer-width`;
-  const [_viewer, _setViewer] = useState(() => loadPanelState(viewerKey, 300));
+  const [console_, setConsole] = usePanelState(`${appName}-console-width`, 380);
+  const [tree, setTree] = usePanelState(`${appName}-tree-width`, 240);
+  const [viewer, setViewer] = usePanelState(`${appName}-viewer-width`, 300);
 
-  // Persist on change
-  useEffect(() => {
-    savePanelState(consoleKey, console_);
-  }, [console_, consoleKey]);
-  useEffect(() => {
-    savePanelState(treeKey, tree);
-  }, [tree, treeKey]);
-  useEffect(() => {
-    savePanelState(viewerKey, _viewer);
-  }, [_viewer, viewerKey]);
-
-  // Dragging refs
-  const dragging = useRef<"console" | "tree" | null>(null);
+  // Dragging refs for curtain propagation
+  const dragging = useRef<string | null>(null);
   const dragStartX = useRef(0);
   const dragStartConsole = useRef(0);
   const dragStartTree = useRef(0);
@@ -109,7 +48,6 @@ export const Workspace: React.FC<WorkspaceProps> = ({
   const propagateStartX = useRef(0);
   const propagateStartWidth = useRef(0);
 
-  // Set accent color
   useEffect(() => {
     if (accentColor) {
       document.documentElement.style.setProperty(
@@ -122,7 +60,6 @@ export const Workspace: React.FC<WorkspaceProps> = ({
     };
   }, [accentColor]);
 
-  // Fetch file tree
   useEffect(() => {
     if (fileTreeBackend) {
       fileTreeBackend.fetchTree().then(setTreeData).catch(console.error);
@@ -132,7 +69,26 @@ export const Workspace: React.FC<WorkspaceProps> = ({
     }
   }, [fileTreeBackend]);
 
-  /** Start drag on console resizer */
+  const disableTransitions = () => {
+    document
+      .querySelectorAll<HTMLElement>(
+        `.${CLS}__console-panel, .${CLS}__tree-panel`,
+      )
+      .forEach((el) => {
+        el.style.transition = "none";
+      });
+  };
+  const enableTransitions = () => {
+    document
+      .querySelectorAll<HTMLElement>(
+        `.${CLS}__console-panel, .${CLS}__tree-panel`,
+      )
+      .forEach((el) => {
+        el.style.transition = "";
+      });
+  };
+
+  /** Console resizer — propagates RIGHT to tree */
   const onConsoleResizerDown = useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault();
@@ -143,22 +99,11 @@ export const Workspace: React.FC<WorkspaceProps> = ({
         ? COLLAPSE_WIDTH
         : console_.width;
       dragStartTree.current = tree.collapsed ? COLLAPSE_WIDTH : tree.width;
-
-      // Expand on drag if collapsed
       if (console_.collapsed) {
         setConsole((s) => ({ ...s, collapsed: false, width: MIN_WIDTH }));
         dragStartConsole.current = MIN_WIDTH;
       }
-
-      // Disable transitions during drag
-      document
-        .querySelectorAll<HTMLElement>(
-          `.${CLS}__console-panel, .${CLS}__tree-panel`,
-        )
-        .forEach((el) => {
-          el.style.transition = "none";
-        });
-
+      disableTransitions();
       document.body.style.cursor = "col-resize";
       document.body.style.userSelect = "none";
 
@@ -166,26 +111,21 @@ export const Workspace: React.FC<WorkspaceProps> = ({
         if (dragging.current !== "console") return;
         const delta = ev.clientX - dragStartX.current;
         const newW = dragStartConsole.current + delta;
-
-        // Smart collapse: instant collapse during drag
         if (newW < COLLAPSE_WIDTH) {
           setConsole((s) => ({
             ...s,
             collapsed: true,
             prevWidth: dragStartConsole.current,
           }));
-
-          // Curtain propagation: transfer remaining delta to tree panel
           if (!propagating.current) {
             propagating.current = true;
             propagateStartX.current = ev.clientX;
             propagateStartWidth.current = dragStartTree.current;
           }
-
           if (propagating.current) {
-            const propDelta = ev.clientX - propagateStartX.current;
-            const propW = propagateStartWidth.current + propDelta;
-
+            const propW =
+              propagateStartWidth.current +
+              (ev.clientX - propagateStartX.current);
             if (propW < COLLAPSE_WIDTH) {
               setTree((s) => ({
                 ...s,
@@ -202,8 +142,6 @@ export const Workspace: React.FC<WorkspaceProps> = ({
           }
           return;
         }
-
-        // Normal resize
         propagating.current = false;
         setConsole((s) => ({
           ...s,
@@ -211,7 +149,6 @@ export const Workspace: React.FC<WorkspaceProps> = ({
           width: Math.max(MIN_WIDTH, Math.min(600, newW)),
         }));
       };
-
       const onUp = () => {
         dragging.current = null;
         propagating.current = false;
@@ -219,22 +156,15 @@ export const Workspace: React.FC<WorkspaceProps> = ({
         document.removeEventListener("mouseup", onUp);
         document.body.style.cursor = "";
         document.body.style.userSelect = "";
-        document
-          .querySelectorAll<HTMLElement>(
-            `.${CLS}__console-panel, .${CLS}__tree-panel`,
-          )
-          .forEach((el) => {
-            el.style.transition = "";
-          });
+        enableTransitions();
       };
-
       document.addEventListener("mousemove", onMove);
       document.addEventListener("mouseup", onUp);
     },
-    [console_, tree],
+    [console_, tree, setConsole, setTree],
   );
 
-  /** Start drag on tree resizer — propagates LEFT to console on collapse */
+  /** Tree resizer — propagates LEFT to console */
   const onTreeResizerDown = useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault();
@@ -245,20 +175,11 @@ export const Workspace: React.FC<WorkspaceProps> = ({
       dragStartConsole.current = console_.collapsed
         ? COLLAPSE_WIDTH
         : console_.width;
-
       if (tree.collapsed) {
         setTree((s) => ({ ...s, collapsed: false, width: MIN_WIDTH }));
         dragStartTree.current = MIN_WIDTH;
       }
-
-      document
-        .querySelectorAll<HTMLElement>(
-          `.${CLS}__console-panel, .${CLS}__tree-panel`,
-        )
-        .forEach((el) => {
-          el.style.transition = "none";
-        });
-
+      disableTransitions();
       document.body.style.cursor = "col-resize";
       document.body.style.userSelect = "none";
 
@@ -266,26 +187,21 @@ export const Workspace: React.FC<WorkspaceProps> = ({
         if (dragging.current !== "tree") return;
         const delta = ev.clientX - dragStartX.current;
         const newW = dragStartTree.current + delta;
-
-        // Smart collapse + propagation to console (left)
         if (newW < COLLAPSE_WIDTH) {
           setTree((s) => ({
             ...s,
             collapsed: true,
             prevWidth: dragStartTree.current,
           }));
-
-          // Curtain propagation: transfer remaining delta to console panel
           if (!propagating.current) {
             propagating.current = true;
             propagateStartX.current = ev.clientX;
             propagateStartWidth.current = dragStartConsole.current;
           }
-
           if (propagating.current) {
-            const propDelta = ev.clientX - propagateStartX.current;
-            const propW = propagateStartWidth.current + propDelta;
-
+            const propW =
+              propagateStartWidth.current +
+              (ev.clientX - propagateStartX.current);
             if (propW < COLLAPSE_WIDTH) {
               setConsole((s) => ({
                 ...s,
@@ -302,8 +218,6 @@ export const Workspace: React.FC<WorkspaceProps> = ({
           }
           return;
         }
-
-        // Normal resize
         propagating.current = false;
         setTree((s) => ({
           ...s,
@@ -311,7 +225,6 @@ export const Workspace: React.FC<WorkspaceProps> = ({
           width: Math.max(MIN_WIDTH, Math.min(500, newW)),
         }));
       };
-
       const onUp = () => {
         dragging.current = null;
         propagating.current = false;
@@ -319,36 +232,67 @@ export const Workspace: React.FC<WorkspaceProps> = ({
         document.removeEventListener("mouseup", onUp);
         document.body.style.cursor = "";
         document.body.style.userSelect = "";
-        document
-          .querySelectorAll<HTMLElement>(
-            `.${CLS}__console-panel, .${CLS}__tree-panel`,
-          )
-          .forEach((el) => {
-            el.style.transition = "";
-          });
+        enableTransitions();
       };
-
       document.addEventListener("mousemove", onMove);
       document.addEventListener("mouseup", onUp);
     },
-    [tree, console_],
+    [tree, console_, setTree, setConsole],
+  );
+
+  /** Simple resizer for viewer panel */
+  const onViewerResizerDown = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      const startX = e.clientX;
+      const startW = viewer.collapsed ? COLLAPSE_WIDTH : viewer.width;
+      document.body.style.cursor = "col-resize";
+      document.body.style.userSelect = "none";
+      const onMove = (ev: MouseEvent) => {
+        const newW = startW + (ev.clientX - startX);
+        if (newW < COLLAPSE_WIDTH) {
+          setViewer((s) => ({ ...s, collapsed: true, prevWidth: startW }));
+        } else {
+          setViewer((s) => ({
+            ...s,
+            collapsed: false,
+            width: Math.max(MIN_WIDTH, Math.min(600, newW)),
+          }));
+        }
+      };
+      const onUp = () => {
+        document.removeEventListener("mousemove", onMove);
+        document.removeEventListener("mouseup", onUp);
+        document.body.style.cursor = "";
+        document.body.style.userSelect = "";
+      };
+      document.addEventListener("mousemove", onMove);
+      document.addEventListener("mouseup", onUp);
+    },
+    [viewer, setViewer],
   );
 
   const expandConsole = useCallback(() => {
     setConsole((s) => ({
       ...s,
       collapsed: false,
-      width: s.prevWidth > COLLAPSE_WIDTH ? s.prevWidth : 300,
+      width: s.prevWidth > COLLAPSE_WIDTH ? s.prevWidth : 380,
     }));
-  }, []);
-
+  }, [setConsole]);
   const expandTree = useCallback(() => {
     setTree((s) => ({
       ...s,
       collapsed: false,
-      width: s.prevWidth > COLLAPSE_WIDTH ? s.prevWidth : 250,
+      width: s.prevWidth > COLLAPSE_WIDTH ? s.prevWidth : 240,
     }));
-  }, []);
+  }, [setTree]);
+  const expandViewer = useCallback(() => {
+    setViewer((s) => ({
+      ...s,
+      collapsed: false,
+      width: s.prevWidth > COLLAPSE_WIDTH ? s.prevWidth : 300,
+    }));
+  }, [setViewer]);
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
@@ -358,14 +302,14 @@ export const Workspace: React.FC<WorkspaceProps> = ({
     },
     [onFileDrop],
   );
-
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = "copy";
   }, []);
 
-  const consoleWidth = console_.collapsed ? COLLAPSE_WIDTH : console_.width;
-  const treeWidth = tree.collapsed ? COLLAPSE_WIDTH : tree.width;
+  const cW = console_.collapsed ? COLLAPSE_WIDTH : console_.width;
+  const tW = tree.collapsed ? COLLAPSE_WIDTH : tree.width;
+  const vW = viewer.collapsed ? COLLAPSE_WIDTH : viewer.width;
 
   return (
     <div
@@ -374,10 +318,10 @@ export const Workspace: React.FC<WorkspaceProps> = ({
       data-app={appName}
     >
       <div className={`${CLS}__columns`}>
-        {/* ── Column 1: Console/Chat Panel ──────────────────────── */}
+        {/* ── Console/Chat ────────────────────────────────── */}
         <div
           className={`${CLS}__console-panel${console_.collapsed ? ` ${CLS}__panel--collapsed` : ""}`}
-          style={{ width: consoleWidth }}
+          style={{ width: cW }}
           onClick={console_.collapsed ? expandConsole : undefined}
         >
           {console_.collapsed ? (
@@ -424,7 +368,6 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                     </div>
                   ))}
               </div>
-              {/* Status inside console panel */}
               <div className={`${CLS}__console-status`}>
                 <i
                   className="fas fa-circle"
@@ -440,10 +383,10 @@ export const Workspace: React.FC<WorkspaceProps> = ({
           onMouseDown={onConsoleResizerDown}
         />
 
-        {/* ── Column 2: File Tree Panel ─────────────────────────── */}
+        {/* ── File Tree ───────────────────────────────────── */}
         <div
           className={`${CLS}__tree-panel${tree.collapsed ? ` ${CLS}__panel--collapsed` : ""}`}
-          style={{ width: treeWidth }}
+          style={{ width: tW }}
           onClick={tree.collapsed ? expandTree : undefined}
         >
           {tree.collapsed ? (
@@ -459,7 +402,10 @@ export const Workspace: React.FC<WorkspaceProps> = ({
               </div>
               <FileBrowser
                 data={treeData}
-                onFileSelect={onFileSelect}
+                onFileSelect={(node) => {
+                  setViewerFile(node.path);
+                  onFileSelect?.(node);
+                }}
                 onContextAction={onFileContextAction}
                 showFileCount
                 showImageBadge
@@ -473,7 +419,41 @@ export const Workspace: React.FC<WorkspaceProps> = ({
           onMouseDown={onTreeResizerDown}
         />
 
-        {/* ── Column 3: App Content ─────────────────────────────── */}
+        {/* ── Viewer (file preview) ───────────────────────── */}
+        {getFileUrl && (
+          <>
+            <div
+              className={`${CLS}__viewer-panel${viewer.collapsed ? ` ${CLS}__panel--collapsed` : ""}`}
+              style={{ width: vW }}
+              onClick={viewer.collapsed ? expandViewer : undefined}
+            >
+              {viewer.collapsed ? (
+                <div className={`${CLS}__collapsed-label`}>
+                  <i className="fas fa-eye" />
+                  <span>Viewer</span>
+                </div>
+              ) : (
+                <Viewer
+                  filePath={viewerFile}
+                  getFileUrl={getFileUrl}
+                  onClose={() =>
+                    setViewer((s) => ({
+                      ...s,
+                      collapsed: true,
+                      prevWidth: s.width,
+                    }))
+                  }
+                />
+              )}
+            </div>
+            <div
+              className={`${CLS}__resizer ${CLS}__resizer--vertical`}
+              onMouseDown={onViewerResizerDown}
+            />
+          </>
+        )}
+
+        {/* ── App Content ─────────────────────────────────── */}
         <div
           className={`${CLS}__app-content`}
           onDrop={handleDrop}
@@ -482,8 +462,6 @@ export const Workspace: React.FC<WorkspaceProps> = ({
           {children}
         </div>
       </div>
-
-      {/* Status bar removed — "Connected" is now inside console panel */}
     </div>
   );
 };
