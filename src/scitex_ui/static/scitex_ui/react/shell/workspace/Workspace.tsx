@@ -2,14 +2,12 @@
  * Workspace — universal shell for all SciTeX apps.
  *
  * Layout: Console/Chat (left) | File Tree (mid) | App Content (right)
+ *         ────────────── Status Bar ──────────────
  *
- * The Console panel always has two tabs: Console (terminal) and Chat (AI).
- * No top navbar in standalone mode. App selector only in cloud mode.
- *
- * Usage:
- *   <Workspace appName="figrecipe" terminalBackend={...} fileTreeBackend={...}>
- *     <MyAppContent />
- *   </Workspace>
+ * Interactions:
+ * - Drag resizer border = smooth curtain resize
+ * - Double-click resizer = collapse/expand panel
+ * - Console panel has two tabs: Console + Chat (always visible)
  */
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
@@ -23,28 +21,26 @@ const CLS = "stx-workspace";
 
 type ConsoleTab = "console" | "chat";
 
-/** Hook for drag-to-resize panels */
+/** Hook for drag-to-resize + double-click-to-collapse */
 function useResizer(
   initialWidth: number,
   minWidth: number,
   maxWidth: number,
-): {
-  width: number;
-  resizerProps: {
-    onMouseDown: (e: React.MouseEvent) => void;
-  };
-} {
+  collapsedWidth: number = 0,
+) {
   const [width, setWidth] = useState(initialWidth);
+  const [collapsed, setCollapsed] = useState(false);
   const dragging = useRef(false);
   const startX = useRef(0);
   const startWidth = useRef(0);
+  const prevWidth = useRef(initialWidth);
 
   const onMouseDown = useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault();
       dragging.current = true;
       startX.current = e.clientX;
-      startWidth.current = width;
+      startWidth.current = collapsed ? collapsedWidth : width;
 
       const onMouseMove = (ev: MouseEvent) => {
         if (!dragging.current) return;
@@ -54,6 +50,7 @@ function useResizer(
           Math.min(maxWidth, startWidth.current + delta),
         );
         setWidth(newWidth);
+        setCollapsed(false);
       };
 
       const onMouseUp = () => {
@@ -69,10 +66,24 @@ function useResizer(
       document.body.style.cursor = "col-resize";
       document.body.style.userSelect = "none";
     },
-    [width, minWidth, maxWidth],
+    [width, collapsed, minWidth, maxWidth, collapsedWidth],
   );
 
-  return { width, resizerProps: { onMouseDown } };
+  const onDoubleClick = useCallback(() => {
+    if (collapsed) {
+      setCollapsed(false);
+      setWidth(prevWidth.current);
+    } else {
+      prevWidth.current = width;
+      setCollapsed(true);
+    }
+  }, [collapsed, width]);
+
+  return {
+    width: collapsed ? collapsedWidth : width,
+    collapsed,
+    resizerProps: { onMouseDown, onDoubleClick },
+  };
 }
 
 export const Workspace: React.FC<WorkspaceProps> = ({
@@ -89,12 +100,10 @@ export const Workspace: React.FC<WorkspaceProps> = ({
   style,
 }) => {
   const [consoleTab, setConsoleTab] = useState<ConsoleTab>("console");
-  const [consoleCollapsed, setConsoleCollapsed] = useState(false);
-  const [treeCollapsed, setTreeCollapsed] = useState(false);
   const [treeData, setTreeData] = useState<FileNode[]>([]);
 
-  const consoleResizer = useResizer(300, 40, 600);
-  const treeResizer = useResizer(250, 40, 500);
+  const consoleResizer = useResizer(300, 80, 600, 40);
+  const treeResizer = useResizer(250, 80, 500, 40);
 
   // Set accent color
   useEffect(() => {
@@ -142,27 +151,21 @@ export const Workspace: React.FC<WorkspaceProps> = ({
       <div className={`${CLS}__columns`}>
         {/* ── Column 1: Console/Chat Panel ──────────────────────── */}
         <div
-          className={`${CLS}__console-panel${consoleCollapsed ? ` ${CLS}__console-panel--collapsed` : ""}`}
-          style={consoleCollapsed ? undefined : { width: consoleResizer.width }}
+          className={`${CLS}__console-panel`}
+          style={{ width: consoleResizer.width }}
         >
-          {consoleCollapsed ? (
+          {consoleResizer.collapsed ? (
             <div className={`${CLS}__console-collapsed`}>
               <button
                 className={`${CLS}__collapsed-tab`}
-                onClick={() => {
-                  setConsoleCollapsed(false);
-                  setConsoleTab("console");
-                }}
+                onClick={() => setConsoleTab("console")}
                 title="Console"
               >
                 <i className="fas fa-terminal" />
               </button>
               <button
                 className={`${CLS}__collapsed-tab`}
-                onClick={() => {
-                  setConsoleCollapsed(false);
-                  setConsoleTab("chat");
-                }}
+                onClick={() => setConsoleTab("chat")}
                 title="Chat"
               >
                 <i className="fas fa-comment" />
@@ -170,7 +173,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
             </div>
           ) : (
             <>
-              {/* Tab bar — always show both tabs */}
+              {/* Tab bar */}
               <div className={`${CLS}__console-tabs`}>
                 <button
                   className={`${CLS}__console-tab${consoleTab === "console" ? ` ${CLS}__console-tab--active` : ""}`}
@@ -183,14 +186,6 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                   onClick={() => setConsoleTab("chat")}
                 >
                   <i className="fas fa-comment" /> Chat
-                </button>
-                <div style={{ flex: 1 }} />
-                <button
-                  className={`${CLS}__console-collapse`}
-                  onClick={() => setConsoleCollapsed(true)}
-                  title="Collapse"
-                >
-                  <i className="fas fa-chevron-left" />
                 </button>
               </div>
 
@@ -228,28 +223,26 @@ export const Workspace: React.FC<WorkspaceProps> = ({
 
         {/* ── Column 2: File Tree Panel ─────────────────────────── */}
         <div
-          className={`${CLS}__tree-panel${treeCollapsed ? ` ${CLS}__tree-panel--collapsed` : ""}`}
-          style={treeCollapsed ? undefined : { width: treeResizer.width }}
+          className={`${CLS}__tree-panel`}
+          style={{ width: treeResizer.width }}
         >
-          <div className={`${CLS}__tree-header`}>
-            <i className="fas fa-folder" />
-            <span>Files</span>
-            <button
-              className={`${CLS}__panel-btn`}
-              onClick={() => setTreeCollapsed(!treeCollapsed)}
-            >
-              <i
-                className={`fas fa-chevron-${treeCollapsed ? "right" : "left"}`}
+          {treeResizer.collapsed ? (
+            <div className={`${CLS}__tree-collapsed`}>
+              <i className="fas fa-folder" />
+            </div>
+          ) : (
+            <>
+              <div className={`${CLS}__tree-header`}>
+                <i className="fas fa-folder" />
+                <span>Files</span>
+              </div>
+              <FileBrowser
+                data={treeData}
+                onFileSelect={onFileSelect}
+                showFileCount
+                showImageBadge
               />
-            </button>
-          </div>
-          {!treeCollapsed && (
-            <FileBrowser
-              data={treeData}
-              onFileSelect={onFileSelect}
-              showFileCount
-              showImageBadge
-            />
+            </>
           )}
         </div>
         <div
@@ -266,7 +259,6 @@ export const Workspace: React.FC<WorkspaceProps> = ({
           {children}
         </div>
       </div>
-      {/* end __columns */}
 
       {/* ── Status Bar ────────────────────────────────────────── */}
       <div className={`${CLS}__status-bar`}>

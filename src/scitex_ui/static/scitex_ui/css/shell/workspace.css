@@ -46,16 +46,11 @@
 /* --- Console/Chat Panel (Column 1) --- */
 
 .stx-workspace__console-panel {
-  width: 300px;
   display: flex;
   flex-direction: column;
   background: var(--workspace-bg-secondary);
   overflow: hidden;
   flex-shrink: 0;
-}
-
-.stx-workspace__console-panel--collapsed {
-  width: 40px;
 }
 
 .stx-workspace__console-collapsed {
@@ -110,18 +105,7 @@
   border-bottom-color: var(--stx-app-accent, var(--app-accent-color));
 }
 
-.stx-workspace__console-collapse {
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  cursor: pointer;
-  padding: 8px;
-  font-size: 11px;
-}
-
-.stx-workspace__console-collapse:hover {
-  color: var(--text-primary);
-}
+/* (collapse via double-click on resizer, no button needed) */
 
 .stx-workspace__console-content {
   flex: 1;
@@ -150,7 +134,6 @@
 /* --- File Tree Panel (Column 2) --- */
 
 .stx-workspace__tree-panel {
-  width: 250px;
   display: flex;
   flex-direction: column;
   background: var(--workspace-bg-secondary);
@@ -158,8 +141,14 @@
   flex-shrink: 0;
 }
 
-.stx-workspace__tree-panel--collapsed {
-  width: 40px;
+/* Collapsed tree — icon only */
+.stx-workspace__tree-collapsed {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 12px;
+  color: var(--text-muted);
+  font-size: 16px;
 }
 
 .stx-workspace__tree-header {
@@ -180,18 +169,7 @@
   flex: 1;
 }
 
-.stx-workspace__panel-btn {
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  cursor: pointer;
-  padding: 2px 4px;
-  font-size: 11px;
-}
-
-.stx-workspace__panel-btn:hover {
-  color: var(--text-primary);
-}
+/* (panel collapse/expand via double-click on resizer border) */
 
 /* --- App Content (Column 3, flex) --- */
 
