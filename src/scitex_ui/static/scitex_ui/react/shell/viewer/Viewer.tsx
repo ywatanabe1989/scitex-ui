@@ -1,20 +1,173 @@
 /**
- * Viewer — file preview pane for the workspace shell.
- * Ported from scitex-cloud's workspace-viewer.
+ * Viewer — file preview pane. Ported from scitex-cloud workspace-viewer.
  *
- * Displays file content based on type:
- * - Images: zoom/pan viewer
- * - Text: syntax-highlighted code view
- * - CSV: table view
- * - Empty state when no file selected
+ * Routes file types to dedicated sub-viewers:
+ * - Image: zoom/pan (ported from ImageViewer.ts)
+ * - Text: syntax-highlighted code (will integrate Monaco)
+ * - CSV: table view (ported from CsvViewer.ts fallback)
+ * - Audio: HTML5 audio player (ported from AudioViewer.ts)
+ * - Video: HTML5 video player (ported from VideoViewer.ts)
+ * - Binary: "cannot preview" message
  */
 
-import React, { useState, useCallback, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import type { ViewerProps } from "./types";
-import { detectFileType } from "./types";
+import { detectFileType, detectLanguage } from "./types";
 
 const CLS = "stx-shell-viewer";
 
+/* ── Image Viewer (ported from ImageViewer.ts) ─────────────────── */
+const ImageView: React.FC<{
+  src: string;
+  fileName: string;
+}> = ({ src, fileName }) => {
+  const [scale, setScale] = useState(1);
+  const [translate, setTranslate] = useState({ x: 0, y: 0 });
+  const [error, setError] = useState(false);
+  const dragging = useRef(false);
+  const dragStart = useRef({ x: 0, y: 0 });
+
+  useEffect(() => {
+    setScale(1);
+    setTranslate({ x: 0, y: 0 });
+    setError(false);
+  }, [src]);
+
+  if (error) {
+    return (
+      <div className={`${CLS}__error`}>
+        <i className="fas fa-exclamation-triangle" /> Failed to load: {fileName}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={`${CLS}__image-container`}
+      onWheel={(e) => {
+        e.preventDefault();
+        setScale((s) =>
+          Math.max(0.1, Math.min(10, s * (e.deltaY > 0 ? 0.9 : 1.1))),
+        );
+      }}
+      onMouseDown={(e) => {
+        dragging.current = true;
+        dragStart.current = {
+          x: e.clientX - translate.x,
+          y: e.clientY - translate.y,
+        };
+      }}
+      onMouseMove={(e) => {
+        if (!dragging.current) return;
+        setTranslate({
+          x: e.clientX - dragStart.current.x,
+          y: e.clientY - dragStart.current.y,
+        });
+      }}
+      onMouseUp={() => {
+        dragging.current = false;
+      }}
+      onMouseLeave={() => {
+        dragging.current = false;
+      }}
+      onDoubleClick={() => {
+        setScale(1);
+        setTranslate({ x: 0, y: 0 });
+      }}
+      style={{ cursor: dragging.current ? "grabbing" : "grab" }}
+    >
+      <img
+        src={src}
+        alt={fileName}
+        draggable={false}
+        onError={() => setError(true)}
+        style={{
+          transform: `translate(${translate.x}px, ${translate.y}px) scale(${scale})`,
+          transformOrigin: "center center",
+          maxWidth: "100%",
+          maxHeight: "100%",
+          userSelect: "none",
+        }}
+      />
+    </div>
+  );
+};
+
+/* ── Text Viewer (will integrate Monaco in future) ─────────────── */
+const TextView: React.FC<{
+  content: string;
+  language: string;
+}> = ({ content }) => (
+  <pre className={`${CLS}__text`}>
+    <code>{content}</code>
+  </pre>
+);
+
+/* ── CSV Table Viewer (ported from CsvViewer.ts fallback) ──────── */
+const CsvView: React.FC<{ content: string }> = ({ content }) => {
+  const rows = content.split(/\r?\n/).filter((l) => l.trim());
+  if (rows.length === 0) {
+    return <div className={`${CLS}__loading`}>Empty file</div>;
+  }
+  return (
+    <div className={`${CLS}__csv-container`}>
+      <table className={`${CLS}__csv-table`}>
+        <thead>
+          <tr>
+            {rows[0].split(",").map((cell, i) => (
+              <th key={i}>{cell.trim()}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.slice(1).map((row, ri) => (
+            <tr key={ri}>
+              {row.split(",").map((cell, ci) => (
+                <td key={ci}>{cell.trim()}</td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+};
+
+/* ── Audio Viewer (ported from AudioViewer.ts) ─────────────────── */
+const AudioView: React.FC<{ src: string; fileName: string }> = ({
+  src,
+  fileName,
+}) => {
+  const ext = fileName.includes(".")
+    ? fileName.split(".").pop()?.toUpperCase()
+    : "Audio";
+  return (
+    <div className={`${CLS}__audio-container`}>
+      <div className={`${CLS}__media-name`}>{fileName}</div>
+      <div className={`${CLS}__media-format`}>{ext}</div>
+      <audio controls src={src} style={{ width: "100%", maxWidth: 480 }} />
+    </div>
+  );
+};
+
+/* ── Video Viewer (ported from VideoViewer.ts) ─────────────────── */
+const VideoView: React.FC<{ src: string; fileName: string }> = ({
+  src,
+  fileName,
+}) => (
+  <div className={`${CLS}__video-container`}>
+    <div className={`${CLS}__media-toolbar`}>{fileName}</div>
+    <div className={`${CLS}__video-wrapper`}>
+      <video
+        controls
+        src={src}
+        style={{ maxWidth: "100%", maxHeight: "100%", display: "block" }}
+      />
+    </div>
+  </div>
+);
+
+/* ── Main Viewer Component ─────────────────────────────────────── */
 export const Viewer: React.FC<ViewerProps> = ({
   filePath,
   getFileUrl,
@@ -26,32 +179,27 @@ export const Viewer: React.FC<ViewerProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Image zoom/pan state
-  const [scale, setScale] = useState(1);
-  const [translate, setTranslate] = useState({ x: 0, y: 0 });
-  const dragging = useRef(false);
-  const dragStart = useRef({ x: 0, y: 0 });
-
   const fileName = filePath?.split("/").pop() || "";
   const fileType = filePath ? detectFileType(filePath) : null;
+  const language = filePath ? detectLanguage(filePath) : "plaintext";
 
-  // Load text content when file changes
+  // Load text/csv content when file changes
   useEffect(() => {
     if (!filePath || !fileType) return;
     setTextContent(null);
     setError(null);
-    setScale(1);
-    setTranslate({ x: 0, y: 0 });
 
     if (fileType === "text" || fileType === "csv") {
       setLoading(true);
       fetch(getFileUrl(filePath))
         .then((r) => {
           if (!r.ok) throw new Error(`HTTP ${r.status}`);
-          return r.json();
+          const ct = r.headers.get("content-type") || "";
+          return ct.includes("application/json") ? r.json() : r.text();
         })
         .then((data) => {
-          setTextContent(data.content ?? JSON.stringify(data, null, 2));
+          const text = typeof data === "string" ? data : (data.content ?? "");
+          setTextContent(text);
           setLoading(false);
         })
         .catch((e) => {
@@ -60,41 +208,6 @@ export const Viewer: React.FC<ViewerProps> = ({
         });
     }
   }, [filePath, fileType, getFileUrl]);
-
-  const handleWheel = useCallback((e: React.WheelEvent) => {
-    e.preventDefault();
-    setScale((s) =>
-      Math.max(0.1, Math.min(10, s * (e.deltaY > 0 ? 0.9 : 1.1))),
-    );
-  }, []);
-
-  const handleMouseDown = useCallback(
-    (e: React.MouseEvent) => {
-      dragging.current = true;
-      dragStart.current = {
-        x: e.clientX - translate.x,
-        y: e.clientY - translate.y,
-      };
-    },
-    [translate],
-  );
-
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    if (!dragging.current) return;
-    setTranslate({
-      x: e.clientX - dragStart.current.x,
-      y: e.clientY - dragStart.current.y,
-    });
-  }, []);
-
-  const handleMouseUp = useCallback(() => {
-    dragging.current = false;
-  }, []);
-
-  const handleDoubleClick = useCallback(() => {
-    setScale(1);
-    setTranslate({ x: 0, y: 0 });
-  }, []);
 
   // Empty state
   if (!filePath) {
@@ -108,7 +221,6 @@ export const Viewer: React.FC<ViewerProps> = ({
 
   return (
     <div className={`${CLS} ${className ?? ""}`} style={style}>
-      {/* Header with filename */}
       <div className={`${CLS}__header`}>
         <span className={`${CLS}__filename`} title={filePath}>
           {fileName}
@@ -120,56 +232,34 @@ export const Viewer: React.FC<ViewerProps> = ({
         )}
       </div>
 
-      {/* Content */}
       <div className={`${CLS}__content`}>
         {loading && (
           <div className={`${CLS}__loading`}>
             <i className="fas fa-spinner fa-spin" /> Loading...
           </div>
         )}
-
         {error && (
           <div className={`${CLS}__error`}>
             <i className="fas fa-exclamation-triangle" /> {error}
           </div>
         )}
 
-        {/* Image viewer with zoom/pan */}
+        {/* Route to sub-viewer by file type */}
         {fileType === "image" && (
-          <div
-            className={`${CLS}__image-container`}
-            onWheel={handleWheel}
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseUp}
-            onDoubleClick={handleDoubleClick}
-            style={{ cursor: dragging.current ? "grabbing" : "grab" }}
-          >
-            <img
-              src={getFileUrl(filePath, true)}
-              alt={fileName}
-              draggable={false}
-              style={{
-                transform: `translate(${translate.x}px, ${translate.y}px) scale(${scale})`,
-                transformOrigin: "center center",
-                maxWidth: "100%",
-                maxHeight: "100%",
-                userSelect: "none",
-              }}
-            />
-          </div>
+          <ImageView src={getFileUrl(filePath, true)} fileName={fileName} />
         )}
-
-        {/* Text viewer */}
-        {(fileType === "text" || fileType === "csv") &&
-          textContent !== null && (
-            <pre className={`${CLS}__text`}>
-              <code>{textContent}</code>
-            </pre>
-          )}
-
-        {/* Binary / unsupported */}
+        {fileType === "text" && textContent !== null && (
+          <TextView content={textContent} language={language} />
+        )}
+        {fileType === "csv" && textContent !== null && (
+          <CsvView content={textContent} />
+        )}
+        {fileType === "audio" && (
+          <AudioView src={getFileUrl(filePath, true)} fileName={fileName} />
+        )}
+        {fileType === "video" && (
+          <VideoView src={getFileUrl(filePath, true)} fileName={fileName} />
+        )}
         {fileType === "binary" && (
           <div className={`${CLS}__binary`}>
             <i className="fas fa-file" />

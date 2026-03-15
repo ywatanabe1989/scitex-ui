@@ -123,6 +123,92 @@
   font-family: inherit;
 }
 
+/* --- CSV Table (ported from CsvViewer.ts) --- */
+
+.stx-shell-viewer__csv-container {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+}
+
+.stx-shell-viewer__csv-table {
+  border-collapse: collapse;
+  font-size: 12px;
+  font-family: "JetBrains Mono", Monaco, Menlo, monospace;
+  white-space: nowrap;
+  width: 100%;
+}
+
+.stx-shell-viewer__csv-table th,
+.stx-shell-viewer__csv-table td {
+  padding: 4px 8px;
+  border: 1px solid var(--workspace-border-subtle);
+}
+
+.stx-shell-viewer__csv-table th {
+  background: var(--workspace-bg-elevated);
+  font-weight: 600;
+  color: var(--text-primary);
+  position: sticky;
+  top: 0;
+}
+
+.stx-shell-viewer__csv-table td {
+  color: var(--text-secondary);
+}
+
+/* --- Audio viewer (ported from AudioViewer.ts) --- */
+
+.stx-shell-viewer__audio-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 12px;
+  padding: 20px;
+}
+
+.stx-shell-viewer__media-name {
+  font-size: 13px;
+  color: var(--text-secondary);
+  text-align: center;
+  word-break: break-all;
+}
+
+.stx-shell-viewer__media-format {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* --- Video viewer (ported from VideoViewer.ts) --- */
+
+.stx-shell-viewer__video-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  background: #000;
+}
+
+.stx-shell-viewer__media-toolbar {
+  padding: 6px 10px;
+  font-size: 13px;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--workspace-border-subtle);
+  flex-shrink: 0;
+}
+
+.stx-shell-viewer__video-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
 /* --- Binary / unsupported --- */
 
 .stx-shell-viewer__binary {
