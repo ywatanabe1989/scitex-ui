@@ -293,9 +293,19 @@ export const Workspace: React.FC<WorkspaceProps> = ({
             </div>
           ) : (
             <>
-              <div className={`${CLS}__tree-header`}>
-                <i className="fas fa-folder" />
-                <span>Files</span>
+              <div className="stx-shell-sidebar__header">
+                <span className="stx-shell-sidebar__title">Files</span>
+                <div className="stx-shell-sidebar__header-actions">
+                  <button
+                    className="sort-toggle"
+                    title="Sort by recent (newest first)"
+                    onClick={() => {
+                      /* TODO: toggle sort mode */
+                    }}
+                  >
+                    <i className="fas fa-sort-alpha-down" />
+                  </button>
+                </div>
               </div>
               <FileBrowser
                 data={treeData}

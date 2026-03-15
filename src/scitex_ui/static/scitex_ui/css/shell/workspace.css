@@ -91,14 +91,14 @@
   transition: width 0.2s ease;
 }
 
-/* File tree header — 50px height matching scitex-cloud sidebar header */
-.stx-workspace__tree-header {
+/* Sidebar header — ported from scitex-cloud stx-shell-sidebar.css */
+.stx-shell-sidebar__header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  height: 50px;
-  min-height: 50px;
-  padding: 0 16px;
+  justify-content: space-between;
+  padding: 0 12px;
+  height: 44px;
+  min-height: 44px;
   font-size: 14px;
   font-weight: 600;
   color: var(--text-primary);
@@ -107,13 +107,36 @@
   flex-shrink: 0;
 }
 
-.stx-workspace__tree-header i {
-  font-size: 14px;
-  color: var(--text-muted);
+.stx-shell-sidebar__title {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.stx-workspace__tree-header span {
-  flex: 1;
+.stx-shell-sidebar__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.stx-shell-sidebar__header-actions button {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.stx-shell-sidebar__header-actions button:hover {
+  color: var(--text-primary);
+  background: var(--workspace-bg-hover);
+}
+
+.stx-shell-sidebar__header-actions button.active {
+  color: var(--stx-app-accent, #059669);
 }
 
 /* --- Collapsed State (ported from stx-shell-sidebar.css) ---
