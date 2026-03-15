@@ -29,6 +29,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
   fileTreeBackend,
   highlightExtensions: _highlightExtensions,
   onFileSelect,
+  onFileDoubleClick,
   onFileDrop,
   onFileContextAction,
   getFileUrl,
@@ -198,7 +199,9 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                       className="stx-shell-ai-console-tabs-list"
                     >
                       <div className="stx-shell-ai-console-tab-item active">
-                        <span className="stx-shell-ai-console-tab-title">T1</span>
+                        <span className="stx-shell-ai-console-tab-title">
+                          T1
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -334,6 +337,17 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                 onFileSelect={(node) => {
                   setViewerFile(node.path);
                   onFileSelect?.(node);
+                }}
+                onFileDoubleClick={(node) => {
+                  if (node.type === "file") {
+                    setViewerFile(node.path);
+                    if (!viewer.collapsed) {
+                      // Already open — just switch file
+                    } else {
+                      expandViewer();
+                    }
+                  }
+                  onFileDoubleClick?.(node);
                 }}
                 onContextAction={onFileContextAction}
                 showFileCount

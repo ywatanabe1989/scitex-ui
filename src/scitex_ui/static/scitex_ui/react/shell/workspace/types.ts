@@ -70,8 +70,10 @@ export interface WorkspaceProps extends BaseProps {
 
   /** File extensions to highlight in tree */
   highlightExtensions?: string[];
-  /** Called when file is selected in tree */
+  /** Called when file is selected (single click) in tree */
   onFileSelect?: (node: FileNode) => void;
+  /** Called when file is double-clicked in tree (opens in viewer/editor) */
+  onFileDoubleClick?: (node: FileNode) => void;
   /** Called when file is dropped onto app area */
   onFileDrop?: (path: string, target: string) => void;
   /** Called on file tree right-click action */
