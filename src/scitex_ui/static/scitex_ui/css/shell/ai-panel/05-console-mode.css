@@ -4,12 +4,12 @@
  * ============================================================================= */
 
 /* Console view must not scroll — xterm handles its own scrollback */
-.scitex-ai-view[data-view="console"] {
+.stx-shell-ai-view[data-view="console"] {
   overflow: hidden !important;
 }
 
 /* Terminal container — flex column so child .stx-shell-terminal fills height */
-.scitex-ai-console-terminal {
+.stx-shell-ai-console-terminal {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -18,13 +18,13 @@
   background: var(--terminal-bg, var(--workspace-bg-tertiary, #0d1117));
 }
 
-.scitex-ai-console-terminal.drop-target {
+.stx-shell-ai-console-terminal.drop-target {
   outline: 2px dashed var(--accent-primary, #3b82f6);
   outline-offset: -2px;
 }
 
 /* Console status indicator */
-.scitex-ai-console-status {
+.stx-shell-ai-console-status {
   flex-shrink: 0;
   padding: 4px 8px;
   font-size: 11px;
@@ -34,20 +34,20 @@
   gap: 4px;
 }
 
-.scitex-ai-console-status .fa-circle {
+.stx-shell-ai-console-status .fa-circle {
   font-size: 0.5rem;
 }
 
-.scitex-ai-console-status.connected {
+.stx-shell-ai-console-status.connected {
   color: var(--workspace-icon-primary, #5a9a7e);
 }
 
-.scitex-ai-console-status.connected .fa-circle {
+.stx-shell-ai-console-status.connected .fa-circle {
   color: var(--workspace-icon-primary, #5a9a7e);
 }
 
 /* Console toolbar (status + camera/sketch/mic buttons) */
-.scitex-ai-console-toolbar {
+.stx-shell-ai-console-toolbar {
   position: relative;
   flex-shrink: 0;
   display: flex;
@@ -59,35 +59,35 @@
   font-size: 0.6875rem;
 }
 
-.scitex-ai-console-toolbar-btns {
+.stx-shell-ai-console-toolbar-btns {
   display: flex;
   align-items: center;
   gap: 0.25rem;
 }
 
-.scitex-ai-console-toolbar-btns .scitex-ai-input-btn {
+.stx-shell-ai-console-toolbar-btns .stx-shell-ai-input-btn {
   font-size: 0.7rem;
   padding: 0.15rem 0.35rem;
 }
 
 /* Auto-accept state label */
-.scitex-ai-auto-accept-state {
+.stx-shell-ai-auto-accept-state {
   font-size: 0.55rem;
   color: var(--text-muted, #8b949e);
   margin-left: 2px;
 }
 
-.scitex-ai-auto-accept-btn.active {
+.stx-shell-ai-auto-accept-btn.active {
   color: var(--workspace-icon-primary, #5a9a7e);
 }
 
 /* Jobs section (collapsible) */
-.scitex-ai-jobs-section {
+.stx-shell-ai-jobs-section {
   flex-shrink: 0;
   border-top: 1px solid var(--border-default, #30363d);
 }
 
-.scitex-ai-jobs-section-summary {
+.stx-shell-ai-jobs-section-summary {
   display: flex;
   align-items: center;
   gap: 0.35rem;
@@ -100,21 +100,21 @@
   background: var(--bg-tertiary, #0d1117);
 }
 
-.scitex-ai-jobs-section-summary::-webkit-details-marker {
+.stx-shell-ai-jobs-section-summary::-webkit-details-marker {
   display: none;
 }
 
-.scitex-ai-jobs-section-summary:hover {
+.stx-shell-ai-jobs-section-summary:hover {
   color: var(--text-primary);
 }
 
-.scitex-ai-jobs-summary {
+.stx-shell-ai-jobs-summary {
   flex: 1;
   font-size: 0.625rem;
   color: var(--text-muted, #8b949e);
 }
 
-.scitex-ai-jobs-list {
+.stx-shell-ai-jobs-list {
   max-height: 200px;
   overflow-y: auto;
   padding: 0.25rem 0.5rem;

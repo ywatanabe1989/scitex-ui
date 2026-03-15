@@ -67,7 +67,7 @@
   transition: width 0.2s ease;
 }
 
-/* Console/Chat inner panel structure now uses scitex-ai-* classes.
+/* Console/Chat inner panel structure now uses stx-shell-ai-* classes.
  * See css/shell/ai-panel.css and css/shell/ai-panel/ for details. */
 
 .stx-workspace__console-content {
@@ -78,7 +78,7 @@
   overflow: hidden;
 }
 
-/* Console toolbar/status now uses .scitex-ai-console-toolbar (see ai-panel.css) */
+/* Console toolbar/status now uses .stx-shell-ai-console-toolbar (see ai-panel.css) */
 
 /* --- File Tree Panel (Column 2) --- */
 

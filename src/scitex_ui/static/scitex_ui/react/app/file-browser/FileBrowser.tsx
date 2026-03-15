@@ -2,17 +2,17 @@
  * FileBrowser — React port of scitex-cloud WorkspaceFilesTree component.
  *
  * Produces IDENTICAL DOM structure and CSS classes to scitex-cloud.
- * Source: scitex-cloud/static/shared/ts/components/workspace-files-tree/
+ * Source: scitex-cloud/static/shared/ts/components/stx-app-file-tree/
  *
  * Top-level DOM:
- *   <div class="workspace-files-tree">
- *     <div class="wft-content">
- *       <div class="wft-tree">
- *         <div class="wft-item wft-root" />   ← hidden by CSS
+ *   <div class="stx-app-file-tree">
+ *     <div class="stx-app-file-tree__content">
+ *       <div class="stx-app-file-tree__tree">
+ *         <div class="stx-app-file-tree__item stx-app-file-tree__root" />   ← hidden by CSS
  *         ... tree items ...
  *       </div>
  *     </div>
- *     <div class="wft-search-box">...</div>    ← when searchable=true
+ *     <div class="stx-app-file-tree__search-box">...</div>    ← when searchable=true
  *   </div>
  */
 
@@ -206,11 +206,11 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({
   if (loading) {
     return (
       <div
-        className={`workspace-files-tree${className ? ` ${className}` : ""}`}
+        className={`stx-app-file-tree${className ? ` ${className}` : ""}`}
         style={style}
       >
-        <div className="wft-content">
-          <div className="wft-loading">
+        <div className="stx-app-file-tree__content">
+          <div className="stx-app-file-tree__loading">
             <i className="fas fa-spinner fa-spin" /> Loading files...
           </div>
         </div>
@@ -221,11 +221,11 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({
   if (error) {
     return (
       <div
-        className={`workspace-files-tree${className ? ` ${className}` : ""}`}
+        className={`stx-app-file-tree${className ? ` ${className}` : ""}`}
         style={style}
       >
-        <div className="wft-content">
-          <div className="wft-error">
+        <div className="stx-app-file-tree__content">
+          <div className="stx-app-file-tree__error">
             <i className="fas fa-exclamation-triangle" />
             <span>{error}</span>
           </div>
@@ -236,13 +236,13 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({
 
   return (
     <div
-      className={`workspace-files-tree${className ? ` ${className}` : ""}`}
+      className={`stx-app-file-tree${className ? ` ${className}` : ""}`}
       style={style}
       onContextMenu={
         onContextAction
           ? (e) => {
               const item = (e.target as HTMLElement).closest(
-                ".wft-item",
+                ".stx-app-file-tree__item",
               ) as HTMLElement | null;
               if (!item) return;
               e.preventDefault();
@@ -254,30 +254,30 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({
           : undefined
       }
     >
-      {/* Content wrapper — mirrors scitex-cloud .wft-content */}
-      <div className="wft-content">
+      {/* Content wrapper — mirrors scitex-cloud .stx-app-file-tree__content */}
+      <div className="stx-app-file-tree__content">
         {showFileCount && (
-          <div className="wft-file-count">
+          <div className="stx-app-file-tree__file-count">
             {countFiles(data)} file{countFiles(data) !== 1 ? "s" : ""}
           </div>
         )}
 
-        {/* Tree root — mirrors scitex-cloud .wft-tree */}
-        <div className="wft-tree">
-          {/* Root item — hidden by CSS: .wft-item.wft-root { display: none } */}
+        {/* Tree root — mirrors scitex-cloud .stx-app-file-tree__tree */}
+        <div className="stx-app-file-tree__tree">
+          {/* Root item — hidden by CSS: .stx-app-file-tree__item.stx-app-file-tree__root { display: none } */}
           <div
-            className="wft-item wft-root"
+            className="stx-app-file-tree__item stx-app-file-tree__root"
             data-path=""
             data-action="select-root"
             style={{ paddingLeft: 8 }}
           >
-            <span className="wft-icon" />
-            <span className="wft-name wft-root-name">Project</span>
+            <span className="stx-app-file-tree__icon" />
+            <span className="stx-app-file-tree__name stx-app-file-tree__root-name">Project</span>
           </div>
 
           {filteredData.length === 0 ? (
             <div
-              className="wft-loading"
+              className="stx-app-file-tree__loading"
               style={{
                 padding: "16px 12px",
                 fontSize: 12,
@@ -305,16 +305,16 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({
         </div>
       </div>
 
-      {/* Search box — mirrors scitex-cloud .wft-search-box */}
+      {/* Search box — mirrors scitex-cloud .stx-app-file-tree__search-box */}
       {searchable && searchVisible && (
-        <div className="wft-search-box">
-          <div className="wft-search-input-wrapper">
-            <span className="wft-search-icon">
+        <div className="stx-app-file-tree__search-box">
+          <div className="stx-app-file-tree__search-input-wrapper">
+            <span className="stx-app-file-tree__search-icon">
               <i className="fas fa-search" />
             </span>
             <input
               ref={searchInputRef}
-              className="wft-search-input"
+              className="stx-app-file-tree__search-input"
               type="text"
               placeholder="Filter files..."
               value={searchQuery}
@@ -328,7 +328,7 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({
             />
             {searchQuery && (
               <button
-                className="wft-search-clear"
+                className="stx-app-file-tree__search-clear"
                 onClick={() => setSearchQuery("")}
                 title="Clear (Esc)"
               >

@@ -3,7 +3,7 @@
  * Ported from scitex-cloud global-ai-chat/03-mode-toggle.css
  * ============================================================================= */
 
-.scitex-ai-mode-toggle {
+.stx-shell-ai-mode-toggle {
   display: flex;
   gap: 0;
   margin-left: 0;
@@ -12,7 +12,7 @@
   border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
 }
 
-.scitex-ai-mode-btn {
+.stx-shell-ai-mode-btn {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -32,15 +32,15 @@
   white-space: nowrap;
 }
 
-.scitex-ai-mode-btn i {
+.stx-shell-ai-mode-btn i {
   font-size: 14px;
 }
 
-.scitex-ai-mode-btn:hover {
+.stx-shell-ai-mode-btn:hover {
   color: var(--text-primary);
 }
 
-.scitex-ai-mode-btn.active {
+.stx-shell-ai-mode-btn.active {
   color: var(--text-primary);
   background: none;
   border-bottom-color: var(--workspace-icon-primary, #5a9a7e);

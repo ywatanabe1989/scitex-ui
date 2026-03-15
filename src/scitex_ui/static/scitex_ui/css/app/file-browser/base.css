@@ -1,10 +1,10 @@
 /**
  * File Browser — Base styles
- * Ported verbatim from scitex-cloud workspace-files-tree/base.css
- * All class names use the canonical wft-* prefix.
+ * Ported verbatim from scitex-cloud stx-app-file-tree/base.css
+ * All class names use the canonical stx-app-file-tree__* prefix.
  */
 
-.workspace-files-tree {
+.stx-app-file-tree {
   font-family: inherit;
   font-size: inherit;
   line-height: inherit;
@@ -20,21 +20,21 @@
 }
 
 /* Content wrapper */
-.wft-content {
+.stx-app-file-tree__content {
   flex: 1 1 auto;
   overflow-y: auto;
   min-height: 0;
 }
 
 /* Tree container */
-.wft-tree {
+.stx-app-file-tree__tree {
   contain: layout style;
   position: relative;
   padding-bottom: 100px;
 }
 
 /* Tree Item Base */
-.wft-item {
+.stx-app-file-tree__item {
   display: flex;
   align-items: center;
   padding: 1px 8px 1px 4px;
@@ -47,31 +47,31 @@
 }
 
 /* Hide project root — show children directly */
-.wft-item.wft-root {
+.stx-app-file-tree__item.stx-app-file-tree__root {
   display: none;
 }
 
-.wft-item.wft-root + .wft-children {
+.stx-app-file-tree__item.stx-app-file-tree__root + .stx-app-file-tree__children {
   margin-left: 0 !important;
   padding-left: 0 !important;
   border-left: none !important;
 }
 
-.wft-item:hover {
+.stx-app-file-tree__item:hover {
   background-color: var(--color-canvas-subtle, rgba(127, 127, 127, 0.1));
 }
 
 /* Folder styles — blue like Emacs dired */
-.wft-folder {
+.stx-app-file-tree__folder {
   font-weight: 500;
 }
 
-.wft-folder > .wft-name {
+.stx-app-file-tree__folder > .stx-app-file-tree__name {
   color: #6cb6ff;
 }
 
 /* Folder toggle button */
-.wft-folder-toggle {
+.stx-app-file-tree__folder-toggle {
   display: flex;
   align-items: center;
   gap: 4px;
@@ -83,7 +83,7 @@
 }
 
 /* Chevron — Unicode ▸ via CSS ::before (NOT FontAwesome) */
-.wft-chevron {
+.stx-app-file-tree__chevron {
   display: inline-block;
   width: 12px;
   height: 12px;
@@ -94,28 +94,28 @@
   color: var(--color-fg-muted, #768390);
 }
 
-.wft-chevron::before {
+.stx-app-file-tree__chevron::before {
   content: "\25B8";
 }
 
-.wft-chevron.expanded {
+.stx-app-file-tree__chevron.expanded {
   transform: rotate(90deg);
 }
 
 /* Spacer (files have no chevron) */
-.wft-spacer {
+.stx-app-file-tree__spacer {
   display: inline-block;
   width: 12px;
   height: 12px;
 }
 
 /* Icon — hidden for simplified look */
-.wft-icon {
+.stx-app-file-tree__icon {
   display: none;
 }
 
 /* Name */
-.wft-name {
+.stx-app-file-tree__name {
   flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -125,14 +125,14 @@
 }
 
 /* Symlink indicator */
-.wft-symlink {
+.stx-app-file-tree__symlink {
   color: var(--color-fg-muted, #768390);
   font-size: 11px;
   margin-left: 4px;
 }
 
 /* File count header */
-.wft-file-count {
+.stx-app-file-tree__file-count {
   display: flex;
   align-items: center;
   padding: 6px 8px;

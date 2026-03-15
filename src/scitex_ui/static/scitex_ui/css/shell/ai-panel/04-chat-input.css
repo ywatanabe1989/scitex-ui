@@ -3,7 +3,7 @@
  * Ported from scitex-cloud global-ai-chat/05-chat-input.css
  * ============================================================================= */
 
-.scitex-ai-input-area {
+.stx-shell-ai-input-area {
   position: relative;
   flex-shrink: 0;
   display: flex;
@@ -15,7 +15,7 @@
 }
 
 /* Input wrapper: textarea + buttons inside */
-.scitex-ai-input-wrap {
+.stx-shell-ai-input-wrap {
   display: flex;
   align-items: center;
   width: 100%;
@@ -26,11 +26,11 @@
   transition: border-color 0.15s;
 }
 
-.scitex-ai-input-wrap:focus-within {
+.stx-shell-ai-input-wrap:focus-within {
   border-color: var(--color-accent-fg, #0969da);
 }
 
-.scitex-ai-input {
+.stx-shell-ai-input {
   flex: 1;
   padding: 0.5rem 0;
   border: none;
@@ -45,17 +45,17 @@
   line-height: 1.4;
 }
 
-.scitex-ai-input::placeholder {
+.stx-shell-ai-input::placeholder {
   color: var(--text-muted, #8b949e);
 }
 
 /* Hidden send button (kept for JS .click() calls) */
-.scitex-ai-send {
+.stx-shell-ai-send {
   display: none;
 }
 
 /* Mic button — inside the input box */
-.scitex-ai-mic {
+.stx-shell-ai-mic {
   flex-shrink: 0;
   align-self: center;
   padding: 0.5rem;
@@ -75,12 +75,12 @@
     color 0.15s;
 }
 
-.scitex-ai-mic:hover {
+.stx-shell-ai-mic:hover {
   background: rgba(255, 255, 255, 0.08);
   color: var(--text-primary);
 }
 
-.scitex-ai-mic.recording {
+.stx-shell-ai-mic.recording {
   color: #cf222e;
   background: rgba(207, 34, 46, 0.1);
   animation: mic-pulse 0.8s ease-in-out infinite;
@@ -97,7 +97,7 @@
 }
 
 /* Camera / Sketch / Gear input buttons */
-.scitex-ai-input-btn {
+.stx-shell-ai-input-btn {
   flex-shrink: 0;
   align-self: center;
   padding: 0.5rem;
@@ -117,18 +117,18 @@
     color 0.15s;
 }
 
-.scitex-ai-input-btn:hover {
+.stx-shell-ai-input-btn:hover {
   background: rgba(255, 255, 255, 0.08);
   color: var(--text-primary);
 }
 
-.scitex-ai-input-btn:disabled {
+.stx-shell-ai-input-btn:disabled {
   opacity: 0.4;
   cursor: default;
 }
 
 /* Model badge above the input row */
-.scitex-ai-model-badge {
+.stx-shell-ai-model-badge {
   font-size: 0.6rem;
   font-family: monospace;
   font-weight: 400;
@@ -137,12 +137,12 @@
   margin-left: 0.25rem;
 }
 
-.scitex-ai-model-badge:empty {
+.stx-shell-ai-model-badge:empty {
   display: none;
 }
 
 /* Volume visualizer (shown during recording) */
-.scitex-ai-vol {
+.stx-shell-ai-vol {
   display: flex;
   align-items: flex-end;
   gap: 2px;
@@ -151,7 +151,7 @@
   flex-shrink: 0;
 }
 
-.scitex-ai-vol-bar {
+.stx-shell-ai-vol-bar {
   display: inline-block;
   width: 3px;
   height: 20px;
@@ -163,13 +163,13 @@
 }
 
 /* Image preview strip above textarea */
-.scitex-ai-image-previews {
+.stx-shell-ai-image-previews {
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
   width: 100%;
 }
 
-.scitex-ai-image-previews:empty {
+.stx-shell-ai-image-previews:empty {
   display: none;
 }

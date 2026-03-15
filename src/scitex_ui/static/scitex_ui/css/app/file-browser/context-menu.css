@@ -1,9 +1,9 @@
 /**
  * File Browser — Context Menu
- * Ported verbatim from scitex-cloud workspace-files-tree/context-menu.css
+ * Ported verbatim from scitex-cloud stx-app-file-tree/context-menu.css
  */
 
-.wft-context-menu {
+.stx-app-file-tree__context-menu {
   background: var(--color-canvas-overlay, #2d333b);
   border: 1px solid var(--workspace-border-default, rgba(110, 118, 129, 0.3));
   border-radius: 6px;
@@ -14,7 +14,7 @@
   font-size: 12px;
 }
 
-.wft-context-item {
+.stx-app-file-tree__context-item {
   display: flex;
   align-items: center;
   padding: 6px 12px;
@@ -23,72 +23,72 @@
   transition: background-color 0.1s ease;
 }
 
-.wft-context-item:hover {
+.stx-app-file-tree__context-item:hover {
   background: var(--color-accent-subtle, rgba(47, 129, 247, 0.15));
 }
 
-.wft-context-item.disabled {
+.stx-app-file-tree__context-item.disabled {
   color: var(--color-fg-muted, #768390);
   cursor: not-allowed;
 }
 
-.wft-context-item.disabled:hover {
+.stx-app-file-tree__context-item.disabled:hover {
   background: transparent;
 }
 
-.wft-context-icon {
+.stx-app-file-tree__context-icon {
   width: 20px;
   text-align: center;
   margin-right: 8px;
   color: var(--color-fg-muted, #768390);
 }
 
-.wft-context-item:hover .wft-context-icon {
+.stx-app-file-tree__context-item:hover .stx-app-file-tree__context-icon {
   color: var(--color-accent-fg, #58a6ff);
 }
 
-.wft-context-label {
+.stx-app-file-tree__context-label {
   flex: 1;
 }
 
-.wft-context-shortcut {
+.stx-app-file-tree__context-shortcut {
   color: var(--color-fg-muted, #768390);
   font-size: 11px;
   margin-left: 16px;
 }
 
-.wft-context-separator {
+.stx-app-file-tree__context-separator {
   height: 1px;
   background: var(--workspace-border-default, rgba(110, 118, 129, 0.3));
   margin: 4px 8px;
 }
 
 /* Icon colors for specific actions */
-.wft-context-item.context-new-file .wft-context-icon {
+.stx-app-file-tree__context-item.context-new-file .stx-app-file-tree__context-icon {
   color: var(--color-accent-fg, #58a6ff);
 }
 
-.wft-context-item.context-new-folder .wft-context-icon {
+.stx-app-file-tree__context-item.context-new-folder .stx-app-file-tree__context-icon {
   color: var(--color-success-fg, #3fb950);
 }
 
-.wft-context-item.context-rename .wft-context-icon {
+.stx-app-file-tree__context-item.context-rename .stx-app-file-tree__context-icon {
   color: var(--color-attention-fg, #d29922);
 }
 
-.wft-context-item.context-duplicate .wft-context-icon {
+.stx-app-file-tree__context-item.context-duplicate .stx-app-file-tree__context-icon {
   color: var(--color-done-fg, #a371f7);
 }
 
-.wft-context-item.context-delete .wft-context-icon {
+.stx-app-file-tree__context-item.context-delete .stx-app-file-tree__context-icon {
   color: var(--color-danger-fg, #f85149);
 }
 
 /* Hover states — maintain icon colors */
-.wft-context-item.context-new-file:hover .wft-context-icon,
-.wft-context-item.context-new-folder:hover .wft-context-icon,
-.wft-context-item.context-rename:hover .wft-context-icon,
-.wft-context-item.context-duplicate:hover .wft-context-icon,
-.wft-context-item.context-delete:hover .wft-context-icon {
+.stx-app-file-tree__context-item.context-new-file:hover .stx-app-file-tree__context-icon,
+.stx-app-file-tree__context-item.context-new-folder:hover .stx-app-file-tree__context-icon,
+.stx-app-file-tree__context-item.context-rename:hover .stx-app-file-tree__context-icon,
+.stx-app-file-tree__context-item.context-duplicate:hover .stx-app-file-tree__context-icon,
+.stx-app-file-tree__context-item.context-delete:hover .stx-app-file-tree__context-icon {
   /* Keep the same color on hover */
 }

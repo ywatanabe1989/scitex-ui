@@ -1,9 +1,9 @@
 /**
  * Chat — AI chat panel with streaming responses.
- * Uses scitex-ai-* CSS classes matching scitex-cloud global_ai_panel.html DOM.
+ * Uses stx-shell-ai-* CSS classes matching scitex-cloud global_ai_panel.html DOM.
  *
  * Renders as a fragment (no wrapper div). The parent (Workspace) supplies
- * the .scitex-ai-view wrapper so there is no nested duplication.
+ * the .stx-shell-ai-view wrapper so there is no nested duplication.
  *
  * Usage:
  *   import { Chat } from '@scitex/ui/react/shell/chat';
@@ -129,22 +129,22 @@ export const Chat: React.FC<ChatProps> = ({
     setMessages([]);
   }, []);
 
-  // Render as fragment — parent (Workspace) provides the .scitex-ai-view wrapper
+  // Render as fragment — parent (Workspace) provides the .stx-shell-ai-view wrapper
   return (
     <>
       {/* Sessions bar — new chat button + session chips + actions */}
-      <div className="scitex-ai-sessions-bar">
-        <button className="scitex-ai-new-chat" title="New chat">
+      <div className="stx-shell-ai-sessions-bar">
+        <button className="stx-shell-ai-new-chat" title="New chat">
           <i className="fas fa-plus" />
         </button>
-        <div className="scitex-ai-sessions-list">
-          <div className="scitex-ai-session-item active">
+        <div className="stx-shell-ai-sessions-list">
+          <div className="stx-shell-ai-session-item active">
             <span>C1</span>
           </div>
         </div>
-        <div className="scitex-ai-panel-actions">
+        <div className="stx-shell-ai-panel-actions">
           <button
-            className="scitex-ai-action-btn"
+            className="stx-shell-ai-action-btn"
             onClick={clearMessages}
             title="Clear chat"
           >
@@ -154,9 +154,9 @@ export const Chat: React.FC<ChatProps> = ({
       </div>
 
       {/* Messages */}
-      <div className="scitex-ai-messages">
+      <div className="stx-shell-ai-messages">
         {messages.length === 0 && (
-          <div className="scitex-ai-empty">
+          <div className="stx-shell-ai-empty">
             <i className="fas fa-robot" />
             <span>Ask anything about SciTeX.</span>
             <span>
@@ -168,11 +168,11 @@ export const Chat: React.FC<ChatProps> = ({
         {messages.map((msg, i) => (
           <div
             key={i}
-            className={`scitex-ai-msg ${msg.role === "user" ? "user" : "assistant"}`}
+            className={`stx-shell-ai-msg ${msg.role === "user" ? "user" : "assistant"}`}
           >
             {msg.content ||
               (streaming && i === messages.length - 1 ? (
-                <span className="scitex-ai-typing">Thinking</span>
+                <span className="stx-shell-ai-typing">Thinking</span>
               ) : (
                 ""
               ))}
@@ -182,13 +182,13 @@ export const Chat: React.FC<ChatProps> = ({
       </div>
 
       {/* Input area */}
-      <div className="scitex-ai-input-area" style={{ position: "relative" }}>
-        <span className="scitex-ai-model-badge" />
-        <div className="scitex-ai-image-previews" />
-        <div className="scitex-ai-input-wrap">
+      <div className="stx-shell-ai-input-area" style={{ position: "relative" }}>
+        <span className="stx-shell-ai-model-badge" />
+        <div className="stx-shell-ai-image-previews" />
+        <div className="stx-shell-ai-input-wrap">
           <textarea
             ref={inputRef}
-            className="scitex-ai-input"
+            className="stx-shell-ai-input"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -198,7 +198,7 @@ export const Chat: React.FC<ChatProps> = ({
           />
           {/* Camera — placeholder, non-functional */}
           <button
-            className="scitex-ai-input-btn"
+            className="stx-shell-ai-input-btn"
             title="Attach image"
             disabled
             aria-disabled="true"
@@ -207,7 +207,7 @@ export const Chat: React.FC<ChatProps> = ({
           </button>
           {/* Sketch — placeholder, non-functional */}
           <button
-            className="scitex-ai-input-btn"
+            className="stx-shell-ai-input-btn"
             title="Draw sketch"
             disabled
             aria-disabled="true"
@@ -216,7 +216,7 @@ export const Chat: React.FC<ChatProps> = ({
           </button>
           {/* Mic — placeholder, non-functional */}
           <button
-            className="scitex-ai-mic"
+            className="stx-shell-ai-mic"
             title="Voice input"
             disabled
             aria-disabled="true"
@@ -225,7 +225,7 @@ export const Chat: React.FC<ChatProps> = ({
           </button>
           {/* Gear / settings — placeholder */}
           <button
-            className="scitex-ai-input-btn scitex-ai-gear-btn"
+            className="stx-shell-ai-input-btn stx-shell-ai-gear-btn"
             title="Chat settings"
             disabled
             aria-disabled="true"
@@ -235,7 +235,7 @@ export const Chat: React.FC<ChatProps> = ({
         </div>
         {/* Hidden send button (kept for JS compatibility) */}
         <button
-          className="scitex-ai-send"
+          className="stx-shell-ai-send"
           onClick={sendMessage}
           disabled={streaming || !input.trim()}
         />

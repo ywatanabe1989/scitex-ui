@@ -4,10 +4,10 @@
  *
  * Matches scitex-cloud _TreeRenderer.ts renderItems() + renderFolder() exactly:
  *   - Alphabetical sort (mirrors scitex-cloud default "name" sort mode)
- *   - Folders: .wft-item.wft-folder + .wft-children.expanded indent guides
- *   - Files:   .wft-item.wft-file (delegated to FileItem)
- *   - Chevron: .wft-chevron span (Unicode ▸ rendered via CSS ::before)
- *   - Spacer:  .wft-spacer span (for empty-toggle folders)
+ *   - Folders: .stx-app-file-tree__item.stx-app-file-tree__folder + .stx-app-file-tree__children.expanded indent guides
+ *   - Files:   .stx-app-file-tree__item.stx-app-file-tree__file (delegated to FileItem)
+ *   - Chevron: .stx-app-file-tree__chevron span (Unicode ▸ rendered via CSS ::before)
+ *   - Spacer:  .stx-app-file-tree__spacer span (for empty-toggle folders)
  */
 
 import React from "react";
@@ -52,13 +52,13 @@ const FolderItem: React.FC<FolderItemProps> = ({
   const isExpanded = expanded.has(node.path);
   const hasChildren = !!(node.children && node.children.length > 0);
 
-  const classes = ["wft-item", "wft-folder"];
+  const classes = ["stx-app-file-tree__item", "stx-app-file-tree__folder"];
   if (isExpanded) classes.push("expanded");
   if (searchActive) {
-    if (searchMatches?.has(node.path)) classes.push("wft-search-match");
+    if (searchMatches?.has(node.path)) classes.push("stx-app-file-tree__search-match");
     else if (searchAncestors?.has(node.path))
-      classes.push("wft-search-ancestor");
-    else classes.push("wft-search-dim");
+      classes.push("stx-app-file-tree__search-ancestor");
+    else classes.push("stx-app-file-tree__search-dim");
   }
 
   return (
@@ -77,26 +77,26 @@ const FolderItem: React.FC<FolderItemProps> = ({
         {/* Folder toggle button */}
         <button
           type="button"
-          className="wft-folder-toggle"
+          className="stx-app-file-tree__folder-toggle"
           data-action="toggle"
           data-path={node.path}
         >
           {hasChildren ? (
-            <span className={`wft-chevron${isExpanded ? " expanded" : ""}`} />
+            <span className={`stx-app-file-tree__chevron${isExpanded ? " expanded" : ""}`} />
           ) : (
-            <span className="wft-spacer" />
+            <span className="stx-app-file-tree__spacer" />
           )}
-          {/* Icon — hidden by CSS: .wft-icon { display: none } */}
-          <span className="wft-icon" />
+          {/* Icon — hidden by CSS: .stx-app-file-tree__icon { display: none } */}
+          <span className="stx-app-file-tree__icon" />
         </button>
-        {/* Folder name — blue #6cb6ff via .wft-folder > .wft-name */}
-        <span className="wft-name">{node.name}</span>
+        {/* Folder name — blue #6cb6ff via .stx-app-file-tree__folder > .stx-app-file-tree__name */}
+        <span className="stx-app-file-tree__name">{node.name}</span>
       </div>
 
       {/* Children container — CSS handles indent guides */}
       {hasChildren && (
         <div
-          className={`wft-children${isExpanded ? " expanded" : ""}`}
+          className={`stx-app-file-tree__children${isExpanded ? " expanded" : ""}`}
           style={isExpanded ? undefined : { display: "none" }}
         >
           <TreeItems

@@ -3,10 +3,10 @@
  * Matches scitex-cloud _TreeRenderer.ts renderFile() output exactly.
  *
  * DOM structure produced:
- *   <div class="wft-item wft-file [selected] [wft-search-*]" data-path="..." draggable>
- *     <span class="wft-spacer" />       ← spacer (no chevron for files)
- *     <span class="wft-icon" />         ← hidden by CSS
- *     <span class="wft-name">filename</span>
+ *   <div class="stx-app-file-tree__item stx-app-file-tree__file [selected] [stx-app-file-tree__search-*]" data-path="..." draggable>
+ *     <span class="stx-app-file-tree__spacer" />       ← spacer (no chevron for files)
+ *     <span class="stx-app-file-tree__icon" />         ← hidden by CSS
+ *     <span class="stx-app-file-tree__name">filename</span>
  *   </div>
  */
 
@@ -30,11 +30,11 @@ export const FileItem: React.FC<FileItemProps> = ({
 }) => {
   const isSelected = node.path === activeFile || node.is_current;
 
-  const classes = ["wft-item", "wft-file"];
+  const classes = ["stx-app-file-tree__item", "stx-app-file-tree__file"];
   if (isSelected) classes.push("selected");
   if (searchActive) {
-    if (searchMatches?.has(node.path)) classes.push("wft-search-match");
-    else classes.push("wft-search-dim");
+    if (searchMatches?.has(node.path)) classes.push("stx-app-file-tree__search-match");
+    else classes.push("stx-app-file-tree__search-dim");
   }
 
   return (
@@ -53,12 +53,12 @@ export const FileItem: React.FC<FileItemProps> = ({
         onSelect(node);
       }}
     >
-      {/* Spacer — scitex-cloud: files use wft-spacer, not chevron */}
-      <span className="wft-spacer" />
-      {/* Icon — hidden by CSS: .wft-icon { display: none } */}
-      <span className="wft-icon" />
+      {/* Spacer — scitex-cloud: files use stx-app-file-tree__spacer, not chevron */}
+      <span className="stx-app-file-tree__spacer" />
+      {/* Icon — hidden by CSS: .stx-app-file-tree__icon { display: none } */}
+      <span className="stx-app-file-tree__icon" />
       {/* File name */}
-      <span className="wft-name">{node.name}</span>
+      <span className="stx-app-file-tree__name">{node.name}</span>
     </div>
   );
 };

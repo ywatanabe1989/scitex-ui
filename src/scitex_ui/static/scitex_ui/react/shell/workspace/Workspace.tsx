@@ -3,7 +3,7 @@
  * Ported from scitex-cloud. Layout:
  *   Console/Chat | FileTree | Viewer | AppContent
  *
- * Console/Chat panel uses scitex-ai-* CSS classes matching scitex-cloud
+ * Console/Chat panel uses stx-shell-ai-* CSS classes matching scitex-cloud
  * global_ai_panel.html DOM structure exactly.
  */
 
@@ -122,7 +122,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
       data-app={appName}
     >
       <div className={`${CLS}__columns`}>
-        {/* ── Console/Chat Panel (scitex-ai-* DOM) ──────────── */}
+        {/* ── Console/Chat Panel (stx-shell-ai-* DOM) ──────────── */}
         <div
           className={`${CLS}__console-panel${console_.collapsed ? ` ${CLS}__panel--collapsed` : ""}`}
           style={{ width: cW }}
@@ -136,10 +136,10 @@ export const Workspace: React.FC<WorkspaceProps> = ({
           ) : (
             <>
               {/* Header: mode toggle (Console | Chat) */}
-              <div className="scitex-ai-panel-header">
-                <div className="scitex-ai-mode-toggle">
+              <div className="stx-shell-ai-panel-header">
+                <div className="stx-shell-ai-mode-toggle">
                   <button
-                    className={`scitex-ai-mode-btn${mode === "console" ? " active" : ""}`}
+                    className={`stx-shell-ai-mode-btn${mode === "console" ? " active" : ""}`}
                     data-mode="console"
                     title="Terminal"
                     onClick={() => setMode("console")}
@@ -148,7 +148,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                     Console
                   </button>
                   <button
-                    className={`scitex-ai-mode-btn${mode === "chat" ? " active" : ""}`}
+                    className={`stx-shell-ai-mode-btn${mode === "chat" ? " active" : ""}`}
                     data-mode="chat"
                     title="AI Chat"
                     onClick={() => setMode("chat")}
@@ -160,11 +160,11 @@ export const Workspace: React.FC<WorkspaceProps> = ({
               </div>
 
               {/* Body: views toggled by mode */}
-              <div className="scitex-ai-body">
+              <div className="stx-shell-ai-body">
                 {/* ── Chat view ────────────────────────────── */}
                 <div
-                  id="scitex-ai-chat-view"
-                  className={`scitex-ai-view${mode === "chat" ? " active" : ""}`}
+                  id="stx-shell-ai-chat-view"
+                  className={`stx-shell-ai-view${mode === "chat" ? " active" : ""}`}
                 >
                   {chatBackend ? (
                     <Chat
@@ -181,32 +181,32 @@ export const Workspace: React.FC<WorkspaceProps> = ({
 
                 {/* ── Console/Terminal view ─────────────────── */}
                 <div
-                  id="scitex-ai-console-view"
-                  className={`scitex-ai-view${mode === "console" ? " active" : ""}`}
+                  id="stx-shell-ai-console-view"
+                  className={`stx-shell-ai-view${mode === "console" ? " active" : ""}`}
                   data-view="console"
                 >
                   {/* Console tabs bar */}
-                  <div className="scitex-ai-console-tabs-bar">
+                  <div className="stx-shell-ai-console-tabs-bar">
                     <button
-                      className="scitex-ai-console-new-tab"
+                      className="stx-shell-ai-console-new-tab"
                       title="New terminal"
                     >
                       <i className="fas fa-plus" />
                     </button>
                     <div
-                      id="scitex-ai-console-tabs-list"
-                      className="scitex-ai-console-tabs-list"
+                      id="stx-shell-ai-console-tabs-list"
+                      className="stx-shell-ai-console-tabs-list"
                     >
-                      <div className="scitex-ai-console-tab-item active">
-                        <span className="scitex-ai-console-tab-title">T1</span>
+                      <div className="stx-shell-ai-console-tab-item active">
+                        <span className="stx-shell-ai-console-tab-title">T1</span>
                       </div>
                     </div>
                   </div>
 
                   {/* Terminal content */}
                   <div
-                    id="scitex-ai-console-terminal"
-                    className="scitex-ai-console-terminal"
+                    id="stx-shell-ai-console-terminal"
+                    className="stx-shell-ai-console-terminal"
                   >
                     {terminalBackend ? (
                       <Terminal backend={terminalBackend} />
@@ -220,18 +220,18 @@ export const Workspace: React.FC<WorkspaceProps> = ({
 
                   {/* Console toolbar */}
                   <div
-                    className="scitex-ai-console-toolbar"
+                    className="stx-shell-ai-console-toolbar"
                     style={{ position: "relative" }}
                   >
                     <span
-                      id="scitex-ai-console-status"
-                      className="scitex-ai-console-status"
+                      id="stx-shell-ai-console-status"
+                      className="stx-shell-ai-console-status"
                     />
-                    <div className="scitex-ai-console-toolbar-btns">
+                    <div className="stx-shell-ai-console-toolbar-btns">
                       {/* Auto-accept toggle */}
                       <button
-                        id="scitex-ai-auto-accept"
-                        className="scitex-ai-input-btn scitex-ai-auto-accept-btn"
+                        id="stx-shell-ai-auto-accept"
+                        className="stx-shell-ai-input-btn stx-shell-ai-auto-accept-btn"
                         title="Auto-Accept"
                         disabled
                         aria-disabled="true"
@@ -240,8 +240,8 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                       </button>
                       {/* Camera — placeholder */}
                       <button
-                        id="scitex-ai-console-camera"
-                        className="scitex-ai-input-btn"
+                        id="stx-shell-ai-console-camera"
+                        className="stx-shell-ai-input-btn"
                         title="Webcam capture"
                         disabled
                         aria-disabled="true"
@@ -250,8 +250,8 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                       </button>
                       {/* Sketch — placeholder */}
                       <button
-                        id="scitex-ai-console-sketch"
-                        className="scitex-ai-input-btn"
+                        id="stx-shell-ai-console-sketch"
+                        className="stx-shell-ai-input-btn"
                         title="Draw sketch"
                         disabled
                         aria-disabled="true"
@@ -260,8 +260,8 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                       </button>
                       {/* Mic — placeholder */}
                       <button
-                        id="scitex-ai-console-mic"
-                        className="scitex-ai-input-btn"
+                        id="stx-shell-ai-console-mic"
+                        className="stx-shell-ai-input-btn"
                         title="Voice input"
                         disabled
                         aria-disabled="true"
@@ -270,8 +270,8 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                       </button>
                       {/* Gear / settings — placeholder */}
                       <button
-                        id="scitex-ai-console-gear"
-                        className="scitex-ai-input-btn scitex-ai-gear-btn"
+                        id="stx-shell-ai-console-gear"
+                        className="stx-shell-ai-input-btn stx-shell-ai-gear-btn"
                         title="Console settings"
                         disabled
                         aria-disabled="true"
