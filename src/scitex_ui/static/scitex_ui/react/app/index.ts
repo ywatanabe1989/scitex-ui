@@ -1,3 +1,18 @@
 // App components (React)
 export { FileBrowser } from "./file-browser";
 export type { FileBrowserProps, FileNode } from "./file-browser";
+
+export { ConfirmModal } from "./confirm-modal";
+export type { ConfirmModalProps } from "./confirm-modal";
+
+export { Dropdown } from "./dropdown";
+export type { DropdownProps, DropdownItem } from "./dropdown";
+
+export { FileTabs } from "./file-tabs";
+export type { FileTabsProps, FileTab } from "./file-tabs";
+
+export { MediaViewer } from "./media-viewer";
+export type { MediaViewerProps, MediaFileType } from "./media-viewer";
+
+export { Tooltip } from "./tooltip";
+export type { TooltipProps } from "./tooltip";
