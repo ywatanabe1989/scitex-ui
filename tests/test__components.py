@@ -81,13 +81,21 @@ class TestConfirmModal:
         _check_metadata(ConfirmModal)
 
 
+class TestFileTabs:
+    def test_metadata_and_files(self):
+        from scitex_ui._components._file_tabs import FileTabs
+
+        _check_metadata(FileTabs)
+
+
 class TestAllComponentsRegistered:
-    def test_eight_components_registered(self):
+    def test_nine_components_registered(self):
         names = scitex_ui.list_components()
         expected = {
             "app-shell",
             "confirm-modal",
             "file-browser",
+            "file-tabs",
             "media-viewer",
             "package-docs-sidebar",
             "resizer",
