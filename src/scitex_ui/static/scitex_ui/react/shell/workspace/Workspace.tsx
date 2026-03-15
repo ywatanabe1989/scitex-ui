@@ -196,7 +196,11 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                     <div
                       id="scitex-ai-console-tabs-list"
                       className="scitex-ai-console-tabs-list"
-                    />
+                    >
+                      <div className="scitex-ai-console-tab-item active">
+                        <span className="scitex-ai-console-tab-title">T1</span>
+                      </div>
+                    </div>
                   </div>
 
                   {/* Terminal content */}

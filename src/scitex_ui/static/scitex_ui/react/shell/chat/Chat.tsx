@@ -137,7 +137,11 @@ export const Chat: React.FC<ChatProps> = ({
         <button className="scitex-ai-new-chat" title="New chat">
           <i className="fas fa-plus" />
         </button>
-        <div className="scitex-ai-sessions-list" />
+        <div className="scitex-ai-sessions-list">
+          <div className="scitex-ai-session-item active">
+            <span>C1</span>
+          </div>
+        </div>
         <div className="scitex-ai-panel-actions">
           <button
             className="scitex-ai-action-btn"
