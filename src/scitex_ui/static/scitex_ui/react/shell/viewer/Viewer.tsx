@@ -48,10 +48,10 @@ export const Viewer: React.FC<ViewerProps> = ({
       fetch(getFileUrl(filePath))
         .then((r) => {
           if (!r.ok) throw new Error(`HTTP ${r.status}`);
-          return r.text();
+          return r.json();
         })
-        .then((text) => {
-          setTextContent(text);
+        .then((data) => {
+          setTextContent(data.content ?? JSON.stringify(data, null, 2));
           setLoading(false);
         })
         .catch((e) => {
