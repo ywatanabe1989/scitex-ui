@@ -344,7 +344,31 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                 >
                   <i className="fas fa-comment" /> Chat
                 </button>
+                <div style={{ flex: 1 }} />
+                <button
+                  className={`${CLS}__console-status-btn`}
+                  title="Layout"
+                  style={{ marginRight: 4 }}
+                >
+                  <i className="fas fa-th" />
+                </button>
               </div>
+              {/* Terminal session tabs (matching scitex-cloud) */}
+              {consoleTab === "console" && (
+                <div className={`${CLS}__terminal-tabs`}>
+                  <button
+                    className={`${CLS}__terminal-tab-new`}
+                    title="New terminal"
+                  >
+                    +
+                  </button>
+                  <button
+                    className={`${CLS}__terminal-tab ${CLS}__terminal-tab--active`}
+                  >
+                    T1
+                  </button>
+                </div>
+              )}
               <div className={`${CLS}__console-content`}>
                 {consoleTab === "console" &&
                   (terminalBackend ? (
@@ -374,6 +398,29 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                   style={{ fontSize: 8, color: "var(--status-success)" }}
                 />{" "}
                 Connected
+                <div className={`${CLS}__console-status-actions`}>
+                  <button
+                    className={`${CLS}__console-status-btn`}
+                    title="Terminal"
+                  >
+                    <i className="fas fa-terminal" />
+                  </button>
+                  <button
+                    className={`${CLS}__console-status-btn`}
+                    title="Microphone"
+                  >
+                    <i className="fas fa-microphone" />
+                  </button>
+                  <button className={`${CLS}__console-status-btn`} title="Edit">
+                    <i className="fas fa-pen" />
+                  </button>
+                  <button
+                    className={`${CLS}__console-status-btn`}
+                    title="Settings"
+                  >
+                    <i className="fas fa-gear" />
+                  </button>
+                </div>
               </div>
             </>
           )}

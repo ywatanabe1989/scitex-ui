@@ -79,16 +79,19 @@
   flex-shrink: 0;
 }
 
+/* Console/Chat tabs — icon above text (matching scitex-cloud) */
 .stx-workspace__console-tab {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 0 14px;
+  gap: 2px;
+  padding: 6px 14px;
   height: 100%;
+  justify-content: center;
   border: none;
   background: transparent;
   color: var(--text-muted);
-  font-size: 13px;
+  font-size: 10px;
   font-weight: 500;
   cursor: pointer;
   border-bottom: 2px solid transparent;
@@ -96,7 +99,60 @@
 }
 
 .stx-workspace__console-tab i {
-  font-size: 14px;
+  font-size: 16px;
+}
+
+/* Terminal session tabs bar (below Console/Chat tabs) */
+.stx-workspace__terminal-tabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--workspace-border-subtle);
+  background: var(--workspace-bg-tertiary);
+  flex-shrink: 0;
+  min-height: 32px;
+}
+
+.stx-workspace__terminal-tab-new {
+  padding: 2px 8px;
+  border: 1px solid var(--workspace-border-default);
+  border-radius: 3px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+.stx-workspace__terminal-tab-new:hover {
+  background: var(--workspace-bg-hover);
+  color: var(--text-primary);
+}
+
+.stx-workspace__terminal-tab {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 11px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.stx-workspace__terminal-tab:hover {
+  background: var(--workspace-bg-hover);
+  color: var(--text-primary);
+}
+
+.stx-workspace__terminal-tab--active {
+  background: rgba(5, 150, 105, 0.15);
+  border-color: rgba(5, 150, 105, 0.6);
+  color: var(--text-primary);
 }
 
 .stx-workspace__console-tab:hover {
@@ -114,16 +170,39 @@
   overflow: hidden;
 }
 
-/* Connected status — inside console panel bottom */
+/* Console status bar — matches scitex-cloud toolbar */
 .stx-workspace__console-status {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   padding: 4px 12px;
   font-size: 12px;
   color: var(--text-muted);
   border-top: 1px solid var(--workspace-border-subtle);
+  background: var(--workspace-bg-tertiary);
   flex-shrink: 0;
+}
+
+.stx-workspace__console-status-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.stx-workspace__console-status-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  font-size: 13px;
+  border-radius: 4px;
+}
+
+.stx-workspace__console-status-btn:hover {
+  color: var(--text-primary);
+  background: var(--workspace-bg-hover);
 }
 
 /* --- File Tree Panel (Column 2) --- */
