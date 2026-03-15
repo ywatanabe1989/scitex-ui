@@ -17,6 +17,7 @@ export interface FileItemProps {
   node: FileNode;
   activeFile: string | null;
   onSelect: (node: FileNode) => void;
+  onDoubleClick?: (node: FileNode) => void;
   searchMatches?: Set<string>;
   searchActive?: boolean;
 }
@@ -25,6 +26,7 @@ export const FileItem: React.FC<FileItemProps> = ({
   node,
   activeFile,
   onSelect,
+  onDoubleClick,
   searchMatches,
   searchActive,
 }) => {
@@ -33,7 +35,8 @@ export const FileItem: React.FC<FileItemProps> = ({
   const classes = ["stx-app-file-tree__item", "stx-app-file-tree__file"];
   if (isSelected) classes.push("selected");
   if (searchActive) {
-    if (searchMatches?.has(node.path)) classes.push("stx-app-file-tree__search-match");
+    if (searchMatches?.has(node.path))
+      classes.push("stx-app-file-tree__search-match");
     else classes.push("stx-app-file-tree__search-dim");
   }
 
@@ -52,6 +55,14 @@ export const FileItem: React.FC<FileItemProps> = ({
         e.stopPropagation();
         onSelect(node);
       }}
+      onDoubleClick={
+        onDoubleClick
+          ? (e) => {
+              e.stopPropagation();
+              onDoubleClick(node);
+            }
+          : undefined
+      }
     >
       {/* Spacer — scitex-cloud: files use stx-app-file-tree__spacer, not chevron */}
       <span className="stx-app-file-tree__spacer" />

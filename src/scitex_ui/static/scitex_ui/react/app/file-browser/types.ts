@@ -51,4 +51,6 @@ export interface FileBrowserProps extends BaseProps {
   ) => void;
   /** Sort mode — 'name' (A-Z) or 'mtime' (newest first). Ported from scitex-cloud SortToggle */
   sortMode?: "name" | "mtime";
+  /** Called when user double-clicks a file (open in editor/viewer) */
+  onFileDoubleClick?: (node: FileNode) => void;
 }

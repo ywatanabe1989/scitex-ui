@@ -21,6 +21,7 @@ interface SharedProps {
   extensions: string[] | null;
   onToggle: (path: string) => void;
   onSelect: (node: FileNode) => void;
+  onDoubleClick?: (node: FileNode) => void;
   searchMatches?: Set<string>;
   searchAncestors?: Set<string>;
   searchActive?: boolean;
@@ -44,6 +45,7 @@ const FolderItem: React.FC<FolderItemProps> = ({
   extensions,
   onToggle,
   onSelect,
+  onDoubleClick,
   searchMatches,
   searchAncestors,
   searchActive,
@@ -55,7 +57,8 @@ const FolderItem: React.FC<FolderItemProps> = ({
   const classes = ["stx-app-file-tree__item", "stx-app-file-tree__folder"];
   if (isExpanded) classes.push("expanded");
   if (searchActive) {
-    if (searchMatches?.has(node.path)) classes.push("stx-app-file-tree__search-match");
+    if (searchMatches?.has(node.path))
+      classes.push("stx-app-file-tree__search-match");
     else if (searchAncestors?.has(node.path))
       classes.push("stx-app-file-tree__search-ancestor");
     else classes.push("stx-app-file-tree__search-dim");
@@ -82,7 +85,9 @@ const FolderItem: React.FC<FolderItemProps> = ({
           data-path={node.path}
         >
           {hasChildren ? (
-            <span className={`stx-app-file-tree__chevron${isExpanded ? " expanded" : ""}`} />
+            <span
+              className={`stx-app-file-tree__chevron${isExpanded ? " expanded" : ""}`}
+            />
           ) : (
             <span className="stx-app-file-tree__spacer" />
           )}
@@ -107,6 +112,7 @@ const FolderItem: React.FC<FolderItemProps> = ({
             extensions={extensions}
             onToggle={onToggle}
             onSelect={onSelect}
+            onDoubleClick={onDoubleClick}
             searchMatches={searchMatches}
             searchAncestors={searchAncestors}
             searchActive={searchActive}
@@ -134,6 +140,7 @@ export const TreeItems: React.FC<TreeItemsProps> = ({
   extensions,
   onToggle,
   onSelect,
+  onDoubleClick,
   searchMatches,
   searchAncestors,
   searchActive,
@@ -172,6 +179,7 @@ export const TreeItems: React.FC<TreeItemsProps> = ({
             extensions={extensions}
             onToggle={onToggle}
             onSelect={onSelect}
+            onDoubleClick={onDoubleClick}
             searchMatches={searchMatches}
             searchAncestors={searchAncestors}
             searchActive={searchActive}
@@ -183,6 +191,7 @@ export const TreeItems: React.FC<TreeItemsProps> = ({
             node={node}
             activeFile={activeFile}
             onSelect={onSelect}
+            onDoubleClick={onDoubleClick}
             searchMatches={searchMatches}
             searchActive={searchActive}
           />

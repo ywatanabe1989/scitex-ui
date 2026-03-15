@@ -113,6 +113,7 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({
   searchable = false,
   onContextAction,
   sortMode = "name",
+  onFileDoubleClick,
   className,
   style,
 }) => {
@@ -272,7 +273,9 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({
             style={{ paddingLeft: 8 }}
           >
             <span className="stx-app-file-tree__icon" />
-            <span className="stx-app-file-tree__name stx-app-file-tree__root-name">Project</span>
+            <span className="stx-app-file-tree__name stx-app-file-tree__root-name">
+              Project
+            </span>
           </div>
 
           {filteredData.length === 0 ? (
@@ -296,6 +299,7 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({
               extensions={extensions}
               onToggle={handleToggle}
               onSelect={handleSelect}
+              onDoubleClick={onFileDoubleClick}
               searchMatches={searchMatches}
               searchAncestors={searchAncestors}
               searchActive={searchActive}
