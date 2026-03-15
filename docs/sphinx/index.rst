@@ -8,5 +8,6 @@ Shared frontend UI components for the SciTeX ecosystem.
    :caption: Contents
 
    quickstart
+   components
    architecture
    api/scitex_ui
