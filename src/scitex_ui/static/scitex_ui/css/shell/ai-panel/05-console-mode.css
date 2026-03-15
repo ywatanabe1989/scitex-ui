@@ -8,9 +8,11 @@
   overflow: hidden !important;
 }
 
-/* Terminal container */
+/* Terminal container — flex column so child .stx-shell-terminal fills height */
 .scitex-ai-console-terminal {
   flex: 1;
+  display: flex;
+  flex-direction: column;
   min-height: 0;
   overflow: hidden;
   background: var(--terminal-bg, var(--workspace-bg-tertiary, #0d1117));
