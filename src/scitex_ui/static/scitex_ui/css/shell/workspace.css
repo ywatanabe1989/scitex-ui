@@ -67,12 +67,12 @@
   transition: width 0.2s ease;
 }
 
-/* Console/Chat tab bar — 50px height matching scitex-cloud sidebar header */
+/* Console/Chat tab bar — compact with stacked icons */
 .stx-workspace__console-tabs {
   display: flex;
   align-items: center;
-  height: 50px;
-  min-height: 50px;
+  height: 44px;
+  min-height: 44px;
   padding: 0 4px;
   border-bottom: 1px solid var(--workspace-border-subtle);
   background: var(--workspace-bg-secondary);
@@ -107,11 +107,11 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 4px 8px;
+  padding: 2px 8px;
   border-bottom: 1px solid var(--workspace-border-subtle);
   background: var(--workspace-bg-tertiary);
   flex-shrink: 0;
-  min-height: 32px;
+  min-height: 28px;
 }
 
 .stx-workspace__terminal-tab-new {
