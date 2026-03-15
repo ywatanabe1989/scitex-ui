@@ -225,7 +225,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
     [console_, tree],
   );
 
-  /** Start drag on tree resizer */
+  /** Start drag on tree resizer — propagates LEFT to console on collapse */
   const onTreeResizerDown = useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault();
@@ -233,6 +233,9 @@ export const Workspace: React.FC<WorkspaceProps> = ({
       propagating.current = false;
       dragStartX.current = e.clientX;
       dragStartTree.current = tree.collapsed ? COLLAPSE_WIDTH : tree.width;
+      dragStartConsole.current = console_.collapsed
+        ? COLLAPSE_WIDTH
+        : console_.width;
 
       if (tree.collapsed) {
         setTree((s) => ({ ...s, collapsed: false, width: MIN_WIDTH }));
@@ -255,15 +258,44 @@ export const Workspace: React.FC<WorkspaceProps> = ({
         const delta = ev.clientX - dragStartX.current;
         const newW = dragStartTree.current + delta;
 
+        // Smart collapse + propagation to console (left)
         if (newW < COLLAPSE_WIDTH) {
           setTree((s) => ({
             ...s,
             collapsed: true,
             prevWidth: dragStartTree.current,
           }));
+
+          // Curtain propagation: transfer remaining delta to console panel
+          if (!propagating.current) {
+            propagating.current = true;
+            propagateStartX.current = ev.clientX;
+            propagateStartWidth.current = dragStartConsole.current;
+          }
+
+          if (propagating.current) {
+            const propDelta = ev.clientX - propagateStartX.current;
+            const propW = propagateStartWidth.current + propDelta;
+
+            if (propW < COLLAPSE_WIDTH) {
+              setConsole((s) => ({
+                ...s,
+                collapsed: true,
+                prevWidth: propagateStartWidth.current,
+              }));
+            } else {
+              setConsole((s) => ({
+                ...s,
+                collapsed: false,
+                width: Math.max(MIN_WIDTH, Math.min(600, propW)),
+              }));
+            }
+          }
           return;
         }
 
+        // Normal resize
+        propagating.current = false;
         setTree((s) => ({
           ...s,
           collapsed: false,
@@ -273,6 +305,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
 
       const onUp = () => {
         dragging.current = null;
+        propagating.current = false;
         document.removeEventListener("mousemove", onMove);
         document.removeEventListener("mouseup", onUp);
         document.body.style.cursor = "";
@@ -289,7 +322,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
       document.addEventListener("mousemove", onMove);
       document.addEventListener("mouseup", onUp);
     },
-    [tree],
+    [tree, console_],
   );
 
   const expandConsole = useCallback(() => {
