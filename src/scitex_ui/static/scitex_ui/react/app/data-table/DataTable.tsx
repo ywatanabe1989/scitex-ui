@@ -63,8 +63,8 @@ function sortDataset(
 export const DataTable: React.FC<DataTableProps> = ({
   data: propData,
   csvContent,
-  readOnly = false,
-  onDataChange,
+  readOnly: _readOnly = false,
+  onDataChange: _onDataChange,
   onCellSelect,
   onStatusUpdate,
   showRowNumbers = true,
