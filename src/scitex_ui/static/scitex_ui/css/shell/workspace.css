@@ -27,22 +27,26 @@
   overflow: hidden;
 }
 
-/* --- Resizers (ported from panel-resizer.css) --- */
+/* --- Resizers (ported from scitex-cloud panel-resizer.css) --- */
 
 .stx-workspace__resizer--vertical {
-  width: 3px;
+  width: 4px;
   cursor: col-resize;
   background: var(--workspace-border-subtle);
   flex-shrink: 0;
-  transition: background 150ms;
+  transition:
+    background 200ms,
+    width 200ms;
+  position: relative;
 }
 
 .stx-workspace__resizer--vertical:hover {
+  width: 4px;
   background: var(--workspace-slider-hover);
 }
 
 .stx-workspace__resizer--vertical:active {
-  background: var(--workspace-slider-active);
+  background: var(--stx-app-accent, var(--workspace-slider-active));
 }
 
 /* --- Console/Chat Panel (Column 1) --- */
@@ -56,24 +60,36 @@
   transition: width 0.2s ease;
 }
 
+/* Console/Chat tab bar — 50px height matching scitex-cloud sidebar header */
 .stx-workspace__console-tabs {
   display: flex;
   align-items: center;
+  height: 50px;
+  min-height: 50px;
+  padding: 0 4px;
   border-bottom: 1px solid var(--workspace-border-subtle);
+  background: var(--workspace-bg-secondary);
   flex-shrink: 0;
 }
 
 .stx-workspace__console-tab {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 12px;
+  gap: 8px;
+  padding: 0 14px;
+  height: 100%;
   border: none;
   background: transparent;
   color: var(--text-muted);
-  font-size: 12px;
+  font-size: 13px;
+  font-weight: 500;
   cursor: pointer;
   border-bottom: 2px solid transparent;
+  transition: color 150ms;
+}
+
+.stx-workspace__console-tab i {
+  font-size: 14px;
 }
 
 .stx-workspace__console-tab:hover {
@@ -102,18 +118,25 @@
   transition: width 0.2s ease;
 }
 
+/* File tree header — 50px height matching scitex-cloud sidebar header */
 .stx-workspace__tree-header {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 12px;
-  font-size: 12px;
+  height: 50px;
+  min-height: 50px;
+  padding: 0 16px;
+  font-size: 14px;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--text-muted);
+  color: var(--text-primary);
   border-bottom: 1px solid var(--workspace-border-subtle);
+  background: var(--workspace-bg-secondary);
   flex-shrink: 0;
+}
+
+.stx-workspace__tree-header i {
+  font-size: 14px;
+  color: var(--text-muted);
 }
 
 .stx-workspace__tree-header span {
@@ -183,15 +206,16 @@
   overflow: auto;
 }
 
-/* --- Status Bar (bottom, full width) --- */
+/* --- Status Bar (bottom, full width — matches scitex-cloud) --- */
 
 .stx-workspace__status-bar {
   width: 100%;
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 2px 12px;
-  font-size: 11px;
+  padding: 4px 12px;
+  height: 28px;
+  font-size: 12px;
   color: var(--text-muted);
   background: var(--workspace-bg-tertiary);
   border-top: 1px solid var(--workspace-border-subtle);
