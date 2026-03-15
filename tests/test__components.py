@@ -88,12 +88,20 @@ class TestFileTabs:
         _check_metadata(FileTabs)
 
 
+class TestDropdown:
+    def test_metadata_and_files(self):
+        from scitex_ui._components._dropdown import Dropdown
+
+        _check_metadata(Dropdown)
+
+
 class TestAllComponentsRegistered:
-    def test_nine_components_registered(self):
+    def test_ten_components_registered(self):
         names = scitex_ui.list_components()
         expected = {
             "app-shell",
             "confirm-modal",
+            "dropdown",
             "file-browser",
             "file-tabs",
             "media-viewer",
