@@ -397,10 +397,11 @@ export class ElementScanner {
   /**
    * Setup scroll wheel handler for cycling through overlapped elements
    */
-  private setupWheelHandler(overlayContainer: HTMLDivElement): void {
+  private setupWheelHandler(_overlayContainer: HTMLDivElement): void {
     this.wheelHandler = (e: WheelEvent) => {
-      // Only handle wheel events over the overlay
-      if (!overlayContainer.contains(e.target as Node)) return;
+      // Skip if target is inside the layer picker panel itself (allow panel scrolling)
+      if ((e.target as Element)?.closest?.(".element-inspector-layer-picker"))
+        return;
 
       // Check if cursor moved significantly - reset depth index
       const cursorMoved =
