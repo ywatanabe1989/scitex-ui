@@ -1,13 +1,17 @@
 /**
  * Workspace — universal shell for all SciTeX apps.
  *
+ * Ported from scitex-cloud's workspace-panel-resizer + stx-shell-sidebar.
+ *
  * Layout: Console/Chat (left) | File Tree (mid) | App Content (right)
  *         ────────────── Status Bar ──────────────
  *
- * Interactions:
- * - Drag resizer border = smooth curtain resize
- * - Double-click resizer = collapse/expand panel
- * - Console panel has two tabs: Console + Chat (always visible)
+ * Interactions (matching scitex-cloud):
+ * - Drag resizer = smooth curtain resize
+ * - Smart collapse: panel collapses instantly when dragged below threshold
+ * - Collapsed panels show vertical icon + label
+ * - Click collapsed panel to expand
+ * - localStorage persistence for width + collapse state
  */
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
@@ -18,39 +22,110 @@ import { Chat } from "../chat";
 import { Terminal } from "../terminal";
 
 const CLS = "stx-workspace";
+const COLLAPSE_WIDTH = 48;
 
 type ConsoleTab = "console" | "chat";
 
-/** Hook for drag-to-resize + double-click-to-collapse */
+/** Hook for drag-to-resize with smart collapse (ported from scitex-cloud) */
 function useResizer(
-  initialWidth: number,
+  defaultWidth: number,
   minWidth: number,
   maxWidth: number,
-  collapsedWidth: number = 0,
+  storageKey: string,
 ) {
-  const [width, setWidth] = useState(initialWidth);
-  const [collapsed, setCollapsed] = useState(false);
+  const [width, setWidth] = useState(() => {
+    try {
+      const saved = localStorage.getItem(storageKey);
+      if (saved) {
+        const w = parseInt(saved, 10);
+        if (w >= minWidth) return w;
+      }
+    } catch {}
+    return defaultWidth;
+  });
+
+  const [collapsed, setCollapsed] = useState(() => {
+    try {
+      return localStorage.getItem(storageKey + ":collapsed") === "true";
+    } catch {
+      return false;
+    }
+  });
+
   const dragging = useRef(false);
   const startX = useRef(0);
   const startWidth = useRef(0);
-  const prevWidth = useRef(initialWidth);
+  const prevWidth = useRef(defaultWidth);
+
+  // Persist width
+  useEffect(() => {
+    if (!collapsed && width > COLLAPSE_WIDTH) {
+      try {
+        localStorage.setItem(storageKey, width.toString());
+      } catch {}
+    }
+  }, [width, collapsed, storageKey]);
+
+  // Persist collapse state
+  useEffect(() => {
+    try {
+      localStorage.setItem(storageKey + ":collapsed", collapsed.toString());
+    } catch {}
+  }, [collapsed, storageKey]);
+
+  const _collapse = useCallback(() => {
+    prevWidth.current = width;
+    setCollapsed(true);
+  }, [width]);
+  void _collapse; // available for programmatic use
+
+  const expand = useCallback(() => {
+    setCollapsed(false);
+    setWidth(
+      prevWidth.current > COLLAPSE_WIDTH ? prevWidth.current : defaultWidth,
+    );
+  }, [defaultWidth]);
 
   const onMouseDown = useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault();
       dragging.current = true;
       startX.current = e.clientX;
-      startWidth.current = collapsed ? collapsedWidth : width;
+      startWidth.current = collapsed ? COLLAPSE_WIDTH : width;
+
+      // If collapsed, expand on drag start
+      if (collapsed) {
+        setCollapsed(false);
+        setWidth(minWidth);
+        startWidth.current = minWidth;
+      }
+
+      // Disable transitions during drag
+      document
+        .querySelectorAll<HTMLElement>(
+          `.${CLS}__console-panel, .${CLS}__tree-panel`,
+        )
+        .forEach((el) => {
+          el.style.transition = "none";
+        });
 
       const onMouseMove = (ev: MouseEvent) => {
         if (!dragging.current) return;
         const delta = ev.clientX - startX.current;
         const newWidth = Math.max(
-          minWidth,
+          0,
           Math.min(maxWidth, startWidth.current + delta),
         );
-        setWidth(newWidth);
+
+        // Smart collapse: instant collapse during drag
+        if (newWidth < COLLAPSE_WIDTH) {
+          prevWidth.current = startWidth.current;
+          setCollapsed(true);
+          return;
+        }
+
         setCollapsed(false);
+        setWidth(newWidth);
       };
 
       const onMouseUp = () => {
@@ -59,6 +134,15 @@ function useResizer(
         document.removeEventListener("mouseup", onMouseUp);
         document.body.style.cursor = "";
         document.body.style.userSelect = "";
+
+        // Re-enable transitions
+        document
+          .querySelectorAll<HTMLElement>(
+            `.${CLS}__console-panel, .${CLS}__tree-panel`,
+          )
+          .forEach((el) => {
+            el.style.transition = "";
+          });
       };
 
       document.addEventListener("mousemove", onMouseMove);
@@ -66,23 +150,14 @@ function useResizer(
       document.body.style.cursor = "col-resize";
       document.body.style.userSelect = "none";
     },
-    [width, collapsed, minWidth, maxWidth, collapsedWidth],
+    [width, collapsed, minWidth, maxWidth],
   );
 
-  const onDoubleClick = useCallback(() => {
-    if (collapsed) {
-      setCollapsed(false);
-      setWidth(prevWidth.current);
-    } else {
-      prevWidth.current = width;
-      setCollapsed(true);
-    }
-  }, [collapsed, width]);
-
   return {
-    width: collapsed ? collapsedWidth : width,
+    width: collapsed ? COLLAPSE_WIDTH : width,
     collapsed,
-    resizerProps: { onMouseDown, onDoubleClick },
+    expand,
+    resizerProps: { onMouseDown },
   };
 }
 
@@ -102,8 +177,8 @@ export const Workspace: React.FC<WorkspaceProps> = ({
   const [consoleTab, setConsoleTab] = useState<ConsoleTab>("console");
   const [treeData, setTreeData] = useState<FileNode[]>([]);
 
-  const consoleResizer = useResizer(300, 80, 600, 40);
-  const treeResizer = useResizer(250, 80, 500, 40);
+  const consoleResizer = useResizer(300, 80, 600, `${appName}-console-width`);
+  const treeResizer = useResizer(250, 80, 500, `${appName}-tree-width`);
 
   // Set accent color
   useEffect(() => {
@@ -151,29 +226,17 @@ export const Workspace: React.FC<WorkspaceProps> = ({
       <div className={`${CLS}__columns`}>
         {/* ── Column 1: Console/Chat Panel ──────────────────────── */}
         <div
-          className={`${CLS}__console-panel`}
+          className={`${CLS}__console-panel${consoleResizer.collapsed ? ` ${CLS}__panel--collapsed` : ""}`}
           style={{ width: consoleResizer.width }}
+          onClick={consoleResizer.collapsed ? consoleResizer.expand : undefined}
         >
           {consoleResizer.collapsed ? (
-            <div className={`${CLS}__console-collapsed`}>
-              <button
-                className={`${CLS}__collapsed-tab`}
-                onClick={() => setConsoleTab("console")}
-                title="Console"
-              >
-                <i className="fas fa-terminal" />
-              </button>
-              <button
-                className={`${CLS}__collapsed-tab`}
-                onClick={() => setConsoleTab("chat")}
-                title="Chat"
-              >
-                <i className="fas fa-comment" />
-              </button>
+            <div className={`${CLS}__collapsed-label`}>
+              <i className="fas fa-terminal" />
+              <span>Console</span>
             </div>
           ) : (
             <>
-              {/* Tab bar */}
               <div className={`${CLS}__console-tabs`}>
                 <button
                   className={`${CLS}__console-tab${consoleTab === "console" ? ` ${CLS}__console-tab--active` : ""}`}
@@ -188,8 +251,6 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                   <i className="fas fa-comment" /> Chat
                 </button>
               </div>
-
-              {/* Content */}
               <div className={`${CLS}__console-content`}>
                 {consoleTab === "console" &&
                   (terminalBackend ? (
@@ -197,7 +258,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                   ) : (
                     <div className={`${CLS}__placeholder`}>
                       <i className="fas fa-terminal" />
-                      <p>No terminal backend configured</p>
+                      <p>No terminal backend</p>
                     </div>
                   ))}
                 {consoleTab === "chat" &&
@@ -209,7 +270,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                   ) : (
                     <div className={`${CLS}__placeholder`}>
                       <i className="fas fa-comment" />
-                      <p>No chat backend configured</p>
+                      <p>No chat backend</p>
                     </div>
                   ))}
               </div>
@@ -223,12 +284,14 @@ export const Workspace: React.FC<WorkspaceProps> = ({
 
         {/* ── Column 2: File Tree Panel ─────────────────────────── */}
         <div
-          className={`${CLS}__tree-panel`}
+          className={`${CLS}__tree-panel${treeResizer.collapsed ? ` ${CLS}__panel--collapsed` : ""}`}
           style={{ width: treeResizer.width }}
+          onClick={treeResizer.collapsed ? treeResizer.expand : undefined}
         >
           {treeResizer.collapsed ? (
-            <div className={`${CLS}__tree-collapsed`}>
+            <div className={`${CLS}__collapsed-label`}>
               <i className="fas fa-folder" />
+              <span>Files</span>
             </div>
           ) : (
             <>

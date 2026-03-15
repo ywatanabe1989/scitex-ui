@@ -1,6 +1,8 @@
 /* =============================================================================
  * SciTeX Shell — Workspace (universal app frame)
  * =============================================================================
+ * Ported from scitex-cloud's stx-shell-sidebar + workspace-panel-resizer.
+ *
  * Layout: Console/Chat | FileTree | AppContent
  *         ──────────── StatusBar ─────────────
  *
@@ -25,7 +27,7 @@
   overflow: hidden;
 }
 
-/* --- Resizers --- */
+/* --- Resizers (ported from panel-resizer.css) --- */
 
 .stx-workspace__resizer--vertical {
   width: 3px;
@@ -51,29 +53,7 @@
   background: var(--workspace-bg-secondary);
   overflow: hidden;
   flex-shrink: 0;
-}
-
-.stx-workspace__console-collapsed {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding-top: 8px;
-}
-
-.stx-workspace__collapsed-tab {
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  cursor: pointer;
-  padding: 8px;
-  font-size: 14px;
-  border-radius: 4px;
-}
-
-.stx-workspace__collapsed-tab:hover {
-  color: var(--text-primary);
-  background: var(--workspace-bg-hover);
+  transition: width 0.2s ease;
 }
 
 .stx-workspace__console-tabs {
@@ -105,30 +85,10 @@
   border-bottom-color: var(--stx-app-accent, var(--app-accent-color));
 }
 
-/* (collapse via double-click on resizer, no button needed) */
-
 .stx-workspace__console-content {
   flex: 1;
   min-height: 0;
   overflow: hidden;
-}
-
-/* --- Placeholder (no backend configured) --- */
-
-.stx-workspace__placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  gap: 12px;
-  color: var(--text-muted);
-  font-size: 13px;
-}
-
-.stx-workspace__placeholder i {
-  font-size: 24px;
-  opacity: 0.4;
 }
 
 /* --- File Tree Panel (Column 2) --- */
@@ -139,16 +99,7 @@
   background: var(--workspace-bg-secondary);
   overflow: hidden;
   flex-shrink: 0;
-}
-
-/* Collapsed tree — icon only */
-.stx-workspace__tree-collapsed {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-top: 12px;
-  color: var(--text-muted);
-  font-size: 16px;
+  transition: width 0.2s ease;
 }
 
 .stx-workspace__tree-header {
@@ -169,7 +120,60 @@
   flex: 1;
 }
 
-/* (panel collapse/expand via double-click on resizer border) */
+/* --- Collapsed State (ported from stx-shell-sidebar.css) ---
+ * Panels collapse to 48px showing vertical icon + label.
+ * Click to expand. Smart collapse during drag. */
+
+.stx-workspace__panel--collapsed {
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.stx-workspace__panel--collapsed:hover {
+  background: var(--workspace-bg-hover);
+  box-shadow: inset -3px 0 10px -4px var(--workspace-icon-primary);
+}
+
+.stx-workspace__collapsed-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding-top: 12px;
+  color: var(--text-secondary);
+}
+
+.stx-workspace__collapsed-label i {
+  font-size: var(--ui-nav-icon-size, 20px);
+  color: var(--text-secondary);
+}
+
+.stx-workspace__collapsed-label span {
+  font-size: 9px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+/* --- Placeholder (no backend configured) --- */
+
+.stx-workspace__placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 12px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.stx-workspace__placeholder i {
+  font-size: 24px;
+  opacity: 0.4;
+}
 
 /* --- App Content (Column 3, flex) --- */
 
