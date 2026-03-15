@@ -1,7 +1,8 @@
 /* =============================================================================
- * SciTeX Shell — Terminal
+ * SciTeX Shell — Terminal (ported from scitex-cloud console_app)
  * =============================================================================
  * Prefix: stx-shell-terminal
+ * All colors reference theme.css tokens.
  * ============================================================================= */
 
 .stx-shell-terminal {
@@ -10,20 +11,32 @@
   flex-direction: column;
   min-height: 0;
   overflow: hidden;
+  background: var(--workspace-bg-primary);
 }
 
 .stx-shell-terminal__container {
   flex: 1;
   min-height: 0;
+  padding: 4px;
 }
 
 .stx-shell-terminal__loading,
 .stx-shell-terminal__error {
   padding: 16px;
   font-size: 13px;
-  color: var(--text-muted, #6c7086);
+  color: var(--text-muted);
 }
 
 .stx-shell-terminal__error {
-  color: var(--status-error, #f38ba8);
+  color: var(--status-error);
+}
+
+/* xterm.js overrides to match workspace theme */
+.stx-shell-terminal .xterm {
+  padding: 4px;
+}
+
+.stx-shell-terminal .xterm-viewport {
+  scrollbar-width: thin;
+  scrollbar-color: var(--workspace-border-default) transparent;
 }
