@@ -3,7 +3,7 @@
  *
  * Layout: Console/Chat (left) | File Tree (mid) | App Content (right)
  *
- * The Console panel has two tabs: Console (terminal) and Chat (AI).
+ * The Console panel always has two tabs: Console (terminal) and Chat (AI).
  * No top navbar in standalone mode. App selector only in cloud mode.
  *
  * Usage:
@@ -12,7 +12,7 @@
  *   </Workspace>
  */
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import type { WorkspaceProps } from "./types";
 import type { FileNode } from "../../app/file-browser/types";
 import { FileBrowser } from "../../app/file-browser";
@@ -23,13 +23,65 @@ const CLS = "stx-workspace";
 
 type ConsoleTab = "console" | "chat";
 
+/** Hook for drag-to-resize panels */
+function useResizer(
+  initialWidth: number,
+  minWidth: number,
+  maxWidth: number,
+): {
+  width: number;
+  resizerProps: {
+    onMouseDown: (e: React.MouseEvent) => void;
+  };
+} {
+  const [width, setWidth] = useState(initialWidth);
+  const dragging = useRef(false);
+  const startX = useRef(0);
+  const startWidth = useRef(0);
+
+  const onMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      dragging.current = true;
+      startX.current = e.clientX;
+      startWidth.current = width;
+
+      const onMouseMove = (ev: MouseEvent) => {
+        if (!dragging.current) return;
+        const delta = ev.clientX - startX.current;
+        const newWidth = Math.max(
+          minWidth,
+          Math.min(maxWidth, startWidth.current + delta),
+        );
+        setWidth(newWidth);
+      };
+
+      const onMouseUp = () => {
+        dragging.current = false;
+        document.removeEventListener("mousemove", onMouseMove);
+        document.removeEventListener("mouseup", onMouseUp);
+        document.body.style.cursor = "";
+        document.body.style.userSelect = "";
+      };
+
+      document.addEventListener("mousemove", onMouseMove);
+      document.addEventListener("mouseup", onMouseUp);
+      document.body.style.cursor = "col-resize";
+      document.body.style.userSelect = "none";
+    },
+    [width, minWidth, maxWidth],
+  );
+
+  return { width, resizerProps: { onMouseDown } };
+}
+
 export const Workspace: React.FC<WorkspaceProps> = ({
   appName,
   accentColor,
   terminalBackend,
   chatBackend,
   fileTreeBackend,
-  highlightExtensions,
+  highlightExtensions: _highlightExtensions,
   onFileSelect,
   onFileDrop,
   children,
@@ -41,7 +93,8 @@ export const Workspace: React.FC<WorkspaceProps> = ({
   const [treeCollapsed, setTreeCollapsed] = useState(false);
   const [treeData, setTreeData] = useState<FileNode[]>([]);
 
-  const hasConsole = !!(terminalBackend || chatBackend);
+  const consoleResizer = useResizer(300, 40, 600);
+  const treeResizer = useResizer(250, 40, 500);
 
   // Set accent color
   useEffect(() => {
@@ -87,117 +140,121 @@ export const Workspace: React.FC<WorkspaceProps> = ({
       data-app={appName}
     >
       {/* ── Column 1: Console/Chat Panel ──────────────────────── */}
-      {hasConsole && (
-        <>
-          <div
-            className={`${CLS}__console-panel${consoleCollapsed ? ` ${CLS}__console-panel--collapsed` : ""}`}
-          >
-            {consoleCollapsed ? (
-              <div className={`${CLS}__console-collapsed`}>
-                {terminalBackend && (
-                  <button
-                    className={`${CLS}__collapsed-tab`}
-                    onClick={() => {
-                      setConsoleCollapsed(false);
-                      setConsoleTab("console");
-                    }}
-                    title="Console"
-                  >
-                    <i className="fas fa-terminal" />
-                  </button>
-                )}
-                {chatBackend && (
-                  <button
-                    className={`${CLS}__collapsed-tab`}
-                    onClick={() => {
-                      setConsoleCollapsed(false);
-                      setConsoleTab("chat");
-                    }}
-                    title="Chat"
-                  >
-                    <i className="fas fa-comment" />
-                  </button>
-                )}
-              </div>
-            ) : (
-              <>
-                {/* Tab bar */}
-                <div className={`${CLS}__console-tabs`}>
-                  {terminalBackend && (
-                    <button
-                      className={`${CLS}__console-tab${consoleTab === "console" ? ` ${CLS}__console-tab--active` : ""}`}
-                      onClick={() => setConsoleTab("console")}
-                    >
-                      <i className="fas fa-terminal" /> Console
-                    </button>
-                  )}
-                  {chatBackend && (
-                    <button
-                      className={`${CLS}__console-tab${consoleTab === "chat" ? ` ${CLS}__console-tab--active` : ""}`}
-                      onClick={() => setConsoleTab("chat")}
-                    >
-                      <i className="fas fa-comment" /> Chat
-                    </button>
-                  )}
-                  <div style={{ flex: 1 }} />
-                  <button
-                    className={`${CLS}__console-collapse`}
-                    onClick={() => setConsoleCollapsed(true)}
-                    title="Collapse"
-                  >
-                    <i className="fas fa-chevron-left" />
-                  </button>
-                </div>
-
-                {/* Content */}
-                <div className={`${CLS}__console-content`}>
-                  {consoleTab === "console" && terminalBackend && (
-                    <Terminal backend={terminalBackend} />
-                  )}
-                  {consoleTab === "chat" && chatBackend && (
-                    <Chat
-                      backend={chatBackend}
-                      storageKey={`${appName}-chat-messages`}
-                    />
-                  )}
-                </div>
-              </>
-            )}
+      <div
+        className={`${CLS}__console-panel${consoleCollapsed ? ` ${CLS}__console-panel--collapsed` : ""}`}
+        style={consoleCollapsed ? undefined : { width: consoleResizer.width }}
+      >
+        {consoleCollapsed ? (
+          <div className={`${CLS}__console-collapsed`}>
+            <button
+              className={`${CLS}__collapsed-tab`}
+              onClick={() => {
+                setConsoleCollapsed(false);
+                setConsoleTab("console");
+              }}
+              title="Console"
+            >
+              <i className="fas fa-terminal" />
+            </button>
+            <button
+              className={`${CLS}__collapsed-tab`}
+              onClick={() => {
+                setConsoleCollapsed(false);
+                setConsoleTab("chat");
+              }}
+              title="Chat"
+            >
+              <i className="fas fa-comment" />
+            </button>
           </div>
-          <div className={`${CLS}__resizer ${CLS}__resizer--vertical`} />
-        </>
-      )}
-
-      {/* ── Column 2: File Tree Panel ─────────────────────────── */}
-      {fileTreeBackend && (
-        <>
-          <div
-            className={`${CLS}__tree-panel${treeCollapsed ? ` ${CLS}__tree-panel--collapsed` : ""}`}
-          >
-            <div className={`${CLS}__tree-header`}>
-              <i className="fas fa-folder" />
-              <span>Files</span>
+        ) : (
+          <>
+            {/* Tab bar — always show both tabs */}
+            <div className={`${CLS}__console-tabs`}>
               <button
-                className={`${CLS}__panel-btn`}
-                onClick={() => setTreeCollapsed(!treeCollapsed)}
+                className={`${CLS}__console-tab${consoleTab === "console" ? ` ${CLS}__console-tab--active` : ""}`}
+                onClick={() => setConsoleTab("console")}
               >
-                <i
-                  className={`fas fa-chevron-${treeCollapsed ? "right" : "left"}`}
-                />
+                <i className="fas fa-terminal" /> Console
+              </button>
+              <button
+                className={`${CLS}__console-tab${consoleTab === "chat" ? ` ${CLS}__console-tab--active` : ""}`}
+                onClick={() => setConsoleTab("chat")}
+              >
+                <i className="fas fa-comment" /> Chat
+              </button>
+              <div style={{ flex: 1 }} />
+              <button
+                className={`${CLS}__console-collapse`}
+                onClick={() => setConsoleCollapsed(true)}
+                title="Collapse"
+              >
+                <i className="fas fa-chevron-left" />
               </button>
             </div>
-            {!treeCollapsed && (
-              <FileBrowser
-                data={treeData}
-                onFileSelect={onFileSelect}
-                showFileCount
-                showImageBadge
-              />
-            )}
-          </div>
-          <div className={`${CLS}__resizer ${CLS}__resizer--vertical`} />
-        </>
-      )}
+
+            {/* Content */}
+            <div className={`${CLS}__console-content`}>
+              {consoleTab === "console" &&
+                (terminalBackend ? (
+                  <Terminal backend={terminalBackend} />
+                ) : (
+                  <div className={`${CLS}__placeholder`}>
+                    <i className="fas fa-terminal" />
+                    <p>No terminal backend configured</p>
+                  </div>
+                ))}
+              {consoleTab === "chat" &&
+                (chatBackend ? (
+                  <Chat
+                    backend={chatBackend}
+                    storageKey={`${appName}-chat-messages`}
+                  />
+                ) : (
+                  <div className={`${CLS}__placeholder`}>
+                    <i className="fas fa-comment" />
+                    <p>No chat backend configured</p>
+                  </div>
+                ))}
+            </div>
+          </>
+        )}
+      </div>
+      <div
+        className={`${CLS}__resizer ${CLS}__resizer--vertical`}
+        {...consoleResizer.resizerProps}
+      />
+
+      {/* ── Column 2: File Tree Panel ─────────────────────────── */}
+      <div
+        className={`${CLS}__tree-panel${treeCollapsed ? ` ${CLS}__tree-panel--collapsed` : ""}`}
+        style={treeCollapsed ? undefined : { width: treeResizer.width }}
+      >
+        <div className={`${CLS}__tree-header`}>
+          <i className="fas fa-folder" />
+          <span>Files</span>
+          <button
+            className={`${CLS}__panel-btn`}
+            onClick={() => setTreeCollapsed(!treeCollapsed)}
+          >
+            <i
+              className={`fas fa-chevron-${treeCollapsed ? "right" : "left"}`}
+            />
+          </button>
+        </div>
+        {!treeCollapsed && (
+          <FileBrowser
+            data={treeData}
+            onFileSelect={onFileSelect}
+            showFileCount
+            showImageBadge
+          />
+        )}
+      </div>
+      <div
+        className={`${CLS}__resizer ${CLS}__resizer--vertical`}
+        {...treeResizer.resizerProps}
+      />
 
       {/* ── Column 3: App Content ─────────────────────────────── */}
       <div
@@ -213,7 +270,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
         <span className={`${CLS}__status-item`}>
           <i
             className="fas fa-circle"
-            style={{ fontSize: 8, color: "#a6e3a1" }}
+            style={{ fontSize: 8, color: "var(--status-success)" }}
           />{" "}
           Connected
         </span>

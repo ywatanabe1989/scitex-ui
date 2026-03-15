@@ -3,6 +3,8 @@
  * =============================================================================
  * Layout: Console/Chat | FileTree | AppContent
  *         ──────────── StatusBar ─────────────
+ *
+ * All colors reference theme.css tokens. No hardcoded values.
  * ============================================================================= */
 
 .stx-workspace {
@@ -11,21 +13,26 @@
   height: 100vh;
   width: 100vw;
   overflow: hidden;
-  background: var(--workspace-bg-primary, #1e1e2e);
-  color: var(--text-primary, #cdd6f4);
+  background: var(--workspace-bg-primary);
+  color: var(--text-primary);
 }
 
 /* --- Resizers --- */
 
 .stx-workspace__resizer--vertical {
-  width: 2px;
+  width: 3px;
   cursor: col-resize;
-  background: var(--border-subtle, rgba(255, 255, 255, 0.06));
+  background: var(--workspace-border-subtle);
   flex-shrink: 0;
+  transition: background 150ms;
 }
 
 .stx-workspace__resizer--vertical:hover {
-  background: var(--stx-app-accent, #7c5cbf);
+  background: var(--workspace-slider-hover);
+}
+
+.stx-workspace__resizer--vertical:active {
+  background: var(--workspace-slider-active);
 }
 
 /* --- Console/Chat Panel (Column 1) --- */
@@ -34,7 +41,7 @@
   width: 300px;
   display: flex;
   flex-direction: column;
-  background: var(--workspace-bg-secondary, #181825);
+  background: var(--workspace-bg-secondary);
   overflow: hidden;
   flex-shrink: 0;
 }
@@ -54,7 +61,7 @@
 .stx-workspace__collapsed-tab {
   background: none;
   border: none;
-  color: var(--text-muted, #6c7086);
+  color: var(--text-muted);
   cursor: pointer;
   padding: 8px;
   font-size: 14px;
@@ -62,14 +69,14 @@
 }
 
 .stx-workspace__collapsed-tab:hover {
-  color: var(--text-primary, #cdd6f4);
-  background: var(--workspace-bg-hover, rgba(255, 255, 255, 0.04));
+  color: var(--text-primary);
+  background: var(--workspace-bg-hover);
 }
 
 .stx-workspace__console-tabs {
   display: flex;
   align-items: center;
-  border-bottom: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.06));
+  border-bottom: 1px solid var(--workspace-border-subtle);
   flex-shrink: 0;
 }
 
@@ -80,28 +87,32 @@
   padding: 8px 12px;
   border: none;
   background: transparent;
-  color: var(--text-muted, #6c7086);
+  color: var(--text-muted);
   font-size: 12px;
   cursor: pointer;
   border-bottom: 2px solid transparent;
 }
 
 .stx-workspace__console-tab:hover {
-  color: var(--text-primary, #cdd6f4);
+  color: var(--text-primary);
 }
 
 .stx-workspace__console-tab--active {
-  color: var(--text-primary, #cdd6f4);
-  border-bottom-color: var(--stx-app-accent, #7c5cbf);
+  color: var(--text-primary);
+  border-bottom-color: var(--stx-app-accent, var(--app-accent-color));
 }
 
 .stx-workspace__console-collapse {
   background: none;
   border: none;
-  color: var(--text-muted, #6c7086);
+  color: var(--text-muted);
   cursor: pointer;
   padding: 8px;
   font-size: 11px;
+}
+
+.stx-workspace__console-collapse:hover {
+  color: var(--text-primary);
 }
 
 .stx-workspace__console-content {
@@ -110,13 +121,31 @@
   overflow: hidden;
 }
 
+/* --- Placeholder (no backend configured) --- */
+
+.stx-workspace__placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 12px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.stx-workspace__placeholder i {
+  font-size: 24px;
+  opacity: 0.4;
+}
+
 /* --- File Tree Panel (Column 2) --- */
 
 .stx-workspace__tree-panel {
   width: 250px;
   display: flex;
   flex-direction: column;
-  background: var(--workspace-bg-secondary, #181825);
+  background: var(--workspace-bg-secondary);
   overflow: hidden;
   flex-shrink: 0;
 }
@@ -134,8 +163,8 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: var(--text-muted, #6c7086);
-  border-bottom: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.06));
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--workspace-border-subtle);
   flex-shrink: 0;
 }
 
@@ -146,14 +175,14 @@
 .stx-workspace__panel-btn {
   background: none;
   border: none;
-  color: var(--text-muted, #6c7086);
+  color: var(--text-muted);
   cursor: pointer;
   padding: 2px 4px;
   font-size: 11px;
 }
 
 .stx-workspace__panel-btn:hover {
-  color: var(--text-primary, #cdd6f4);
+  color: var(--text-primary);
 }
 
 /* --- App Content (Column 3, flex) --- */
@@ -173,9 +202,9 @@
   gap: 12px;
   padding: 2px 12px;
   font-size: 11px;
-  color: var(--text-muted, #6c7086);
-  background: var(--workspace-bg-tertiary, #11111b);
-  border-top: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.06));
+  color: var(--text-muted);
+  background: var(--workspace-bg-tertiary);
+  border-top: 1px solid var(--workspace-border-subtle);
   flex-shrink: 0;
 }
 

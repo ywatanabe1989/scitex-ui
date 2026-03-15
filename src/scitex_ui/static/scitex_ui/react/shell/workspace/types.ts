@@ -4,6 +4,7 @@
  */
 
 import type { BaseProps } from "../../_base/types";
+export type { FileNode } from "../../app/file-browser/types";
 import type { FileNode } from "../../app/file-browser/types";
 
 // ── Terminal Backend Protocol ────────────────────────────────────
