@@ -1,0 +1,137 @@
+/* =============================================================================
+ * SciTeX App — DataTable (shared spreadsheet component)
+ * =============================================================================
+ * Ported from scitex-cloud data-table CSS.
+ * Prefix: stx-app-data-table
+ * ============================================================================= */
+
+.stx-app-data-table {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  font-family: "JetBrains Mono", Monaco, Menlo, monospace;
+  font-size: 12px;
+}
+
+.stx-app-data-table--empty {
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-family: inherit;
+}
+
+.stx-app-data-table--empty i {
+  font-size: 32px;
+  opacity: 0.3;
+}
+
+/* --- Scroll container --- */
+
+.stx-app-data-table__scroll {
+  flex: 1;
+  overflow: auto;
+}
+
+/* --- Table --- */
+
+.stx-app-data-table__table {
+  border-collapse: collapse;
+  width: 100%;
+  white-space: nowrap;
+}
+
+/* --- Header cells (ported from data-table.css) --- */
+
+.stx-app-data-table__header-cell {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: 6px 8px;
+  background: var(--workspace-bg-elevated);
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 11px;
+  text-align: left;
+  border-bottom: 2px solid var(--workspace-border-default);
+  border-right: 1px solid var(--workspace-border-subtle);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  position: relative;
+}
+
+.stx-app-data-table__header-cell span {
+  margin-right: 4px;
+}
+
+.stx-app-data-table__header-cell i {
+  font-size: 10px;
+  opacity: 0.6;
+}
+
+.stx-app-data-table__header-cell:hover {
+  background: var(--workspace-bg-hover);
+}
+
+.stx-app-data-table__header-cell--sorted {
+  color: var(--stx-app-accent, var(--status-success));
+}
+
+/* --- Resize handle (ported from resize.css) --- */
+
+.stx-app-data-table__resize-handle {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  cursor: col-resize;
+  z-index: 3;
+}
+
+.stx-app-data-table__resize-handle:hover {
+  background: var(--stx-app-accent, var(--workspace-slider-hover));
+}
+
+/* --- Data cells --- */
+
+.stx-app-data-table__cell {
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--workspace-border-subtle);
+  border-right: 1px solid var(--workspace-border-subtle);
+  color: var(--text-secondary);
+  cursor: cell;
+}
+
+.stx-app-data-table__cell:hover {
+  background: var(--workspace-bg-hover);
+}
+
+.stx-app-data-table__cell--selected {
+  background: var(--workspace-bg-active);
+  outline: 2px solid var(--stx-app-accent, var(--status-success));
+  outline-offset: -2px;
+}
+
+/* --- Row numbers (ported from data-table.css) --- */
+
+.stx-app-data-table__row-num {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  padding: 4px 6px;
+  background: var(--workspace-bg-elevated);
+  color: var(--text-muted);
+  font-size: 10px;
+  text-align: right;
+  border-right: 1px solid var(--workspace-border-default);
+  user-select: none;
+  min-width: 32px;
+}
+
+thead .stx-app-data-table__row-num {
+  z-index: 3;
+}
