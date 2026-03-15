@@ -12,7 +12,7 @@
  *   />
  */
 
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import type { FileBrowserProps, FileNode } from "./types";
 
 const CLS = "stx-app-file-browser";
@@ -181,6 +181,27 @@ const FileList: React.FC<FileListProps> = ({
   );
 };
 
+/** Filter tree recursively — keep parents of matching children (ported from scitex-cloud) */
+function filterTree(nodes: FileNode[], query: string): FileNode[] {
+  if (!query) return nodes;
+  const lq = query.toLowerCase();
+  const result: FileNode[] = [];
+  for (const node of nodes) {
+    if (node.type === "directory" && node.children) {
+      const filtered = filterTree(node.children, query);
+      if (node.name.toLowerCase().includes(lq) || filtered.length > 0) {
+        result.push({
+          ...node,
+          children: filtered.length > 0 ? filtered : node.children,
+        });
+      }
+    } else if (node.name.toLowerCase().includes(lq)) {
+      result.push(node);
+    }
+  }
+  return result;
+}
+
 export const FileBrowser: React.FC<FileBrowserProps> = ({
   data: propData,
   apiUrl,
@@ -190,6 +211,7 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({
   showHidden = false,
   showImageBadge = true,
   showFileCount = false,
+  searchable = false,
   className,
   style,
 }) => {
@@ -198,6 +220,31 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({
   const [activeFile, setActiveFile] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchVisible, setSearchVisible] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Ctrl+K keyboard shortcut (ported from scitex-cloud WorkspaceKeyboardHandler)
+  useEffect(() => {
+    if (!searchable) return;
+    const handler = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+        e.preventDefault();
+        setSearchVisible((v) => {
+          if (!v) {
+            setTimeout(() => searchInputRef.current?.focus(), 50);
+          } else {
+            setSearchQuery("");
+          }
+          return !v;
+        });
+      }
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [searchable]);
+
+  const filteredData = searchQuery ? filterTree(data, searchQuery) : data;
 
   useEffect(() => {
     if (propData) setData(propData);
@@ -287,12 +334,44 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({
           {countFiles(data)} file{countFiles(data) !== 1 ? "s" : ""}
         </div>
       )}
+      {searchable && searchVisible && (
+        <div className={`${CLS}__search`}>
+          <div className={`${CLS}__search-wrap`}>
+            <i className="fas fa-search" />
+            <input
+              ref={searchInputRef}
+              className={`${CLS}__search-input`}
+              type="text"
+              placeholder="Filter files..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Escape") {
+                  setSearchQuery("");
+                  setSearchVisible(false);
+                }
+              }}
+            />
+            {searchQuery && (
+              <button
+                className={`${CLS}__search-clear`}
+                onClick={() => setSearchQuery("")}
+                title="Clear (Esc)"
+              >
+                <i className="fas fa-times" />
+              </button>
+            )}
+          </div>
+        </div>
+      )}
       <nav className={CLS}>
-        {data.length === 0 ? (
-          <div className={`${CLS}__empty`}>No files to display</div>
+        {filteredData.length === 0 ? (
+          <div className={`${CLS}__empty`}>
+            {searchQuery ? "No matching files" : "No files to display"}
+          </div>
         ) : (
           <FileList
-            nodes={data}
+            nodes={filteredData}
             depth={0}
             expanded={expanded}
             activeFile={activeFile}

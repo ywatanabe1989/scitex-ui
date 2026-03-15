@@ -412,6 +412,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                 onFileSelect={onFileSelect}
                 showFileCount
                 showImageBadge
+                searchable
               />
             </>
           )}

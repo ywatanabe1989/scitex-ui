@@ -148,3 +148,66 @@
   );
   color: var(--workspace-bg-primary, #ffffff);
 }
+
+/* --- Search (Ctrl+K filter — ported from scitex-cloud wft-search) --- */
+
+.stx-app-file-browser__search {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--workspace-border-subtle);
+  flex-shrink: 0;
+}
+
+.stx-app-file-browser__search-wrap {
+  display: flex;
+  align-items: center;
+  background: var(--workspace-bg-primary);
+  border: 1px solid var(--workspace-border-default);
+  border-radius: 4px;
+  padding: 3px 8px;
+  gap: 6px;
+}
+
+.stx-app-file-browser__search-wrap:focus-within {
+  border-color: var(--stx-app-accent, var(--app-accent-color));
+  box-shadow: 0 0 0 1px var(--stx-app-accent, var(--app-accent-color));
+}
+
+.stx-app-file-browser__search-wrap i {
+  color: var(--text-muted);
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+.stx-app-file-browser__search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-size: 12px;
+  font-family: inherit;
+  outline: none;
+  min-width: 0;
+  padding: 2px 0;
+}
+
+.stx-app-file-browser__search-input::placeholder {
+  color: var(--text-muted);
+}
+
+.stx-app-file-browser__search-clear {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  border-radius: 2px;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+.stx-app-file-browser__search-clear:hover {
+  color: var(--text-primary);
+  background: var(--workspace-bg-hover);
+}

@@ -32,4 +32,6 @@ export interface FileBrowserProps extends BaseProps {
   showImageBadge?: boolean;
   /** Show file count header (default: false) */
   showFileCount?: boolean;
+  /** Enable Ctrl+K file search (default: false) */
+  searchable?: boolean;
 }
