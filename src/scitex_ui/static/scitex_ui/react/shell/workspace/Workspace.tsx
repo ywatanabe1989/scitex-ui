@@ -9,6 +9,7 @@
  * Interactions (matching scitex-cloud):
  * - Drag resizer = smooth curtain resize
  * - Smart collapse: panel collapses instantly when dragged below threshold
+ * - Curtain propagation: drag delta cascades to adjacent panel (domino)
  * - Collapsed panels show vertical icon + label
  * - Click collapsed panel to expand
  * - localStorage persistence for width + collapse state
@@ -23,142 +24,39 @@ import { Terminal } from "../terminal";
 
 const CLS = "stx-workspace";
 const COLLAPSE_WIDTH = 48;
+const MIN_WIDTH = 80;
 
 type ConsoleTab = "console" | "chat";
 
-/** Hook for drag-to-resize with smart collapse (ported from scitex-cloud) */
-function useResizer(
-  defaultWidth: number,
-  minWidth: number,
-  maxWidth: number,
-  storageKey: string,
-) {
-  const [width, setWidth] = useState(() => {
-    try {
-      const saved = localStorage.getItem(storageKey);
-      if (saved) {
-        const w = parseInt(saved, 10);
-        if (w >= minWidth) return w;
-      }
-    } catch {}
-    return defaultWidth;
-  });
+/** Centralized resize state for curtain propagation between panels */
+interface PanelState {
+  width: number;
+  collapsed: boolean;
+  prevWidth: number;
+}
 
-  const [collapsed, setCollapsed] = useState(() => {
-    try {
-      return localStorage.getItem(storageKey + ":collapsed") === "true";
-    } catch {
-      return false;
+function loadPanelState(key: string, defaultWidth: number): PanelState {
+  try {
+    const savedW = localStorage.getItem(key);
+    const savedC = localStorage.getItem(key + ":collapsed");
+    const w = savedW ? parseInt(savedW, 10) : defaultWidth;
+    return {
+      width: w >= MIN_WIDTH ? w : defaultWidth,
+      collapsed: savedC === "true",
+      prevWidth: defaultWidth,
+    };
+  } catch {
+    return { width: defaultWidth, collapsed: false, prevWidth: defaultWidth };
+  }
+}
+
+function savePanelState(key: string, state: PanelState) {
+  try {
+    if (!state.collapsed && state.width > COLLAPSE_WIDTH) {
+      localStorage.setItem(key, state.width.toString());
     }
-  });
-
-  const dragging = useRef(false);
-  const startX = useRef(0);
-  const startWidth = useRef(0);
-  const prevWidth = useRef(defaultWidth);
-
-  // Persist width
-  useEffect(() => {
-    if (!collapsed && width > COLLAPSE_WIDTH) {
-      try {
-        localStorage.setItem(storageKey, width.toString());
-      } catch {}
-    }
-  }, [width, collapsed, storageKey]);
-
-  // Persist collapse state
-  useEffect(() => {
-    try {
-      localStorage.setItem(storageKey + ":collapsed", collapsed.toString());
-    } catch {}
-  }, [collapsed, storageKey]);
-
-  const _collapse = useCallback(() => {
-    prevWidth.current = width;
-    setCollapsed(true);
-  }, [width]);
-  void _collapse; // available for programmatic use
-
-  const expand = useCallback(() => {
-    setCollapsed(false);
-    setWidth(
-      prevWidth.current > COLLAPSE_WIDTH ? prevWidth.current : defaultWidth,
-    );
-  }, [defaultWidth]);
-
-  const onMouseDown = useCallback(
-    (e: React.MouseEvent) => {
-      e.preventDefault();
-      dragging.current = true;
-      startX.current = e.clientX;
-      startWidth.current = collapsed ? COLLAPSE_WIDTH : width;
-
-      // If collapsed, expand on drag start
-      if (collapsed) {
-        setCollapsed(false);
-        setWidth(minWidth);
-        startWidth.current = minWidth;
-      }
-
-      // Disable transitions during drag
-      document
-        .querySelectorAll<HTMLElement>(
-          `.${CLS}__console-panel, .${CLS}__tree-panel`,
-        )
-        .forEach((el) => {
-          el.style.transition = "none";
-        });
-
-      const onMouseMove = (ev: MouseEvent) => {
-        if (!dragging.current) return;
-        const delta = ev.clientX - startX.current;
-        const newWidth = Math.max(
-          0,
-          Math.min(maxWidth, startWidth.current + delta),
-        );
-
-        // Smart collapse: instant collapse during drag
-        if (newWidth < COLLAPSE_WIDTH) {
-          prevWidth.current = startWidth.current;
-          setCollapsed(true);
-          return;
-        }
-
-        setCollapsed(false);
-        setWidth(newWidth);
-      };
-
-      const onMouseUp = () => {
-        dragging.current = false;
-        document.removeEventListener("mousemove", onMouseMove);
-        document.removeEventListener("mouseup", onMouseUp);
-        document.body.style.cursor = "";
-        document.body.style.userSelect = "";
-
-        // Re-enable transitions
-        document
-          .querySelectorAll<HTMLElement>(
-            `.${CLS}__console-panel, .${CLS}__tree-panel`,
-          )
-          .forEach((el) => {
-            el.style.transition = "";
-          });
-      };
-
-      document.addEventListener("mousemove", onMouseMove);
-      document.addEventListener("mouseup", onMouseUp);
-      document.body.style.cursor = "col-resize";
-      document.body.style.userSelect = "none";
-    },
-    [width, collapsed, minWidth, maxWidth],
-  );
-
-  return {
-    width: collapsed ? COLLAPSE_WIDTH : width,
-    collapsed,
-    expand,
-    resizerProps: { onMouseDown },
-  };
+    localStorage.setItem(key + ":collapsed", state.collapsed.toString());
+  } catch {}
 }
 
 export const Workspace: React.FC<WorkspaceProps> = ({
@@ -177,8 +75,30 @@ export const Workspace: React.FC<WorkspaceProps> = ({
   const [consoleTab, setConsoleTab] = useState<ConsoleTab>("console");
   const [treeData, setTreeData] = useState<FileNode[]>([]);
 
-  const consoleResizer = useResizer(300, 80, 600, `${appName}-console-width`);
-  const treeResizer = useResizer(250, 80, 500, `${appName}-tree-width`);
+  // Centralized panel state for curtain propagation
+  const consoleKey = `${appName}-console-width`;
+  const treeKey = `${appName}-tree-width`;
+  const [console_, setConsole] = useState(() =>
+    loadPanelState(consoleKey, 300),
+  );
+  const [tree, setTree] = useState(() => loadPanelState(treeKey, 250));
+
+  // Persist on change
+  useEffect(() => {
+    savePanelState(consoleKey, console_);
+  }, [console_, consoleKey]);
+  useEffect(() => {
+    savePanelState(treeKey, tree);
+  }, [tree, treeKey]);
+
+  // Dragging refs
+  const dragging = useRef<"console" | "tree" | null>(null);
+  const dragStartX = useRef(0);
+  const dragStartConsole = useRef(0);
+  const dragStartTree = useRef(0);
+  const propagating = useRef(false);
+  const propagateStartX = useRef(0);
+  const propagateStartWidth = useRef(0);
 
   // Set accent color
   useEffect(() => {
@@ -203,6 +123,191 @@ export const Workspace: React.FC<WorkspaceProps> = ({
     }
   }, [fileTreeBackend]);
 
+  /** Start drag on console resizer */
+  const onConsoleResizerDown = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      dragging.current = "console";
+      propagating.current = false;
+      dragStartX.current = e.clientX;
+      dragStartConsole.current = console_.collapsed
+        ? COLLAPSE_WIDTH
+        : console_.width;
+      dragStartTree.current = tree.collapsed ? COLLAPSE_WIDTH : tree.width;
+
+      // Expand on drag if collapsed
+      if (console_.collapsed) {
+        setConsole((s) => ({ ...s, collapsed: false, width: MIN_WIDTH }));
+        dragStartConsole.current = MIN_WIDTH;
+      }
+
+      // Disable transitions during drag
+      document
+        .querySelectorAll<HTMLElement>(
+          `.${CLS}__console-panel, .${CLS}__tree-panel`,
+        )
+        .forEach((el) => {
+          el.style.transition = "none";
+        });
+
+      document.body.style.cursor = "col-resize";
+      document.body.style.userSelect = "none";
+
+      const onMove = (ev: MouseEvent) => {
+        if (dragging.current !== "console") return;
+        const delta = ev.clientX - dragStartX.current;
+        const newW = dragStartConsole.current + delta;
+
+        // Smart collapse: instant collapse during drag
+        if (newW < COLLAPSE_WIDTH) {
+          setConsole((s) => ({
+            ...s,
+            collapsed: true,
+            prevWidth: dragStartConsole.current,
+          }));
+
+          // Curtain propagation: transfer remaining delta to tree panel
+          if (!propagating.current) {
+            propagating.current = true;
+            propagateStartX.current = ev.clientX;
+            propagateStartWidth.current = dragStartTree.current;
+          }
+
+          if (propagating.current) {
+            const propDelta = ev.clientX - propagateStartX.current;
+            const propW = propagateStartWidth.current + propDelta;
+
+            if (propW < COLLAPSE_WIDTH) {
+              setTree((s) => ({
+                ...s,
+                collapsed: true,
+                prevWidth: propagateStartWidth.current,
+              }));
+            } else {
+              setTree((s) => ({
+                ...s,
+                collapsed: false,
+                width: Math.min(propW, 500),
+              }));
+            }
+          }
+          return;
+        }
+
+        // Normal resize
+        propagating.current = false;
+        setConsole((s) => ({
+          ...s,
+          collapsed: false,
+          width: Math.max(MIN_WIDTH, Math.min(600, newW)),
+        }));
+      };
+
+      const onUp = () => {
+        dragging.current = null;
+        propagating.current = false;
+        document.removeEventListener("mousemove", onMove);
+        document.removeEventListener("mouseup", onUp);
+        document.body.style.cursor = "";
+        document.body.style.userSelect = "";
+        document
+          .querySelectorAll<HTMLElement>(
+            `.${CLS}__console-panel, .${CLS}__tree-panel`,
+          )
+          .forEach((el) => {
+            el.style.transition = "";
+          });
+      };
+
+      document.addEventListener("mousemove", onMove);
+      document.addEventListener("mouseup", onUp);
+    },
+    [console_, tree],
+  );
+
+  /** Start drag on tree resizer */
+  const onTreeResizerDown = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      dragging.current = "tree";
+      propagating.current = false;
+      dragStartX.current = e.clientX;
+      dragStartTree.current = tree.collapsed ? COLLAPSE_WIDTH : tree.width;
+
+      if (tree.collapsed) {
+        setTree((s) => ({ ...s, collapsed: false, width: MIN_WIDTH }));
+        dragStartTree.current = MIN_WIDTH;
+      }
+
+      document
+        .querySelectorAll<HTMLElement>(
+          `.${CLS}__console-panel, .${CLS}__tree-panel`,
+        )
+        .forEach((el) => {
+          el.style.transition = "none";
+        });
+
+      document.body.style.cursor = "col-resize";
+      document.body.style.userSelect = "none";
+
+      const onMove = (ev: MouseEvent) => {
+        if (dragging.current !== "tree") return;
+        const delta = ev.clientX - dragStartX.current;
+        const newW = dragStartTree.current + delta;
+
+        if (newW < COLLAPSE_WIDTH) {
+          setTree((s) => ({
+            ...s,
+            collapsed: true,
+            prevWidth: dragStartTree.current,
+          }));
+          return;
+        }
+
+        setTree((s) => ({
+          ...s,
+          collapsed: false,
+          width: Math.max(MIN_WIDTH, Math.min(500, newW)),
+        }));
+      };
+
+      const onUp = () => {
+        dragging.current = null;
+        document.removeEventListener("mousemove", onMove);
+        document.removeEventListener("mouseup", onUp);
+        document.body.style.cursor = "";
+        document.body.style.userSelect = "";
+        document
+          .querySelectorAll<HTMLElement>(
+            `.${CLS}__console-panel, .${CLS}__tree-panel`,
+          )
+          .forEach((el) => {
+            el.style.transition = "";
+          });
+      };
+
+      document.addEventListener("mousemove", onMove);
+      document.addEventListener("mouseup", onUp);
+    },
+    [tree],
+  );
+
+  const expandConsole = useCallback(() => {
+    setConsole((s) => ({
+      ...s,
+      collapsed: false,
+      width: s.prevWidth > COLLAPSE_WIDTH ? s.prevWidth : 300,
+    }));
+  }, []);
+
+  const expandTree = useCallback(() => {
+    setTree((s) => ({
+      ...s,
+      collapsed: false,
+      width: s.prevWidth > COLLAPSE_WIDTH ? s.prevWidth : 250,
+    }));
+  }, []);
+
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault();
@@ -217,6 +322,9 @@ export const Workspace: React.FC<WorkspaceProps> = ({
     e.dataTransfer.dropEffect = "copy";
   }, []);
 
+  const consoleWidth = console_.collapsed ? COLLAPSE_WIDTH : console_.width;
+  const treeWidth = tree.collapsed ? COLLAPSE_WIDTH : tree.width;
+
   return (
     <div
       className={`${CLS} ${className ?? ""}`}
@@ -226,11 +334,11 @@ export const Workspace: React.FC<WorkspaceProps> = ({
       <div className={`${CLS}__columns`}>
         {/* ── Column 1: Console/Chat Panel ──────────────────────── */}
         <div
-          className={`${CLS}__console-panel${consoleResizer.collapsed ? ` ${CLS}__panel--collapsed` : ""}`}
-          style={{ width: consoleResizer.width }}
-          onClick={consoleResizer.collapsed ? consoleResizer.expand : undefined}
+          className={`${CLS}__console-panel${console_.collapsed ? ` ${CLS}__panel--collapsed` : ""}`}
+          style={{ width: consoleWidth }}
+          onClick={console_.collapsed ? expandConsole : undefined}
         >
-          {consoleResizer.collapsed ? (
+          {console_.collapsed ? (
             <div className={`${CLS}__collapsed-label`}>
               <i className="fas fa-terminal" />
               <span>Console</span>
@@ -279,16 +387,16 @@ export const Workspace: React.FC<WorkspaceProps> = ({
         </div>
         <div
           className={`${CLS}__resizer ${CLS}__resizer--vertical`}
-          {...consoleResizer.resizerProps}
+          onMouseDown={onConsoleResizerDown}
         />
 
         {/* ── Column 2: File Tree Panel ─────────────────────────── */}
         <div
-          className={`${CLS}__tree-panel${treeResizer.collapsed ? ` ${CLS}__panel--collapsed` : ""}`}
-          style={{ width: treeResizer.width }}
-          onClick={treeResizer.collapsed ? treeResizer.expand : undefined}
+          className={`${CLS}__tree-panel${tree.collapsed ? ` ${CLS}__panel--collapsed` : ""}`}
+          style={{ width: treeWidth }}
+          onClick={tree.collapsed ? expandTree : undefined}
         >
-          {treeResizer.collapsed ? (
+          {tree.collapsed ? (
             <div className={`${CLS}__collapsed-label`}>
               <i className="fas fa-folder" />
               <span>Files</span>
@@ -310,7 +418,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
         </div>
         <div
           className={`${CLS}__resizer ${CLS}__resizer--vertical`}
-          {...treeResizer.resizerProps}
+          onMouseDown={onTreeResizerDown}
         />
 
         {/* ── Column 3: App Content ─────────────────────────────── */}
