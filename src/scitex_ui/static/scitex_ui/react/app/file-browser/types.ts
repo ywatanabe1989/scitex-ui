@@ -34,4 +34,9 @@ export interface FileBrowserProps extends BaseProps {
   showFileCount?: boolean;
   /** Enable Ctrl+K file search (default: false) */
   searchable?: boolean;
+  /** Context menu action handler (right-click on file/dir) */
+  onContextAction?: (
+    action: "new" | "rename" | "delete" | "duplicate" | "copy-path",
+    node: FileNode,
+  ) => void;
 }

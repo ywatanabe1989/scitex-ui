@@ -214,3 +214,56 @@
   color: var(--text-primary);
   background: var(--workspace-bg-hover);
 }
+
+/* --- Context Menu (right-click on file/dir) --- */
+
+.stx-app-file-browser__context-menu {
+  position: fixed;
+  z-index: 1000;
+  min-width: 160px;
+  background: var(--workspace-bg-elevated);
+  border: 1px solid var(--workspace-border-default);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  padding: 4px 0;
+  overflow: hidden;
+}
+
+.stx-app-file-browser__context-menu button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 12px;
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 12px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.stx-app-file-browser__context-menu button:hover {
+  background: var(--workspace-bg-hover);
+}
+
+.stx-app-file-browser__context-menu button i {
+  width: 14px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.stx-app-file-browser__context-divider {
+  height: 1px;
+  margin: 4px 0;
+  background: var(--workspace-border-subtle);
+}
+
+.stx-app-file-browser__context-danger {
+  color: var(--status-error) !important;
+}
+
+.stx-app-file-browser__context-danger i {
+  color: var(--status-error) !important;
+}

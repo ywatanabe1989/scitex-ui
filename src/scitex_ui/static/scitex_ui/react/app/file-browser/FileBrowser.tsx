@@ -211,6 +211,53 @@ function filterTree(nodes: FileNode[], query: string): FileNode[] {
   return result;
 }
 
+/** Context menu for file tree items */
+const ContextMenu: React.FC<{
+  x: number;
+  y: number;
+  node: FileNode;
+  onAction: (action: string) => void;
+  onClose: () => void;
+}> = ({ x, y, node, onAction, onClose }) => {
+  const isDir = node.type === "directory";
+
+  useEffect(() => {
+    const handler = () => onClose();
+    document.addEventListener("click", handler);
+    return () => document.removeEventListener("click", handler);
+  }, [onClose]);
+
+  return (
+    <div
+      className={`${CLS}__context-menu`}
+      style={{ top: y, left: x }}
+      onClick={(e) => e.stopPropagation()}
+    >
+      {isDir && (
+        <button onClick={() => onAction("new")}>
+          <i className="fas fa-plus" /> New File
+        </button>
+      )}
+      <button onClick={() => onAction("rename")}>
+        <i className="fas fa-pen" /> Rename
+      </button>
+      <button onClick={() => onAction("duplicate")}>
+        <i className="fas fa-copy" /> Duplicate
+      </button>
+      <button onClick={() => onAction("copy-path")}>
+        <i className="fas fa-clipboard" /> Copy Path
+      </button>
+      <div className={`${CLS}__context-divider`} />
+      <button
+        className={`${CLS}__context-danger`}
+        onClick={() => onAction("delete")}
+      >
+        <i className="fas fa-trash" /> Delete
+      </button>
+    </div>
+  );
+};
+
 export const FileBrowser: React.FC<FileBrowserProps> = ({
   data: propData,
   apiUrl,
@@ -221,6 +268,7 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({
   showImageBadge = true,
   showFileCount = false,
   searchable = false,
+  onContextAction,
   className,
   style,
 }) => {
@@ -232,6 +280,11 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [searchVisible, setSearchVisible] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const [contextMenu, setContextMenu] = useState<{
+    x: number;
+    y: number;
+    node: FileNode;
+  } | null>(null);
 
   // Ctrl+K keyboard shortcut (ported from scitex-cloud WorkspaceKeyboardHandler)
   useEffect(() => {
@@ -373,7 +426,34 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({
           </div>
         </div>
       )}
-      <nav className={CLS}>
+      <nav
+        className={CLS}
+        onContextMenu={
+          onContextAction
+            ? (e) => {
+                const item = (e.target as HTMLElement).closest(
+                  `.${CLS}__item`,
+                ) as HTMLElement | null;
+                if (!item) return;
+                e.preventDefault();
+                const path = item.dataset.path;
+                if (!path) return;
+                const findNode = (nodes: FileNode[]): FileNode | null => {
+                  for (const n of nodes) {
+                    if (n.path === path) return n;
+                    if (n.children) {
+                      const found = findNode(n.children);
+                      if (found) return found;
+                    }
+                  }
+                  return null;
+                };
+                const node = findNode(data);
+                if (node) setContextMenu({ x: e.clientX, y: e.clientY, node });
+              }
+            : undefined
+        }
+      >
         {filteredData.length === 0 ? (
           <div className={`${CLS}__empty`}>
             {searchQuery ? "No matching files" : "No files to display"}
@@ -392,6 +472,21 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({
           />
         )}
       </nav>
+      {contextMenu && onContextAction && (
+        <ContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          node={contextMenu.node}
+          onAction={(action) => {
+            onContextAction(
+              action as "new" | "rename" | "delete" | "duplicate" | "copy-path",
+              contextMenu.node,
+            );
+            setContextMenu(null);
+          }}
+          onClose={() => setContextMenu(null)}
+        />
+      )}
     </div>
   );
 };
