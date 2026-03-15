@@ -74,11 +74,19 @@ class TestMediaViewer:
         _check_metadata(MediaViewer)
 
 
+class TestConfirmModal:
+    def test_metadata_and_files(self):
+        from scitex_ui._components._confirm_modal import ConfirmModal
+
+        _check_metadata(ConfirmModal)
+
+
 class TestAllComponentsRegistered:
-    def test_seven_components_registered(self):
+    def test_eight_components_registered(self):
         names = scitex_ui.list_components()
         expected = {
             "app-shell",
+            "confirm-modal",
             "file-browser",
             "media-viewer",
             "package-docs-sidebar",
