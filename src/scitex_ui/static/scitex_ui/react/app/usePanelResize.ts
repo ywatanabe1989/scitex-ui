@@ -52,6 +52,8 @@ export interface PanelResizeConfig {
 export interface PanelResizeResult {
   width: number;
   collapsed: boolean;
+  /** Attach to the panel element for smooth direct-DOM resizing */
+  panelRef: React.RefObject<HTMLElement | null>;
   resizerProps: {
     onMouseDown: (e: React.MouseEvent) => void;
     onDoubleClick: () => void;
@@ -107,6 +109,9 @@ export function usePanelResize(config: PanelResizeConfig): PanelResizeResult {
   const dragging = useRef(false);
   const startX = useRef(0);
   const startWidth = useRef(0);
+  // Direct DOM refs for smooth drag (no React re-renders during drag)
+  const liveWidth = useRef(0);
+  const panelRef = useRef<HTMLElement | null>(null);
 
   const saveWidth = useCallback(
     (w: number) => writeStorage(storageKey, w.toString()),
@@ -166,6 +171,7 @@ export function usePanelResize(config: PanelResizeConfig): PanelResizeResult {
       dragging.current = true;
       startX.current = e.clientX;
       startWidth.current = collapsed ? minWidth : width;
+      liveWidth.current = collapsed ? minWidth : width;
 
       document.body.style.cursor = "col-resize";
       document.body.style.userSelect = "none";
@@ -183,8 +189,18 @@ export function usePanelResize(config: PanelResizeConfig): PanelResizeResult {
           ? startWidth.current + delta
           : startWidth.current - delta;
       const clamped = clampWidth(raw);
+
       if (clamped >= minWidth) {
-        setWidth(clamped);
+        liveWidth.current = clamped;
+        // Direct DOM update — no React re-render during drag
+        if (panelRef.current) {
+          panelRef.current.style.width = `${clamped}px`;
+        }
+      } else {
+        liveWidth.current = minWidth;
+        if (panelRef.current) {
+          panelRef.current.style.width = `${minWidth}px`;
+        }
       }
       // Cross-boundary propagation: when drag exceeds the panel boundary
       if (raw < minWidth && onBoundaryOverflow) {
@@ -195,21 +211,22 @@ export function usePanelResize(config: PanelResizeConfig): PanelResizeResult {
 
     const onMouseUp = (e: MouseEvent) => {
       if (!dragging.current) return;
-      // Apply final position
+      // Apply final mouse position (fixes fast drag not reaching destination)
       onMouseMove(e);
       dragging.current = false;
       document.body.style.cursor = "";
       document.body.style.userSelect = "";
 
-      setWidth((current) => {
-        if (current <= minWidth + 10) {
-          setCollapsed(true);
-          saveCollapsed(true);
-          return defaultWidth;
-        }
-        saveWidth(current);
-        return current;
-      });
+      // Sync React state from liveWidth (single re-render)
+      const finalWidth = liveWidth.current;
+      if (finalWidth <= minWidth + 10) {
+        setCollapsed(true);
+        saveCollapsed(true);
+        setWidth(defaultWidth);
+      } else {
+        setWidth(finalWidth);
+        saveWidth(finalWidth);
+      }
     };
 
     document.addEventListener("mousemove", onMouseMove);
@@ -218,11 +235,20 @@ export function usePanelResize(config: PanelResizeConfig): PanelResizeResult {
       document.removeEventListener("mousemove", onMouseMove);
       document.removeEventListener("mouseup", onMouseUp);
     };
-  }, [direction, minWidth, defaultWidth, saveWidth, saveCollapsed, clampWidth]);
+  }, [
+    direction,
+    minWidth,
+    defaultWidth,
+    saveWidth,
+    saveCollapsed,
+    clampWidth,
+    onBoundaryOverflow,
+  ]);
 
   return {
     width,
     collapsed,
+    panelRef,
     resizerProps: { onMouseDown, onDoubleClick: toggleCollapse },
     headerProps: {
       onDoubleClick: toggleCollapse,
