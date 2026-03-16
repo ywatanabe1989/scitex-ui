@@ -209,13 +209,14 @@ export function registerFontSizeZoom(
 ): boolean {
   const el = document.querySelector<HTMLElement>(selector);
   if (!el) return false;
+  const zoneEl: HTMLElement = el;
 
   const defaultSize = opts?.defaultSize ?? 13;
   const targetSel = opts?.target;
 
   function getTargets(): HTMLElement[] {
-    if (!targetSel) return [el];
-    return Array.from(el.querySelectorAll<HTMLElement>(targetSel));
+    if (!targetSel) return [zoneEl];
+    return Array.from(zoneEl.querySelectorAll<HTMLElement>(targetSel));
   }
 
   registerZoomZone({
