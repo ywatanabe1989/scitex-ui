@@ -16,9 +16,11 @@ import { Terminal } from "../terminal";
 import { Viewer } from "../viewer";
 import { usePanelState, COLLAPSE_WIDTH } from "./usePanelState";
 import { useResizers } from "./useResizers";
+import { useVoiceRecorder } from "../media-input/useVoiceRecorder";
+import { WebcamCapture } from "../media-input/WebcamCapture";
+import { SketchCanvas } from "../media-input/SketchCanvas";
 
 const CLS = "stx-workspace";
-/** Mode matching scitex-cloud data-mode values */
 type ConsoleMode = "console" | "chat";
 
 export const Workspace: React.FC<WorkspaceProps> = ({
@@ -33,14 +35,16 @@ export const Workspace: React.FC<WorkspaceProps> = ({
   onFileDrop,
   onFileContextAction,
   getFileUrl,
-  sttUrl: _sttUrl,
-  onImageCapture: _onImageCapture,
-  onVoiceTranscript: _onVoiceTranscript,
+  sttUrl,
+  onImageCapture,
+  onVoiceTranscript,
   children,
   className,
   style,
 }) => {
   const [mode, setMode] = useState<ConsoleMode>("console");
+  const [showCamera, setShowCamera] = useState(false);
+  const [showSketch, setShowSketch] = useState(false);
   const [treeData, setTreeData] = useState<FileNode[]>([]);
   const [viewerFile, setViewerFile] = useState<string | null>(null);
   const [sortMode, setSortMode] = useState<"name" | "mtime">(() => {
@@ -48,6 +52,11 @@ export const Workspace: React.FC<WorkspaceProps> = ({
       (localStorage.getItem("scitex-file-sort-mode") as "name" | "mtime") ||
       "name"
     );
+  });
+
+  const voiceRecorder = useVoiceRecorder({
+    onTranscript: (text) => onVoiceTranscript?.(text),
+    sttUrl,
   });
 
   const [console_, setConsole] = usePanelState(`${appName}-console-width`, 380);
@@ -110,6 +119,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
     },
     [onFileDrop],
   );
+
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = "copy";
@@ -118,6 +128,8 @@ export const Workspace: React.FC<WorkspaceProps> = ({
   const cW = console_.collapsed ? COLLAPSE_WIDTH : console_.width;
   const tW = tree.collapsed ? COLLAPSE_WIDTH : tree.width;
   const vW = viewer.collapsed ? COLLAPSE_WIDTH : viewer.width;
+  const mediaEnabled = !!onImageCapture;
+  const micEnabled = !!sttUrl || !!onVoiceTranscript;
 
   return (
     <div
@@ -126,7 +138,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
       data-app={appName}
     >
       <div className={`${CLS}__columns`}>
-        {/* ── Console/Chat Panel (stx-shell-ai-* DOM) ──────────── */}
+        {/* ── Console/Chat Panel ──────────── */}
         <div
           className={`${CLS}__console-panel${console_.collapsed ? ` ${CLS}__panel--collapsed` : ""}`}
           style={{ width: cW }}
@@ -139,7 +151,6 @@ export const Workspace: React.FC<WorkspaceProps> = ({
             </div>
           ) : (
             <>
-              {/* Header: mode toggle (Console | Chat) */}
               <div className="stx-shell-ai-panel-header">
                 <div className="stx-shell-ai-mode-toggle">
                   <button
@@ -148,8 +159,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                     title="Terminal"
                     onClick={() => setMode("console")}
                   >
-                    <i className="fas fa-terminal" />
-                    Console
+                    <i className="fas fa-terminal" /> Console
                   </button>
                   <button
                     className={`stx-shell-ai-mode-btn${mode === "chat" ? " active" : ""}`}
@@ -157,15 +167,12 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                     title="AI Chat"
                     onClick={() => setMode("chat")}
                   >
-                    <i className="fas fa-robot" />
-                    Chat
+                    <i className="fas fa-robot" /> Chat
                   </button>
                 </div>
               </div>
 
-              {/* Body: views toggled by mode */}
               <div className="stx-shell-ai-body">
-                {/* ── Chat view ────────────────────────────── */}
                 <div
                   id="stx-shell-ai-chat-view"
                   className={`stx-shell-ai-view${mode === "chat" ? " active" : ""}`}
@@ -183,13 +190,11 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                   )}
                 </div>
 
-                {/* ── Console/Terminal view ─────────────────── */}
                 <div
                   id="stx-shell-ai-console-view"
                   className={`stx-shell-ai-view${mode === "console" ? " active" : ""}`}
                   data-view="console"
                 >
-                  {/* Console tabs bar */}
                   <div className="stx-shell-ai-console-tabs-bar">
                     <button
                       className="stx-shell-ai-console-new-tab"
@@ -209,7 +214,6 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                     </div>
                   </div>
 
-                  {/* Terminal content */}
                   <div
                     id="stx-shell-ai-console-terminal"
                     className="stx-shell-ai-console-terminal"
@@ -224,7 +228,6 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                     )}
                   </div>
 
-                  {/* Console toolbar */}
                   <div
                     className="stx-shell-ai-console-toolbar"
                     style={{ position: "relative" }}
@@ -234,9 +237,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                       className="stx-shell-ai-console-status"
                     />
                     <div className="stx-shell-ai-console-toolbar-btns">
-                      {/* Auto-accept toggle */}
                       <button
-                        id="stx-shell-ai-auto-accept"
                         className="stx-shell-ai-input-btn stx-shell-ai-auto-accept-btn"
                         title="Auto-Accept"
                         disabled
@@ -244,19 +245,37 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                       >
                         <i className="fas fa-robot" />
                       </button>
-                      {/* Camera */}
-                      <button className="stx-shell-ai-input-btn" title="Webcam capture" disabled>
+                      <button
+                        className="stx-shell-ai-input-btn"
+                        title="Webcam capture"
+                        onClick={() => setShowCamera(true)}
+                        disabled={!mediaEnabled}
+                      >
                         <i className="fas fa-camera" />
                       </button>
-                      <button className="stx-shell-ai-input-btn" title="Draw sketch" disabled>
+                      <button
+                        className="stx-shell-ai-input-btn"
+                        title="Draw sketch"
+                        onClick={() => setShowSketch(true)}
+                        disabled={!mediaEnabled}
+                      >
                         <i className="fas fa-pen" />
                       </button>
-                      <button className="stx-shell-ai-input-btn" title="Voice input" disabled>
-                        <i className="fas fa-microphone" />
-                      </button>
-                      {/* Gear / settings — placeholder */}
                       <button
-                        id="stx-shell-ai-console-gear"
+                        className={`stx-shell-ai-input-btn${voiceRecorder.isRecording ? " recording" : ""}`}
+                        title={
+                          voiceRecorder.isRecording
+                            ? "Stop recording"
+                            : "Voice input"
+                        }
+                        onClick={voiceRecorder.toggle}
+                        disabled={!micEnabled}
+                      >
+                        <i
+                          className={`fas fa-microphone${voiceRecorder.isRecording ? "-slash" : ""}`}
+                        />
+                      </button>
+                      <button
                         className="stx-shell-ai-input-btn stx-shell-ai-gear-btn"
                         title="Console settings"
                         disabled
@@ -276,7 +295,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
           onMouseDown={onConsoleResizerDown}
         />
 
-        {/* ── File Tree ───────────────────────────────────── */}
+        {/* ── File Tree ───────────────────── */}
         <div
           className={`${CLS}__tree-panel${tree.collapsed ? ` ${CLS}__panel--collapsed` : ""}`}
           style={{ width: tW }}
@@ -324,11 +343,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                 onFileDoubleClick={(node) => {
                   if (node.type === "file") {
                     setViewerFile(node.path);
-                    if (!viewer.collapsed) {
-                      // Already open — just switch file
-                    } else {
-                      expandViewer();
-                    }
+                    if (viewer.collapsed) expandViewer();
                   }
                   onFileDoubleClick?.(node);
                 }}
@@ -346,7 +361,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
           onMouseDown={onTreeResizerDown}
         />
 
-        {/* ── Viewer (file preview) ───────────────────────── */}
+        {/* ── Viewer ───────────────────────── */}
         {getFileUrl && (
           <>
             <div
@@ -380,7 +395,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
           </>
         )}
 
-        {/* ── App Content ─────────────────────────────────── */}
+        {/* ── App Content ──────────────────── */}
         <div
           className={`${CLS}__app-content`}
           onDrop={handleDrop}
@@ -390,7 +405,21 @@ export const Workspace: React.FC<WorkspaceProps> = ({
         </div>
       </div>
 
-      {/* Media input modals — placeholder, to be implemented */}
+      {/* ── Media Input Modals ──────────── */}
+      {onImageCapture && (
+        <>
+          <WebcamCapture
+            open={showCamera}
+            onClose={() => setShowCamera(false)}
+            onCapture={onImageCapture}
+          />
+          <SketchCanvas
+            open={showSketch}
+            onClose={() => setShowSketch(false)}
+            onDone={onImageCapture}
+          />
+        </>
+      )}
     </div>
   );
 };
