@@ -117,7 +117,7 @@ export function useResizers(
     panels: PanelRef[],
     originLeftIdx: number,
     totalDelta: number,
-    cascade: { shrinkRightIdx: number; rightConsumed: number },
+    _cascade: { shrinkRightIdx: number; rightConsumed: number },
   ) {
     // Grow the left panel
     const left = panels[originLeftIdx];
@@ -154,7 +154,7 @@ export function useResizers(
     panels: PanelRef[],
     originLeftIdx: number,
     totalDelta: number, // negative
-    cascade: { shrinkLeftIdx: number; leftConsumed: number },
+    _cascade: { shrinkLeftIdx: number; leftConsumed: number },
   ) {
     // Grow the right panel
     const right = panels[originLeftIdx + 1];
