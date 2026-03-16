@@ -192,10 +192,10 @@ class ElementInspector {
   }
 }
 
-// Initialize global instance
-const elementInspector = new ElementInspector();
-
-// Export to window for manual control
+// Initialize global instance (idempotent — prevents double init)
+const existing = (window as any).elementInspector;
+const elementInspector =
+  existing instanceof ElementInspector ? existing : new ElementInspector();
 (window as any).elementInspector = elementInspector;
 
 // Auto-refresh on window resize (with debounce)
