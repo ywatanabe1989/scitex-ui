@@ -12,7 +12,7 @@
  */
 
 import { useCallback, useRef, useState } from "react";
-import type { OnTranscript, SttConfig } from "./types";
+import type { OnTranscript } from "./types";
 
 export interface UseVoiceRecorderOptions {
   /** Called with transcribed text after recording stops */

@@ -128,8 +128,9 @@ export const Workspace: React.FC<WorkspaceProps> = ({
   const cW = console_.collapsed ? COLLAPSE_WIDTH : console_.width;
   const tW = tree.collapsed ? COLLAPSE_WIDTH : tree.width;
   const vW = viewer.collapsed ? COLLAPSE_WIDTH : viewer.width;
-  const mediaEnabled = !!onImageCapture;
-  const micEnabled = !!sttUrl || !!onVoiceTranscript;
+  // Media buttons always enabled — modals/recorder work standalone
+  const mediaEnabled = true;
+  const micEnabled = true;
 
   return (
     <div
