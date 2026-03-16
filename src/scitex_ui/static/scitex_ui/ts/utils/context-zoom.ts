@@ -344,26 +344,12 @@ export interface FontSizeZoomDef {
  * @param fontSizeZoomZones  Array of font-size zoom zone definitions
  * @param timeoutMs       Stop observing after this many ms (default 30s)
  */
-let bootstrapped = false;
 export function bootstrapContextZoom(
   fontZoomZones: FontZoomDef[] = [],
   fontSizeZoomZones: FontSizeZoomDef[] = [],
   timeoutMs = 30_000,
 ): void {
-  if (bootstrapped) {
-    console.warn("[zoom] bootstrapContextZoom called twice — skipping");
-    return;
-  }
-  bootstrapped = true;
-
-  console.log(
-    "[zoom] bootstrapContextZoom: initializing with",
-    fontZoomZones.length,
-    "CSS zones,",
-    fontSizeZoomZones.length,
-    "font-size zones",
-  );
-
+  // initContextZoom and attachZoomIndicator are idempotent
   initContextZoom();
   attachZoomIndicator();
 
