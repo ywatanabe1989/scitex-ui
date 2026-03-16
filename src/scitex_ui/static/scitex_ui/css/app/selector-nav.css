@@ -1,0 +1,122 @@
+/* =============================================================================
+ * SciTeX App — Selector Nav (vertical icon+label navigation strip)
+ * =============================================================================
+ * Ported from scitex-cloud selector-nav.css
+ * Prefix: stx-app-selector-nav
+ * ============================================================================= */
+
+.stx-app-selector-nav {
+  --selector-nav-icon-size: var(--ui-nav-icon-size, 20px);
+  --selector-nav-label-size: 9px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 4px 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  flex-shrink: 0;
+  background: var(--workspace-bg-primary, #0d1117);
+}
+
+.stx-app-selector-nav__items {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.stx-app-selector-nav__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 2px;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  color: var(--workspace-text-secondary, #8b949e);
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    background 0.15s,
+    color 0.15s;
+  line-height: 1;
+  font-weight: 400;
+  white-space: nowrap;
+  position: relative;
+}
+
+.stx-app-selector-nav__item:hover {
+  background: var(--workspace-bg-hover, rgba(177, 186, 196, 0.08));
+  color: var(--workspace-text-primary, #e6edf3);
+}
+
+.stx-app-selector-nav__item.active {
+  color: var(--workspace-text-primary, #e6edf3);
+  background: var(--workspace-bg-active, rgba(177, 186, 196, 0.12));
+}
+
+.stx-app-selector-nav__item.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.stx-app-selector-nav__item i {
+  width: var(--selector-nav-icon-size, 20px);
+  min-width: var(--selector-nav-icon-size, 20px);
+  height: var(--selector-nav-icon-size, 20px);
+  text-align: center;
+  font-size: var(--selector-nav-icon-size, 20px);
+}
+
+.stx-app-selector-nav__label {
+  font-size: var(--selector-nav-label-size, 9px);
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 48px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+.stx-app-selector-nav__footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  border-top: 1px solid var(--workspace-border-subtle, #30363d);
+  flex-shrink: 0;
+  font-size: 10px;
+  color: var(--workspace-text-secondary, #8b949e);
+}
+
+/* Active indicators */
+.stx-app-selector-nav[data-indicator="left"]
+  .stx-app-selector-nav__item.active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 20%;
+  bottom: 20%;
+  width: 4px;
+  border-radius: 0 2px 2px 0;
+  background: var(--app-accent-color, var(--workspace-icon-primary, #059669));
+  z-index: 2;
+}
+
+.stx-app-selector-nav[data-indicator="right"]
+  .stx-app-selector-nav__item.active::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 20%;
+  bottom: 20%;
+  width: 4px;
+  border-radius: 2px 0 0 2px;
+  background: var(--app-accent-color, var(--workspace-icon-primary, #059669));
+  z-index: 2;
+}
