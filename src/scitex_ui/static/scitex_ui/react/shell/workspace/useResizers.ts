@@ -34,6 +34,10 @@ interface PanelRef {
   state: PanelState;
   set: SetPanel;
   startWidth: number;
+  /** Live width during drag (direct DOM) — committed to React on mouseup */
+  liveWidth: number;
+  /** Live collapsed state during drag */
+  liveCollapsed: boolean;
 }
 
 export function useResizers(
@@ -99,17 +103,54 @@ export function useResizers(
     };
 
     const onUp = (ev: globalThis.MouseEvent) => {
-      onMove(ev); // Apply final position
+      onMove(ev); // Apply final DOM position
       dragging.current = false;
       document.removeEventListener("mousemove", onMove);
       document.removeEventListener("mouseup", onUp);
       document.body.style.cursor = "";
       document.body.style.userSelect = "";
       enableTransitions();
+
+      // Commit live state to React (single batch re-render)
+      for (const p of panels) {
+        if (p.liveCollapsed) {
+          p.set((s) => ({
+            ...s,
+            collapsed: true,
+            prevWidth: p.startWidth,
+          }));
+        } else {
+          p.set((s) => ({
+            ...s,
+            collapsed: false,
+            width: p.liveWidth,
+          }));
+        }
+      }
     };
 
     document.addEventListener("mousemove", onMove);
     document.addEventListener("mouseup", onUp);
+  }
+
+  /** CSS selectors for shell panels — used for direct DOM manipulation */
+  const PANEL_SELECTORS = [
+    ".stx-workspace__console-panel",
+    ".stx-workspace__tree-panel",
+    ".stx-workspace__viewer-panel",
+  ];
+
+  /** Set panel width directly in DOM (no React re-render) */
+  function setDomWidth(idx: number, width: number, collapsed: boolean) {
+    const el = document.querySelector<HTMLElement>(PANEL_SELECTORS[idx]);
+    if (!el) return;
+    if (collapsed) {
+      el.style.width = COLLAPSE_WIDTH + "px";
+      el.classList.add("collapsed");
+    } else {
+      el.style.width = width + "px";
+      el.classList.remove("collapsed");
+    }
   }
 
   /** Drag moving RIGHT: grow left panel, shrink right panel(s) with cascade */
@@ -125,7 +166,9 @@ export function useResizers(
       MIN_WIDTH,
       Math.min(MAX_WIDTH, left.startWidth + totalDelta),
     );
-    left.set((s) => ({ ...s, collapsed: false, width: newLeftW }));
+    left.liveWidth = newLeftW;
+    left.liveCollapsed = false;
+    setDomWidth(originLeftIdx, newLeftW, false);
 
     // Shrink right panels with cascade
     let remainingDelta = totalDelta;
@@ -136,14 +179,15 @@ export function useResizers(
 
       if (newW < COLLAPSE_WIDTH) {
         // Collapse this panel, cascade remainder to next
-        p.set((s) => ({ ...s, collapsed: true, prevWidth: p.startWidth }));
+        p.liveWidth = COLLAPSE_WIDTH;
+        p.liveCollapsed = true;
+        setDomWidth(i, COLLAPSE_WIDTH, true);
         remainingDelta -= p.startWidth - COLLAPSE_WIDTH;
       } else {
-        p.set((s) => ({
-          ...s,
-          collapsed: false,
-          width: Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, newW)),
-        }));
+        const clamped = Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, newW));
+        p.liveWidth = clamped;
+        p.liveCollapsed = false;
+        setDomWidth(i, clamped, false);
         break; // Absorbed all delta
       }
     }
@@ -163,7 +207,9 @@ export function useResizers(
         MIN_WIDTH,
         Math.min(MAX_WIDTH, right.startWidth - totalDelta),
       );
-      right.set((s) => ({ ...s, collapsed: false, width: newRightW }));
+      right.liveWidth = newRightW;
+      right.liveCollapsed = false;
+      setDomWidth(originLeftIdx + 1, newRightW, false);
     }
 
     // Shrink left panels with cascade
@@ -175,43 +221,51 @@ export function useResizers(
 
       if (newW < COLLAPSE_WIDTH) {
         // Collapse this panel, cascade remainder to next
-        p.set((s) => ({ ...s, collapsed: true, prevWidth: p.startWidth }));
+        p.liveWidth = COLLAPSE_WIDTH;
+        p.liveCollapsed = true;
+        setDomWidth(i, COLLAPSE_WIDTH, true);
         remainingDelta -= p.startWidth - COLLAPSE_WIDTH;
       } else {
-        p.set((s) => ({
-          ...s,
-          collapsed: false,
-          width: Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, newW)),
-        }));
+        const clamped = Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, newW));
+        p.liveWidth = clamped;
+        p.liveCollapsed = false;
+        setDomWidth(i, clamped, false);
         break; // Absorbed all delta
       }
     }
   }
 
+  /** Build panel ref array with current state */
+  function makePanelRefs(): PanelRef[] {
+    return [
+      {
+        state: console_,
+        set: setConsole,
+        startWidth: console_.collapsed ? COLLAPSE_WIDTH : console_.width,
+        liveWidth: console_.collapsed ? COLLAPSE_WIDTH : console_.width,
+        liveCollapsed: console_.collapsed,
+      },
+      {
+        state: tree,
+        set: setTree,
+        startWidth: tree.collapsed ? COLLAPSE_WIDTH : tree.width,
+        liveWidth: tree.collapsed ? COLLAPSE_WIDTH : tree.width,
+        liveCollapsed: tree.collapsed,
+      },
+      {
+        state: viewer,
+        set: setViewer,
+        startWidth: viewer.collapsed ? COLLAPSE_WIDTH : viewer.width,
+        liveWidth: viewer.collapsed ? COLLAPSE_WIDTH : viewer.width,
+        liveCollapsed: viewer.collapsed,
+      },
+    ];
+  }
+
   /** Console resizer (between console and tree) */
   const onConsoleResizerDown = useCallback(
     (e: MouseEvent) => {
-      startDrag(
-        e,
-        [
-          {
-            state: console_,
-            set: setConsole,
-            startWidth: console_.collapsed ? COLLAPSE_WIDTH : console_.width,
-          },
-          {
-            state: tree,
-            set: setTree,
-            startWidth: tree.collapsed ? COLLAPSE_WIDTH : tree.width,
-          },
-          {
-            state: viewer,
-            set: setViewer,
-            startWidth: viewer.collapsed ? COLLAPSE_WIDTH : viewer.width,
-          },
-        ],
-        0,
-      );
+      startDrag(e, makePanelRefs(), 0);
     },
     [console_, tree, viewer, setConsole, setTree, setViewer],
   );
@@ -219,27 +273,7 @@ export function useResizers(
   /** Tree resizer (between tree and viewer) */
   const onTreeResizerDown = useCallback(
     (e: MouseEvent) => {
-      startDrag(
-        e,
-        [
-          {
-            state: console_,
-            set: setConsole,
-            startWidth: console_.collapsed ? COLLAPSE_WIDTH : console_.width,
-          },
-          {
-            state: tree,
-            set: setTree,
-            startWidth: tree.collapsed ? COLLAPSE_WIDTH : tree.width,
-          },
-          {
-            state: viewer,
-            set: setViewer,
-            startWidth: viewer.collapsed ? COLLAPSE_WIDTH : viewer.width,
-          },
-        ],
-        1,
-      );
+      startDrag(e, makePanelRefs(), 1);
     },
     [console_, tree, viewer, setConsole, setTree, setViewer],
   );
@@ -247,27 +281,7 @@ export function useResizers(
   /** Viewer resizer (between viewer and app content) */
   const onViewerResizerDown = useCallback(
     (e: MouseEvent) => {
-      startDrag(
-        e,
-        [
-          {
-            state: console_,
-            set: setConsole,
-            startWidth: console_.collapsed ? COLLAPSE_WIDTH : console_.width,
-          },
-          {
-            state: tree,
-            set: setTree,
-            startWidth: tree.collapsed ? COLLAPSE_WIDTH : tree.width,
-          },
-          {
-            state: viewer,
-            set: setViewer,
-            startWidth: viewer.collapsed ? COLLAPSE_WIDTH : viewer.width,
-          },
-        ],
-        2,
-      );
+      startDrag(e, makePanelRefs(), 2);
     },
     [console_, tree, viewer, setConsole, setTree, setViewer],
   );
