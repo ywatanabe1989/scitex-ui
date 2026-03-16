@@ -19,7 +19,7 @@ import { useResizers } from "./useResizers";
 import { useVoiceRecorder } from "../media-input/useVoiceRecorder";
 import { WebcamCapture } from "../media-input/WebcamCapture";
 import { SketchCanvas } from "../media-input/SketchCanvas";
-import { bootstrapContextZoom } from "../../ts/utils/context-zoom";
+import { bootstrapContextZoom } from "../../../ts/utils/context-zoom";
 
 const CLS = "stx-workspace";
 type ConsoleMode = "console" | "chat";

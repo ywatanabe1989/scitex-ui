@@ -108,7 +108,10 @@ function syncGroup(source: ZoomZone, value: number): void {
  * Initialize global event listeners for context-aware zoom.
  * Call once at app startup.
  */
+let contextZoomInited = false;
 export function initContextZoom(): void {
+  if (contextZoomInited) return;
+  contextZoomInited = true;
   // Ctrl+Wheel — zoom the zone under the cursor
   document.addEventListener(
     "wheel",
@@ -282,7 +285,10 @@ function getZoomLabel(): string | null {
   return `${Math.round(val)}px`;
 }
 
+let indicatorAttached = false;
 function attachZoomIndicator(): void {
+  if (indicatorAttached) return;
+  indicatorAttached = true;
   let mx = 0,
     my = 0;
   document.addEventListener("mousemove", (e) => {
@@ -344,8 +350,19 @@ export function bootstrapContextZoom(
   fontSizeZoomZones: FontSizeZoomDef[] = [],
   timeoutMs = 30_000,
 ): void {
-  if (bootstrapped) return;
+  if (bootstrapped) {
+    console.warn("[zoom] bootstrapContextZoom called twice — skipping");
+    return;
+  }
   bootstrapped = true;
+
+  console.log(
+    "[zoom] bootstrapContextZoom: initializing with",
+    fontZoomZones.length,
+    "CSS zones,",
+    fontSizeZoomZones.length,
+    "font-size zones",
+  );
 
   initContextZoom();
   attachZoomIndicator();
@@ -357,33 +374,71 @@ export function bootstrapContextZoom(
     let count = 0;
     for (const z of fontZoomZones) {
       if (registered.has(z.selector)) continue;
-      if (registerFontZoom(z.selector, z.storageKey, 1, z)) {
+      const found = !!document.querySelector(z.selector);
+      if (found && registerFontZoom(z.selector, z.storageKey, 1, z)) {
         registered.add(z.selector);
         count++;
+        console.log("[zoom] CSS-zoom registered:", z.selector);
       }
     }
     for (const z of fontSizeZoomZones) {
       if (registered.has(z.selector)) continue;
-      if (registerFontSizeZoom(z.selector, z.storageKey, z)) {
+      const found = !!document.querySelector(z.selector);
+      if (found && registerFontSizeZoom(z.selector, z.storageKey, z)) {
         registered.add(z.selector);
         count++;
+        console.log("[zoom] font-size registered:", z.selector);
       }
     }
     return count;
   }
 
   // Try immediately
-  registerPending();
+  const initial = registerPending();
+  console.log(
+    "[zoom] initial registration:",
+    initial,
+    "/",
+    totalExpected,
+    "zones",
+  );
 
   // Watch for lazy-loaded panes
   if (registered.size < totalExpected) {
+    console.log(
+      "[zoom] starting MutationObserver for remaining",
+      totalExpected - registered.size,
+      "zones",
+    );
     const observer = new MutationObserver(() => {
       const added = registerPending();
-      if (added > 0 && registered.size >= totalExpected) {
+      if (added > 0) {
+        console.log(
+          "[zoom] observer registered",
+          added,
+          "more zones, total:",
+          registered.size,
+          "/",
+          totalExpected,
+        );
+      }
+      if (registered.size >= totalExpected) {
         observer.disconnect();
+        console.log("[zoom] all zones registered, observer disconnected");
       }
     });
     observer.observe(document.body, { childList: true, subtree: true });
-    setTimeout(() => observer.disconnect(), timeoutMs);
+    setTimeout(() => {
+      observer.disconnect();
+      if (registered.size < totalExpected) {
+        console.warn(
+          "[zoom] timeout: only",
+          registered.size,
+          "/",
+          totalExpected,
+          "zones registered",
+        );
+      }
+    }, timeoutMs);
   }
 }
