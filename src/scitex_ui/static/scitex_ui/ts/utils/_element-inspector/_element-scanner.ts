@@ -23,8 +23,9 @@ export class ElementScanner {
   private layerPicker: LayerPickerPanel;
   private labelRenderer: LabelRenderer;
 
-  // Performance: limit max elements per batch (512 = 2^9)
-  private static readonly BATCH_SIZE = 512;
+  // Scan all elements but only render those in viewport
+  // (viewport filter in renderBatch handles performance)
+  private static readonly BATCH_SIZE = 10000;
   private static readonly MIN_SIZE = 10; // Skip elements smaller than 10px
 
   // Pagination state
