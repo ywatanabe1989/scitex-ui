@@ -100,7 +100,9 @@ export function useResizers(
           width: Math.max(MIN_WIDTH, Math.min(600, newW)),
         }));
       };
-      const onUp = () => {
+      const onUp = (ev: globalThis.MouseEvent) => {
+        // Apply final position — fixes fast mouse movement missing last position
+        onMove(ev);
         dragging.current = null;
         propagating.current = false;
         document.removeEventListener("mousemove", onMove);
@@ -176,7 +178,8 @@ export function useResizers(
           width: Math.max(MIN_WIDTH, Math.min(500, newW)),
         }));
       };
-      const onUp = () => {
+      const onUp = (ev: globalThis.MouseEvent) => {
+        onMove(ev);
         dragging.current = null;
         propagating.current = false;
         document.removeEventListener("mousemove", onMove);
@@ -211,7 +214,8 @@ export function useResizers(
           }));
         }
       };
-      const onUp = () => {
+      const onUp = (ev: globalThis.MouseEvent) => {
+        onMove(ev);
         document.removeEventListener("mousemove", onMove);
         document.removeEventListener("mouseup", onUp);
         document.body.style.cursor = "";
