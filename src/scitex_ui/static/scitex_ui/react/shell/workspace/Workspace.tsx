@@ -7,7 +7,7 @@
  * global_ai_panel.html DOM structure exactly.
  */
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import type { WorkspaceProps } from "./types";
 import type { FileNode } from "../../app/file-browser/types";
 import { FileBrowser } from "../../app/file-browser";
@@ -19,6 +19,7 @@ import { useResizers } from "./useResizers";
 import { useVoiceRecorder } from "../media-input/useVoiceRecorder";
 import { WebcamCapture } from "../media-input/WebcamCapture";
 import { SketchCanvas } from "../media-input/SketchCanvas";
+import { bootstrapContextZoom } from "../../ts/utils/context-zoom";
 
 const CLS = "stx-workspace";
 type ConsoleMode = "console" | "chat";
@@ -77,6 +78,52 @@ export const Workspace: React.FC<WorkspaceProps> = ({
       document.documentElement.style.removeProperty("--stx-app-accent");
     };
   }, [accentColor]);
+
+  // Auto-register context-zoom zones for all shell-owned panes.
+  // Any app using <Workspace> gets per-pane zoom for free.
+  const zoomInitialized = useRef(false);
+  useEffect(() => {
+    if (zoomInitialized.current) return;
+    zoomInitialized.current = true;
+    bootstrapContextZoom(
+      [
+        // Chat/AI pane — CSS zoom
+        {
+          selector: ".stx-shell-ai-view",
+          storageKey: `${appName}-chat-zoom`,
+          min: 0.7,
+          max: 1.6,
+        },
+        // Viewer pane — CSS zoom
+        {
+          selector: `.${CLS}__viewer-panel`,
+          storageKey: `${appName}-viewer-zoom`,
+          min: 0.7,
+          max: 1.6,
+        },
+      ],
+      [
+        // Terminal pane — font-size zoom
+        {
+          selector: ".stx-shell-ai-console-terminal",
+          storageKey: `${appName}-terminal-font-size`,
+          defaultSize: 13,
+          min: 8,
+          max: 24,
+          group: "terminal",
+        },
+        // File tree — font-size zoom on item names
+        {
+          selector: ".stx-app-file-tree",
+          storageKey: `${appName}-filetree-font-size`,
+          defaultSize: 13,
+          min: 9,
+          max: 20,
+          target: ".stx-app-file-tree__name",
+        },
+      ],
+    );
+  }, [appName]);
 
   useEffect(() => {
     if (fileTreeBackend) {
