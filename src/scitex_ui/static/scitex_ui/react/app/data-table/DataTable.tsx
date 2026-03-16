@@ -1,45 +1,45 @@
 /**
- * DataTable — shared spreadsheet-like table component.
- * Ported from scitex-cloud DataTableManager.
+ * DataTable — full-featured spreadsheet component.
  *
- * Features (ported from scitex-cloud):
- * - CSV/TSV parsing and display
- * - Column sorting (click header)
- * - Column resizing (drag header border)
- * - Cell selection (click + shift-click for range)
- * - Row numbers
- * - Virtual scrolling for large datasets (planned)
+ * Orchestrates all sub-hooks; rendering only lives here.
+ * Ported feature-for-feature from scitex-cloud DataTableManager.
+ *
+ * Features:
+ * - Multi-cell range selection (click + drag)
+ * - Cell editing (double-click, F2, Enter/Escape)
+ * - Clipboard copy/paste (Ctrl+C / Ctrl+V, Excel TSV format)
+ * - Column resize (drag header border)
+ * - Right-click context menu
+ * - Row/column header highlighting on selection
+ * - Fill handle (drag bottom-right corner)
+ * - Keyboard navigation (Arrow, Tab, Enter, Delete)
+ * - Virtual scrolling (>100 rows)
+ * - Empty Excel-like grid when no data
  */
 
-import React, { useState, useCallback, useMemo, useRef } from "react";
-import type { DataTableProps, Dataset, CellPosition, DataRow } from "./types";
+import React, { useMemo, useEffect, useRef } from "react";
+import type { DataTableProps, Dataset } from "./types";
+import { parseCSV, exportToCSV, makeEmptyGrid } from "./utils/parseCSV";
+import {
+  isCellInRange,
+  isColHighlighted,
+  isRowHighlighted,
+  isSelectionCorner,
+} from "./utils/selectionHelpers";
+import { useDataReducer } from "./hooks/useDataReducer";
+import { useSelection } from "./hooks/useSelection";
+import { useEditing } from "./hooks/useEditing";
+import { useClipboard } from "./hooks/useClipboard";
+import { useVirtualScroll } from "./hooks/useVirtualScroll";
+import { useFillHandle } from "./hooks/useFillHandle";
+import { useColumnResize } from "./hooks/useColumnResize";
 
 const CLS = "stx-app-data-table";
 
-/** Parse CSV/TSV string into Dataset (ported from _TableData.ts) */
-function parseCSV(content: string, fileName?: string): Dataset {
-  const delimiter = fileName?.endsWith(".tsv") ? "\t" : ",";
-  const lines = content.split(/\r?\n/).filter((l) => l.trim());
-  if (lines.length === 0) return { columns: [], rows: [] };
+// ----------------------------------------------------------------
+// Sort helpers
+// ----------------------------------------------------------------
 
-  const headerCells = lines[0].split(delimiter).map((c) => c.trim());
-  const rows: DataRow[] = [];
-
-  for (let i = 1; i < lines.length; i++) {
-    const cells = lines[i].split(delimiter);
-    const row: DataRow = {};
-    for (let j = 0; j < headerCells.length; j++) {
-      const val = (cells[j] ?? "").trim();
-      const num = Number(val);
-      row[headerCells[j]] = val !== "" && !isNaN(num) ? num : val;
-    }
-    rows.push(row);
-  }
-
-  return { columns: headerCells, rows };
-}
-
-/** Sort dataset by column */
 function sortDataset(
   data: Dataset,
   colIdx: number,
@@ -53,18 +53,22 @@ function sortDataset(
     if (typeof va === "number" && typeof vb === "number") {
       return direction === "asc" ? va - vb : vb - va;
     }
-    const sa = String(va ?? "");
-    const sb = String(vb ?? "");
-    return direction === "asc" ? sa.localeCompare(sb) : sb.localeCompare(sa);
+    return direction === "asc"
+      ? String(va ?? "").localeCompare(String(vb ?? ""))
+      : String(vb ?? "").localeCompare(String(va ?? ""));
   });
   return { ...data, rows: sorted };
 }
 
+// ----------------------------------------------------------------
+// Component
+// ----------------------------------------------------------------
+
 export const DataTable: React.FC<DataTableProps> = ({
   data: propData,
   csvContent,
-  readOnly: _readOnly = false,
-  onDataChange: _onDataChange,
+  readOnly = false,
+  onDataChange,
   onCellSelect,
   onStatusUpdate,
   showRowNumbers = true,
@@ -73,167 +77,424 @@ export const DataTable: React.FC<DataTableProps> = ({
   className,
   style,
 }) => {
-  const [selectedCell, setSelectedCell] = useState<CellPosition | null>(null);
-  const [sortCol, setSortCol] = useState<number | null>(null);
-  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
-  const [colWidths, setColWidths] = useState<Map<number, number>>(new Map());
-  const resizing = useRef<{
-    col: number;
-    startX: number;
-    startW: number;
+  // ---- Sort state ----
+  const [sortCol, setSortCol] = React.useState<number | null>(null);
+  const [sortDir, setSortDir] = React.useState<"asc" | "desc">("asc");
+  const [contextMenuPos, setContextMenuPos] = React.useState<{
+    x: number;
+    y: number;
   } | null>(null);
 
-  // Parse CSV if provided, otherwise use prop data or generate empty Excel-like grid
-  const baseData = useMemo(() => {
+  // ---- Base data ----
+  const initialData = useMemo<Dataset>(() => {
     if (propData) return propData;
     if (csvContent) return parseCSV(csvContent);
-    // Generate empty Excel-like grid (A..Z columns, empty rows)
-    const cols = Array.from({ length: 26 }, (_, i) =>
-      String.fromCharCode(65 + i),
-    );
-    const rows: DataRow[] = Array.from({ length: 100 }, () => {
-      const row: DataRow = {};
-      for (const c of cols) row[c] = "";
-      return row;
-    });
-    return { columns: cols, rows };
-  }, [propData, csvContent]);
+    return makeEmptyGrid();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Apply sorting
-  const data = useMemo(() => {
-    if (sortCol === null) return baseData;
-    return sortDataset(baseData, sortCol, sortDir);
-  }, [baseData, sortCol, sortDir]);
+  const [data, dispatchData] = useDataReducer(initialData);
 
-  const handleHeaderClick = useCallback(
-    (colIdx: number) => {
-      if (!sortable) return;
-      if (sortCol === colIdx) {
-        setSortDir((d) => (d === "asc" ? "desc" : "asc"));
-      } else {
-        setSortCol(colIdx);
-        setSortDir("asc");
-      }
-    },
-    [sortable, sortCol],
+  // Sync external prop changes
+  useEffect(() => {
+    if (propData) dispatchData({ type: "SET_DATA", payload: propData });
+  }, [propData]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (csvContent) {
+      dispatchData({ type: "SET_DATA", payload: parseCSV(csvContent) });
+    }
+  }, [csvContent]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Notify parent on changes
+  useEffect(() => {
+    onDataChange?.(data);
+  }, [data]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ---- Sorted view ----
+  const sortedData = useMemo<Dataset>(() => {
+    if (sortCol === null) return data;
+    return sortDataset(data, sortCol, sortDir);
+  }, [data, sortCol, sortDir]);
+
+  // ---- Sub-hooks ----
+  const {
+    selection,
+    currentCell,
+    selectedColumns,
+    selectedRows,
+    handleCellMouseDown,
+    handleCellMouseOver,
+    handleColumnHeaderMouseDown,
+    handleColumnHeaderMouseOver,
+    handleRowNumberMouseDown,
+    handleRowNumberMouseOver,
+    moveCurrentCell,
+  } = useSelection(onCellSelect, onStatusUpdate, sortedData.columns);
+
+  const {
+    editing,
+    startEditing,
+    commitEdit,
+    cancelEdit,
+    setEditValue,
+    handleCellKeyDown,
+  } = useEditing(sortedData, dispatchData);
+
+  const { handleClipboardKeyDown } = useClipboard(
+    sortedData,
+    dispatchData,
+    selection,
+    currentCell,
+    readOnly,
+    onStatusUpdate,
   );
 
-  const handleCellClick = useCallback(
-    (row: number, col: number) => {
-      const pos = { row, col };
-      setSelectedCell(pos);
-      onCellSelect?.(pos);
-      onStatusUpdate?.(`Cell (${row + 1}, ${data.columns[col] || col + 1})`);
-    },
-    [data.columns, onCellSelect, onStatusUpdate],
-  );
+  const totalRows = sortedData.rows.length;
+  const useVS = totalRows > 100;
+  const {
+    renderStart,
+    renderEnd,
+    topSpacerHeight,
+    bottomSpacerHeight,
+    scrollContainerRef,
+  } = useVirtualScroll(totalRows, useVS);
 
-  const handleResizeStart = useCallback(
-    (colIdx: number, e: React.MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      const startX = e.clientX;
-      const startW = colWidths.get(colIdx) ?? 80;
-      resizing.current = { col: colIdx, startX, startW };
+  const { fillHandle, handleFillHandleMouseDown, isFillPreview } =
+    useFillHandle(selection, dispatchData, onStatusUpdate);
 
-      const onMove = (ev: MouseEvent) => {
-        if (!resizing.current) return;
-        const delta = ev.clientX - resizing.current.startX;
-        const newW = Math.max(30, resizing.current.startW + delta);
-        setColWidths((prev) => {
-          const next = new Map(prev);
-          next.set(colIdx, newW);
-          return next;
-        });
-      };
-      const onUp = () => {
-        resizing.current = null;
-        document.removeEventListener("mousemove", onMove);
-        document.removeEventListener("mouseup", onUp);
-        document.body.style.cursor = "";
-      };
-      document.addEventListener("mousemove", onMove);
-      document.addEventListener("mouseup", onUp);
-      document.body.style.cursor = "col-resize";
-    },
-    [colWidths],
-  );
+  const { getColWidth, handleResizeStart } = useColumnResize();
 
-  // Show empty Excel-like grid when no data loaded
-  const EMPTY_COLS = 8;
-  const EMPTY_ROWS = 20;
-  const displayData =
-    data.columns.length > 0
-      ? data
-      : {
-          columns: Array.from({ length: EMPTY_COLS }, (_, i) =>
-            String.fromCharCode(65 + i),
-          ),
-          rows: Array.from({ length: EMPTY_ROWS }, () => {
-            const row: DataRow = {};
-            for (let i = 0; i < EMPTY_COLS; i++) {
-              row[String.fromCharCode(65 + i)] = "";
-            }
-            return row;
-          }),
-        };
+  // Edit input ref
+  const editInputRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (editing && editInputRef.current) {
+      editInputRef.current.focus();
+      editInputRef.current.select();
+    }
+  }, [editing]);
 
+  // Hide context menu on outside click
+  useEffect(() => {
+    if (!contextMenuPos) return;
+    const hide = () => setContextMenuPos(null);
+    document.addEventListener("click", hide);
+    return () => document.removeEventListener("click", hide);
+  }, [contextMenuPos]);
+
+  // ---- Key handler ----
+  const handleTableKeyDown = (e: React.KeyboardEvent) => {
+    handleClipboardKeyDown(e);
+    if (currentCell) {
+      handleCellKeyDown(
+        e,
+        currentCell.row,
+        currentCell.col,
+        sortedData,
+        selection,
+        moveCurrentCell,
+        dispatchData,
+        readOnly,
+      );
+    }
+  };
+
+  // ---- Cell CSS ----
+  const getCellClass = (row: number, col: number): string => {
+    const parts = [`${CLS}__cell`];
+    if (isCellInRange(row, col, selection))
+      parts.push(`${CLS}__cell--selected`);
+    if (currentCell?.row === row && currentCell?.col === col)
+      parts.push(`${CLS}__cell--current`);
+    if (editing?.row === row && editing?.col === col && !editing.isHeader)
+      parts.push(`${CLS}__cell--editing`);
+    if (isFillPreview(row, col)) parts.push(`${CLS}__cell--fill-preview`);
+    return parts.join(" ");
+  };
+
+  // ---- Render ----
   return (
-    <div className={`${CLS} ${className ?? ""}`} style={style}>
-      <div className={`${CLS}__scroll`}>
+    <div
+      className={`${CLS} ${className ?? ""}`}
+      style={style}
+      tabIndex={0}
+      onKeyDown={handleTableKeyDown}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        setContextMenuPos({ x: e.clientX, y: e.clientY });
+      }}
+    >
+      <div ref={scrollContainerRef} className={`${CLS}__scroll`}>
+        {useVS && topSpacerHeight > 0 && (
+          <div style={{ height: topSpacerHeight }} />
+        )}
+
         <table className={`${CLS}__table`}>
           <thead>
             <tr>
-              {showRowNumbers && <th className={`${CLS}__row-num`}>#</th>}
-              {displayData.columns.map((col, ci) => (
-                <th
-                  key={ci}
-                  className={`${CLS}__header-cell${sortCol === ci ? ` ${CLS}__header-cell--sorted` : ""}`}
-                  style={
-                    colWidths.has(ci) ? { width: colWidths.get(ci) } : undefined
-                  }
-                  onClick={() => handleHeaderClick(ci)}
-                >
-                  <span>{col}</span>
-                  {sortable && sortCol === ci && (
-                    <i
-                      className={`fas fa-caret-${sortDir === "asc" ? "up" : "down"}`}
-                    />
-                  )}
-                  {resizable && (
-                    <div
-                      className={`${CLS}__resize-handle`}
-                      onMouseDown={(e) => handleResizeStart(ci, e)}
-                    />
-                  )}
-                </th>
-              ))}
+              {showRowNumbers && (
+                <th className={`${CLS}__row-num ${CLS}__row-num--header`}>#</th>
+              )}
+              {sortedData.columns.map((col, ci) => {
+                const highlighted = isColHighlighted(
+                  ci,
+                  selection,
+                  selectedColumns,
+                );
+                const isEditingHeader = editing?.isHeader && editing.col === ci;
+                return (
+                  <th
+                    key={ci}
+                    data-col={ci}
+                    className={[
+                      `${CLS}__header-cell`,
+                      sortCol === ci ? `${CLS}__header-cell--sorted` : "",
+                      highlighted ? `${CLS}__header-cell--highlighted` : "",
+                    ]
+                      .join(" ")
+                      .trim()}
+                    style={{ width: getColWidth(ci), minWidth: 30 }}
+                    onClick={() =>
+                      !editing &&
+                      sortable &&
+                      (sortCol === ci
+                        ? setSortDir((d) => (d === "asc" ? "desc" : "asc"))
+                        : (setSortCol(ci), setSortDir("asc")))
+                    }
+                    onMouseDown={(e) => handleColumnHeaderMouseDown(e, ci)}
+                    onMouseOver={(e) => handleColumnHeaderMouseOver(e, ci)}
+                    onDoubleClick={() =>
+                      !readOnly && startEditing(-1, ci, col, true)
+                    }
+                  >
+                    {isEditingHeader ? (
+                      <input
+                        ref={editInputRef}
+                        className={`${CLS}__edit-input`}
+                        value={editing.value}
+                        onChange={(e) => setEditValue(e.target.value)}
+                        onBlur={commitEdit}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            commitEdit();
+                          } else if (e.key === "Escape") {
+                            e.preventDefault();
+                            cancelEdit();
+                          }
+                          e.stopPropagation();
+                        }}
+                        style={{ width: "100%" }}
+                      />
+                    ) : (
+                      <>
+                        <span>{col}</span>
+                        {sortable && sortCol === ci && (
+                          <i
+                            className={`fas fa-caret-${sortDir === "asc" ? "up" : "down"}`}
+                          />
+                        )}
+                      </>
+                    )}
+                    {resizable && (
+                      <div
+                        className={`${CLS}__resize-handle`}
+                        onMouseDown={(e) => handleResizeStart(ci, e)}
+                      />
+                    )}
+                  </th>
+                );
+              })}
             </tr>
           </thead>
           <tbody>
-            {displayData.rows.map((row, ri) => (
-              <tr key={ri}>
-                {showRowNumbers && (
-                  <td className={`${CLS}__row-num`}>{ri + 1}</td>
-                )}
-                {displayData.columns.map((col, ci) => {
-                  const isSelected =
-                    selectedCell?.row === ri && selectedCell?.col === ci;
-                  return (
-                    <td
-                      key={ci}
-                      className={`${CLS}__cell${isSelected ? ` ${CLS}__cell--selected` : ""}`}
-                      onClick={() => handleCellClick(ri, ci)}
-                    >
-                      {row[col] ?? ""}
-                    </td>
-                  );
-                })}
-              </tr>
-            ))}
+            {sortedData.rows
+              .slice(renderStart, renderEnd)
+              .map((row, relIdx) => {
+                const ri = renderStart + relIdx;
+                return (
+                  <tr
+                    key={ri}
+                    className={`${CLS}__row${ri % 2 === 0 ? ` ${CLS}__row--even` : ` ${CLS}__row--odd`}`}
+                  >
+                    {showRowNumbers && (
+                      <td
+                        className={`${CLS}__row-num${isRowHighlighted(ri, selection, selectedRows) ? ` ${CLS}__row-num--highlighted` : ""}`}
+                        onMouseDown={(e) => handleRowNumberMouseDown(e, ri)}
+                        onMouseOver={(e) => handleRowNumberMouseOver(e, ri)}
+                      >
+                        {ri + 1}
+                      </td>
+                    )}
+                    {sortedData.columns.map((col, ci) => {
+                      const cellEditing =
+                        editing?.row === ri &&
+                        editing?.col === ci &&
+                        !editing.isHeader;
+                      const cellValue = row[col] ?? "";
+                      const isLast = isSelectionCorner(ri, ci, selection);
+                      return (
+                        <td
+                          key={ci}
+                          className={getCellClass(ri, ci)}
+                          data-row={ri}
+                          data-col={ci}
+                          tabIndex={
+                            currentCell?.row === ri && currentCell?.col === ci
+                              ? 0
+                              : -1
+                          }
+                          style={{ width: getColWidth(ci), minWidth: 30 }}
+                          onMouseDown={(e) => {
+                            if (
+                              !editing ||
+                              editing.row !== ri ||
+                              editing.col !== ci
+                            )
+                              commitEdit();
+                            handleCellMouseDown(e, ri, ci);
+                          }}
+                          onMouseOver={(e) => handleCellMouseOver(e, ri, ci)}
+                          onDoubleClick={() =>
+                            !readOnly && startEditing(ri, ci, String(cellValue))
+                          }
+                          title={String(cellValue)}
+                        >
+                          {cellEditing ? (
+                            <input
+                              ref={editInputRef}
+                              className={`${CLS}__edit-input`}
+                              value={editing.value}
+                              onChange={(e) => setEditValue(e.target.value)}
+                              onBlur={commitEdit}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                  e.preventDefault();
+                                  commitEdit();
+                                } else if (e.key === "Escape") {
+                                  e.preventDefault();
+                                  cancelEdit();
+                                } else if (e.key === "Tab") {
+                                  e.preventDefault();
+                                  commitEdit();
+                                }
+                                e.stopPropagation();
+                              }}
+                              style={{ width: "100%" }}
+                            />
+                          ) : (
+                            <span className={`${CLS}__cell-text`}>
+                              {cellValue}
+                            </span>
+                          )}
+                          {!readOnly && isLast && !fillHandle && (
+                            <div
+                              className={`${CLS}__fill-handle`}
+                              onMouseDown={handleFillHandleMouseDown}
+                            />
+                          )}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                );
+              })}
           </tbody>
         </table>
+
+        {useVS && bottomSpacerHeight > 0 && (
+          <div style={{ height: bottomSpacerHeight }} />
+        )}
       </div>
+
+      {/* Context menu */}
+      {contextMenuPos && (
+        <div
+          className={`${CLS}__context-menu`}
+          style={{
+            position: "fixed",
+            left: contextMenuPos.x,
+            top: contextMenuPos.y,
+            zIndex: 10000,
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className={`${CLS}__context-menu-section`}>
+            <div
+              className={`${CLS}__context-menu-item`}
+              onClick={() => {
+                handleImportFile(dispatchData, onStatusUpdate);
+                setContextMenuPos(null);
+              }}
+            >
+              <i className="fas fa-file-import" />{" "}
+              <span>Import CSV / TSV…</span>
+            </div>
+            {!readOnly && selection && (
+              <div
+                className={`${CLS}__context-menu-item`}
+                onClick={() => {
+                  const sel = selection;
+                  if (sel) {
+                    const b = {
+                      minRow: Math.min(sel.start.row, sel.end.row),
+                      maxRow: Math.max(sel.start.row, sel.end.row),
+                      minCol: Math.min(sel.start.col, sel.end.col),
+                      maxCol: Math.max(sel.start.col, sel.end.col),
+                    };
+                    dispatchData({ type: "CLEAR_RANGE", ...b });
+                  }
+                  setContextMenuPos(null);
+                }}
+              >
+                <i className="fas fa-eraser" /> <span>Clear selection</span>
+              </div>
+            )}
+            <div
+              className={`${CLS}__context-menu-item`}
+              onClick={() => {
+                const csv = exportToCSV(data);
+                const b = new Blob([csv], { type: "text/csv" });
+                const url = URL.createObjectURL(b);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "data.csv";
+                a.click();
+                URL.revokeObjectURL(url);
+                setContextMenuPos(null);
+              }}
+            >
+              <i className="fas fa-file-export" /> <span>Export as CSV</span>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
+
+// ---- Standalone helper (not a hook) ----
+function handleImportFile(
+  dispatchData: (a: import("./hooks/useDataReducer").DataAction) => void,
+  onStatusUpdate?: (msg: string) => void,
+) {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = ".csv,.tsv";
+  input.onchange = (e) => {
+    const file = (e.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const content = ev.target?.result as string;
+      if (content) {
+        const parsed = parseCSV(content, file.name);
+        dispatchData({ type: "SET_DATA", payload: parsed });
+        onStatusUpdate?.(
+          `Loaded ${file.name} — ${parsed.rows.length} rows × ${parsed.columns.length} cols`,
+        );
+      }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
