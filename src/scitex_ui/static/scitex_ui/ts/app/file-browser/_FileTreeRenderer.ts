@@ -62,8 +62,7 @@ function renderNodes(
   onToggleDir: (path: string) => void,
 ): void {
   const sorted = [...nodes].sort((a, b) => {
-    if (a.type !== b.type) return a.type === "directory" ? -1 : 1;
-    return a.name.localeCompare(b.name);
+    return a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
   });
 
   for (const node of sorted) {
