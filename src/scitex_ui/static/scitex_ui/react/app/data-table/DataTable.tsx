@@ -83,11 +83,20 @@ export const DataTable: React.FC<DataTableProps> = ({
     startW: number;
   } | null>(null);
 
-  // Parse CSV if provided, otherwise use prop data
+  // Parse CSV if provided, otherwise use prop data or generate empty Excel-like grid
   const baseData = useMemo(() => {
     if (propData) return propData;
     if (csvContent) return parseCSV(csvContent);
-    return { columns: [], rows: [] };
+    // Generate empty Excel-like grid (A..Z columns, empty rows)
+    const cols = Array.from({ length: 26 }, (_, i) =>
+      String.fromCharCode(65 + i),
+    );
+    const rows: DataRow[] = Array.from({ length: 100 }, () => {
+      const row: DataRow = {};
+      for (const c of cols) row[c] = "";
+      return row;
+    });
+    return { columns: cols, rows };
   }, [propData, csvContent]);
 
   // Apply sorting
