@@ -199,7 +199,16 @@ export const Workspace: React.FC<WorkspaceProps> = ({
             </div>
           ) : (
             <>
-              <div className="stx-shell-ai-panel-header">
+              <div
+                className="stx-shell-ai-panel-header"
+                onDoubleClick={() =>
+                  setConsole((s) => ({
+                    ...s,
+                    collapsed: true,
+                    prevWidth: s.width,
+                  }))
+                }
+              >
                 <div className="stx-shell-ai-mode-toggle">
                   <button
                     className={`stx-shell-ai-mode-btn${mode === "console" ? " active" : ""}`}
@@ -360,7 +369,16 @@ export const Workspace: React.FC<WorkspaceProps> = ({
             </div>
           ) : (
             <>
-              <div className="stx-shell-sidebar__header">
+              <div
+                className="stx-shell-sidebar__header"
+                onDoubleClick={() =>
+                  setTree((s) => ({
+                    ...s,
+                    collapsed: true,
+                    prevWidth: s.width,
+                  }))
+                }
+              >
                 <span className="stx-shell-sidebar__title">Files</span>
                 <div className="stx-shell-sidebar__header-actions">
                   <button

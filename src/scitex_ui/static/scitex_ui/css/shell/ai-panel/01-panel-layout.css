@@ -30,6 +30,11 @@
   flex-shrink: 0;
 }
 
+.stx-shell-ai-panel-header:hover {
+  background: var(--workspace-bg-hover, rgba(139, 148, 158, 0.08));
+  border-bottom-color: var(--stx-app-accent, #059669);
+}
+
 /* Panel actions container */
 .stx-shell-ai-panel-actions {
   display: flex;
