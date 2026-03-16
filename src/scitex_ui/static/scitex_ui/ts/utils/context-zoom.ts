@@ -241,3 +241,149 @@ export function registerFontSizeZoom(
   });
   return true;
 }
+
+// ── Zoom indicator ──────────────────────────────────────────────────
+let indicatorEl: HTMLElement | null = null;
+let indicatorTimer = 0;
+
+function showZoomIndicator(pct: string, x: number, y: number): void {
+  if (!indicatorEl) {
+    indicatorEl = document.createElement("div");
+    Object.assign(indicatorEl.style, {
+      position: "fixed",
+      padding: "2px 8px",
+      borderRadius: "4px",
+      background: "rgba(0,0,0,0.7)",
+      color: "#fff",
+      fontSize: "12px",
+      fontFamily: "monospace",
+      pointerEvents: "none",
+      zIndex: "99999",
+      opacity: "0",
+      transition: "opacity 0.15s",
+    });
+    document.body.appendChild(indicatorEl);
+  }
+  indicatorEl.textContent = pct;
+  indicatorEl.style.left = `${x}px`;
+  indicatorEl.style.top = `${y}px`;
+  indicatorEl.style.opacity = "1";
+  clearTimeout(indicatorTimer);
+  indicatorTimer = window.setTimeout(() => {
+    if (indicatorEl) indicatorEl.style.opacity = "0";
+  }, 800);
+}
+
+function getZoomLabel(): string | null {
+  const zone = getActiveZone();
+  if (!zone || zone.passthrough) return null;
+  const val = zone.getSize();
+  if (zone.step && zone.step < 1) return `${Math.round(val * 100)}%`;
+  return `${Math.round(val)}px`;
+}
+
+function attachZoomIndicator(): void {
+  let mx = 0,
+    my = 0;
+  document.addEventListener("mousemove", (e) => {
+    mx = e.clientX;
+    my = e.clientY;
+  });
+  const show = () =>
+    requestAnimationFrame(() => {
+      const label = getZoomLabel();
+      if (label) showZoomIndicator(label, mx + 16, my - 24);
+    });
+  document.addEventListener(
+    "wheel",
+    (e) => {
+      if (e.ctrlKey) show();
+    },
+    { passive: true },
+  );
+  document.addEventListener("keydown", (e) => {
+    if (e.ctrlKey && !e.altKey && "=+-0".includes(e.key)) show();
+  });
+}
+
+// ── Declarative zone registration with MutationObserver ─────────────
+
+export interface FontZoomDef {
+  selector: string;
+  storageKey: string;
+  min?: number;
+  max?: number;
+  group?: string;
+  passthrough?: boolean;
+}
+
+export interface FontSizeZoomDef {
+  selector: string;
+  storageKey: string;
+  defaultSize?: number;
+  min?: number;
+  max?: number;
+  step?: number;
+  group?: string;
+  target?: string;
+}
+
+/**
+ * Initialize context zoom and register zones declaratively.
+ *
+ * Uses MutationObserver to wait for elements that may not exist yet
+ * (e.g. React-rendered panes). Safe to call once at app startup.
+ *
+ * @param fontZoomZones   Array of CSS-zoom zone definitions
+ * @param fontSizeZoomZones  Array of font-size zoom zone definitions
+ * @param timeoutMs       Stop observing after this many ms (default 30s)
+ */
+let bootstrapped = false;
+export function bootstrapContextZoom(
+  fontZoomZones: FontZoomDef[] = [],
+  fontSizeZoomZones: FontSizeZoomDef[] = [],
+  timeoutMs = 30_000,
+): void {
+  if (bootstrapped) return;
+  bootstrapped = true;
+
+  initContextZoom();
+  attachZoomIndicator();
+
+  const registered = new Set<string>();
+  const totalExpected = fontZoomZones.length + fontSizeZoomZones.length;
+
+  function registerPending(): number {
+    let count = 0;
+    for (const z of fontZoomZones) {
+      if (registered.has(z.selector)) continue;
+      if (registerFontZoom(z.selector, z.storageKey, 1, z)) {
+        registered.add(z.selector);
+        count++;
+      }
+    }
+    for (const z of fontSizeZoomZones) {
+      if (registered.has(z.selector)) continue;
+      if (registerFontSizeZoom(z.selector, z.storageKey, z)) {
+        registered.add(z.selector);
+        count++;
+      }
+    }
+    return count;
+  }
+
+  // Try immediately
+  registerPending();
+
+  // Watch for lazy-loaded panes
+  if (registered.size < totalExpected) {
+    const observer = new MutationObserver(() => {
+      const added = registerPending();
+      if (added > 0 && registered.size >= totalExpected) {
+        observer.disconnect();
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+    setTimeout(() => observer.disconnect(), timeoutMs);
+  }
+}
