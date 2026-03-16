@@ -427,7 +427,6 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                   onFileDoubleClick?.(node);
                 }}
                 onContextAction={onFileContextAction}
-                showFileCount
                 showImageBadge
                 searchable
                 sortMode={sortMode}
