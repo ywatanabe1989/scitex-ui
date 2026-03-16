@@ -155,25 +155,67 @@ export function useEditing(
           e.preventDefault();
           if (col < maxCol) moveCurrentCell(row, col + 1);
           break;
-        case "Tab":
+        case "Tab": {
           e.preventDefault();
+          // Selection-aware: stay within selection bounds if range selected
+          const hasRange =
+            selection &&
+            (selection.startRow !== selection.endRow ||
+              selection.startCol !== selection.endCol);
+          const minR = hasRange
+            ? Math.min(selection!.startRow, selection!.endRow)
+            : 0;
+          const maxR = hasRange
+            ? Math.max(selection!.startRow, selection!.endRow)
+            : maxRow;
+          const minC = hasRange
+            ? Math.min(selection!.startCol, selection!.endCol)
+            : 0;
+          const maxC = hasRange
+            ? Math.max(selection!.startCol, selection!.endCol)
+            : maxCol;
           if (!e.shiftKey) {
-            if (col < maxCol) moveCurrentCell(row, col + 1);
-            else if (row < maxRow) moveCurrentCell(row + 1, 0);
+            if (col < maxC) moveCurrentCell(row, col + 1);
+            else moveCurrentCell(row < maxR ? row + 1 : minR, minC);
           } else {
-            if (col > 0) moveCurrentCell(row, col - 1);
-            else if (row > 0) moveCurrentCell(row - 1, maxCol);
+            if (col > minC) moveCurrentCell(row, col - 1);
+            else moveCurrentCell(row > minR ? row - 1 : maxR, maxC);
           }
           break;
-        case "Enter":
+        }
+        case "Enter": {
           e.preventDefault();
-          if (!readOnly) {
+          if (!readOnly && !e.shiftKey) {
             const val = data.rows[row]?.[data.columns[col]];
             startEditing(row, col, String(val ?? ""));
-          } else if (row < maxRow) {
-            moveCurrentCell(row + 1, col);
+          } else {
+            // Shift+Enter: move up; Enter in readOnly: move down
+            const hasRng =
+              selection &&
+              (selection.startRow !== selection.endRow ||
+                selection.startCol !== selection.endCol);
+            const mnR = hasRng
+              ? Math.min(selection!.startRow, selection!.endRow)
+              : 0;
+            const mxR = hasRng
+              ? Math.max(selection!.startRow, selection!.endRow)
+              : maxRow;
+            const mnC = hasRng
+              ? Math.min(selection!.startCol, selection!.endCol)
+              : 0;
+            const mxC = hasRng
+              ? Math.max(selection!.startCol, selection!.endCol)
+              : maxCol;
+            if (e.shiftKey) {
+              if (row > mnR) moveCurrentCell(row - 1, col);
+              else moveCurrentCell(mxR, col < mxC ? col + 1 : mnC);
+            } else {
+              if (row < mxR) moveCurrentCell(row + 1, col);
+              else moveCurrentCell(mnR, col < mxC ? col + 1 : mnC);
+            }
           }
           break;
+        }
         case "F2":
           e.preventDefault();
           if (!readOnly) {
