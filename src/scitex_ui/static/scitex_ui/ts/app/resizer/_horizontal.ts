@@ -71,19 +71,18 @@ export class HorizontalResizer extends BaseResizer {
 
   /**
    * Find the next non-collapsed resizable panel for cascade.
-   * Walks siblings of workspace-three-col, skipping collapsed or
-   * non-resizable panes. Frame-level only (isInApp=false).
+   * Walks siblings, skipping collapsed or non-resizable panes.
+   * Works for both workspace (shell) and in-app resizers.
    */
   protected findCascadeTarget(
     collapsingPanel: HTMLElement,
     mousePos: number,
   ): PropagationTarget | null {
-    if (this.isInApp) return null;
-
-    // Find the pane wrapper of the collapsing panel
-    const paneContainer = collapsingPanel.closest(
-      ".ws-ai-pane, .ws-worktree-pane, .ws-viewer-pane, .ws-apps-pane, .ws-module-pane",
-    );
+    // Find the pane wrapper — try workspace-specific first, then generic
+    const paneContainer =
+      collapsingPanel.closest(
+        ".ws-ai-pane, .ws-worktree-pane, .ws-viewer-pane, .ws-apps-pane, .ws-module-pane",
+      ) || collapsingPanel;
     if (!paneContainer) return null;
 
     // Determine cascade direction: walk left or right through siblings
@@ -102,11 +101,11 @@ export class HorizontalResizer extends BaseResizer {
       const sibResizer = sibling.querySelector(
         "[data-h-resizer], [data-panel-resizer]",
       ) as HTMLElement;
-      const sibPanel = sibling.querySelector(
-        ".stx-shell-sidebar",
-      ) as HTMLElement;
+      // Try shell sidebar first, then use the sibling element itself
+      const sibPanel = (sibling.querySelector(".stx-shell-sidebar") ||
+        sibling) as HTMLElement;
 
-      if (!sibResizer || !sibPanel) {
+      if (!sibResizer) {
         current = sibling;
         continue;
       }

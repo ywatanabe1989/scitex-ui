@@ -290,7 +290,6 @@ function tryStartCascade(
   collapsingPanel: HTMLElement,
   e: MouseEvent,
 ): void {
-  if (r.getIsInApp()) return;
   const target = r.findCascadeTargetPublic(
     collapsingPanel,
     r.getMousePosPublic(e),
