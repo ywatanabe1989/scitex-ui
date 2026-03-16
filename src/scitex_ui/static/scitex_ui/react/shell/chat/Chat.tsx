@@ -1,59 +1,109 @@
 /**
- * Chat — AI chat panel with streaming responses.
+ * Chat — AI chat panel with streaming responses and multi-tab sessions.
  * Uses stx-shell-ai-* CSS classes matching scitex-cloud global_ai_panel.html DOM.
  *
  * Renders as a fragment (no wrapper div). The parent (Workspace) supplies
  * the .stx-shell-ai-view wrapper so there is no nested duplication.
- *
- * Usage:
- *   import { Chat } from '@scitex/ui/react/shell/chat';
- *   <Chat backend={directChatBackend} />
  */
 
 import React, { useState, useRef, useCallback, useEffect } from "react";
 import type { ChatProps } from "./types";
 import type { ChatMessage } from "../workspace/types";
 
+interface ChatSession {
+  id: string;
+  label: string;
+  messages: ChatMessage[];
+}
+
+let nextSessionId = 1;
+function makeSession(): ChatSession {
+  const id = `C${nextSessionId++}`;
+  return { id, label: id, messages: [] };
+}
+
 export const Chat: React.FC<ChatProps> = ({
   backend,
   placeholder = "Ask anything",
   initialMessages,
   storageKey,
-  className: _className,
-  style: _style,
 }) => {
-  const [messages, setMessages] = useState<ChatMessage[]>(() => {
-    if (initialMessages) return initialMessages;
+  // Multi-session state
+  const [sessions, setSessions] = useState<ChatSession[]>(() => {
     if (storageKey) {
       try {
-        const stored = localStorage.getItem(storageKey);
-        return stored ? JSON.parse(stored) : [];
+        const stored = localStorage.getItem(storageKey + ":sessions");
+        if (stored) {
+          const parsed = JSON.parse(stored) as ChatSession[];
+          if (parsed.length > 0) {
+            nextSessionId =
+              Math.max(...parsed.map((s) => parseInt(s.id.slice(1)) || 0)) + 1;
+            return parsed;
+          }
+        }
       } catch {
-        return [];
+        /* noop */
       }
     }
-    return [];
+    const first = makeSession();
+    if (initialMessages) first.messages = initialMessages;
+    return [first];
   });
+
+  const [activeId, setActiveId] = useState<string>(() => {
+    if (storageKey) {
+      try {
+        return (
+          localStorage.getItem(storageKey + ":active") ||
+          sessions[0]?.id ||
+          "C1"
+        );
+      } catch {
+        /* noop */
+      }
+    }
+    return sessions[0]?.id || "C1";
+  });
+
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  // Persist messages
+  const activeSession = sessions.find((s) => s.id === activeId) || sessions[0];
+  const messages = activeSession?.messages || [];
+
+  // Persist sessions
   useEffect(() => {
     if (storageKey) {
       try {
-        localStorage.setItem(storageKey, JSON.stringify(messages));
+        localStorage.setItem(
+          storageKey + ":sessions",
+          JSON.stringify(sessions),
+        );
+        localStorage.setItem(storageKey + ":active", activeId);
       } catch {
         /* noop */
       }
     }
-  }, [messages, storageKey]);
+  }, [sessions, activeId, storageKey]);
 
   // Auto-scroll
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  // Update messages for active session
+  const updateMessages = useCallback(
+    (updater: (prev: ChatMessage[]) => ChatMessage[]) => {
+      setSessions((prev) =>
+        prev.map((s) =>
+          s.id === activeId ? { ...s, messages: updater(s.messages) } : s,
+        ),
+      );
+    },
+    [activeId],
+  );
 
   const sendMessage = useCallback(async () => {
     const text = input.trim();
@@ -65,47 +115,50 @@ export const Chat: React.FC<ChatProps> = ({
       content: text,
       timestamp: Date.now(),
     };
-    setMessages((prev) => [...prev, userMsg]);
+    updateMessages((prev) => [...prev, userMsg]);
     setStreaming(true);
 
-    let assistantText = "";
     const assistantMsg: ChatMessage = {
       role: "assistant",
       content: "",
       timestamp: Date.now(),
     };
-    setMessages((prev) => [...prev, assistantMsg]);
+    updateMessages((prev) => [...prev, assistantMsg]);
 
+    let assistantText = "";
     try {
       for await (const chunk of backend.sendMessage(text)) {
         if (chunk.type === "text" && chunk.text) {
           assistantText += chunk.text;
-          setMessages((prev) => {
+          const finalText = assistantText;
+          updateMessages((prev) => {
             const updated = [...prev];
             updated[updated.length - 1] = {
               ...updated[updated.length - 1],
-              content: assistantText,
+              content: finalText,
             };
             return updated;
           });
         } else if (chunk.type === "error") {
           assistantText += `\n[Error: ${chunk.text}]`;
-          setMessages((prev) => {
+          const finalText = assistantText;
+          updateMessages((prev) => {
             const updated = [...prev];
             updated[updated.length - 1] = {
               ...updated[updated.length - 1],
-              content: assistantText,
+              content: finalText,
             };
             return updated;
           });
         }
       }
     } catch (e) {
-      setMessages((prev) => {
+      const errorText = assistantText || `Error: ${e}`;
+      updateMessages((prev) => {
         const updated = [...prev];
         updated[updated.length - 1] = {
           ...updated[updated.length - 1],
-          content: assistantText || `Error: ${e}`,
+          content: errorText,
         };
         return updated;
       });
@@ -113,7 +166,7 @@ export const Chat: React.FC<ChatProps> = ({
 
     setStreaming(false);
     inputRef.current?.focus();
-  }, [input, streaming, backend]);
+  }, [input, streaming, backend, updateMessages]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -125,27 +178,72 @@ export const Chat: React.FC<ChatProps> = ({
     [sendMessage],
   );
 
-  const clearMessages = useCallback(() => {
-    setMessages([]);
+  const addSession = useCallback(() => {
+    const session = makeSession();
+    setSessions((prev) => [...prev, session]);
+    setActiveId(session.id);
   }, []);
 
-  // Render as fragment — parent (Workspace) provides the .stx-shell-ai-view wrapper
+  const closeSession = useCallback(
+    (id: string) => {
+      setSessions((prev) => {
+        const remaining = prev.filter((s) => s.id !== id);
+        if (remaining.length === 0) {
+          const fresh = makeSession();
+          setActiveId(fresh.id);
+          return [fresh];
+        }
+        if (activeId === id) {
+          setActiveId(remaining[remaining.length - 1].id);
+        }
+        return remaining;
+      });
+    },
+    [activeId],
+  );
+
+  const clearActive = useCallback(() => {
+    updateMessages(() => []);
+  }, [updateMessages]);
+
   return (
     <>
-      {/* Sessions bar — new chat button + session chips + actions */}
+      {/* Sessions bar — new chat + session tabs + actions */}
       <div className="stx-shell-ai-sessions-bar">
-        <button className="stx-shell-ai-new-chat" title="New chat">
+        <button
+          className="stx-shell-ai-new-chat"
+          title="New chat"
+          onClick={addSession}
+        >
           <i className="fas fa-plus" />
         </button>
         <div className="stx-shell-ai-sessions-list">
-          <div className="stx-shell-ai-session-item active">
-            <span>C1</span>
-          </div>
+          {sessions.map((s) => (
+            <div
+              key={s.id}
+              className={`stx-shell-ai-session-item${s.id === activeId ? " active" : ""}`}
+              onClick={() => setActiveId(s.id)}
+            >
+              <span>{s.label}</span>
+              {sessions.length > 1 && (
+                <button
+                  className="stx-shell-ai-session-close"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    closeSession(s.id);
+                  }}
+                  title="Close tab"
+                >
+                  &times;
+                </button>
+              )}
+            </div>
+          ))}
         </div>
         <div className="stx-shell-ai-panel-actions">
           <button
             className="stx-shell-ai-action-btn"
-            onClick={clearMessages}
+            onClick={clearActive}
             title="Clear chat"
           >
             <i className="fas fa-trash-alt" />
@@ -196,7 +294,6 @@ export const Chat: React.FC<ChatProps> = ({
             rows={1}
             disabled={streaming}
           />
-          {/* Camera — placeholder, non-functional */}
           <button
             className="stx-shell-ai-input-btn"
             title="Attach image"
@@ -205,7 +302,6 @@ export const Chat: React.FC<ChatProps> = ({
           >
             <i className="fas fa-camera" />
           </button>
-          {/* Sketch — placeholder, non-functional */}
           <button
             className="stx-shell-ai-input-btn"
             title="Draw sketch"
@@ -214,7 +310,6 @@ export const Chat: React.FC<ChatProps> = ({
           >
             <i className="fas fa-pen" />
           </button>
-          {/* Mic — placeholder, non-functional */}
           <button
             className="stx-shell-ai-mic"
             title="Voice input"
@@ -223,7 +318,6 @@ export const Chat: React.FC<ChatProps> = ({
           >
             <i className="fas fa-microphone" />
           </button>
-          {/* Gear / settings — placeholder */}
           <button
             className="stx-shell-ai-input-btn stx-shell-ai-gear-btn"
             title="Chat settings"
@@ -233,7 +327,6 @@ export const Chat: React.FC<ChatProps> = ({
             <i className="fas fa-cog" />
           </button>
         </div>
-        {/* Hidden send button (kept for JS compatibility) */}
         <button
           className="stx-shell-ai-send"
           onClick={sendMessage}
