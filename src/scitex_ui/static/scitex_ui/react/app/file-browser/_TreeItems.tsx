@@ -155,14 +155,12 @@ export const TreeItems: React.FC<TreeItemsProps> = ({
     return true;
   });
 
-  // Sort — mirrors scitex-cloud sortItems() with name/mtime modes
+  // Sort — alphabetical or by mtime, no directory/file separation
   const sorted = [...filtered].sort((a, b) => {
     if (sortMode === "mtime") {
-      // Newest first — directories still before files
-      if (a.type !== b.type) return a.type === "directory" ? -1 : 1;
       return (b.mtime ?? 0) - (a.mtime ?? 0);
     }
-    // Default: alphabetical (case-insensitive)
+    // Default: alphabetical (case-insensitive), dirs and files interleaved
     return a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
   });
 
