@@ -159,14 +159,24 @@ export const DataTable: React.FC<DataTableProps> = ({
     [colWidths],
   );
 
-  if (data.columns.length === 0) {
-    return (
-      <div className={`${CLS} ${CLS}--empty ${className ?? ""}`} style={style}>
-        <i className="fas fa-table" />
-        <p>No data loaded</p>
-      </div>
-    );
-  }
+  // Show empty Excel-like grid when no data loaded
+  const EMPTY_COLS = 8;
+  const EMPTY_ROWS = 20;
+  const displayData =
+    data.columns.length > 0
+      ? data
+      : {
+          columns: Array.from({ length: EMPTY_COLS }, (_, i) =>
+            String.fromCharCode(65 + i),
+          ),
+          rows: Array.from({ length: EMPTY_ROWS }, () => {
+            const row: DataRow = {};
+            for (let i = 0; i < EMPTY_COLS; i++) {
+              row[String.fromCharCode(65 + i)] = "";
+            }
+            return row;
+          }),
+        };
 
   return (
     <div className={`${CLS} ${className ?? ""}`} style={style}>
@@ -175,7 +185,7 @@ export const DataTable: React.FC<DataTableProps> = ({
           <thead>
             <tr>
               {showRowNumbers && <th className={`${CLS}__row-num`}>#</th>}
-              {data.columns.map((col, ci) => (
+              {displayData.columns.map((col, ci) => (
                 <th
                   key={ci}
                   className={`${CLS}__header-cell${sortCol === ci ? ` ${CLS}__header-cell--sorted` : ""}`}
@@ -201,12 +211,12 @@ export const DataTable: React.FC<DataTableProps> = ({
             </tr>
           </thead>
           <tbody>
-            {data.rows.map((row, ri) => (
+            {displayData.rows.map((row, ri) => (
               <tr key={ri}>
                 {showRowNumbers && (
                   <td className={`${CLS}__row-num`}>{ri + 1}</td>
                 )}
-                {data.columns.map((col, ci) => {
+                {displayData.columns.map((col, ci) => {
                   const isSelected =
                     selectedCell?.row === ri && selectedCell?.col === ci;
                   return (
