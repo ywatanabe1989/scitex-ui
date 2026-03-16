@@ -42,6 +42,11 @@ export interface PanelResizeConfig {
   maxWidth?: number;
   /** Ref to the flex container — used to cap total width */
   containerRef?: React.RefObject<HTMLElement>;
+  /** Called when drag exceeds the panel boundary (for cross-boundary propagation) */
+  onBoundaryOverflow?: (
+    overflowPx: number,
+    direction: "left" | "right",
+  ) => void;
 }
 
 export interface PanelResizeResult {
@@ -83,6 +88,7 @@ export function usePanelResize(config: PanelResizeConfig): PanelResizeResult {
     collapseKey,
     maxWidth,
     containerRef,
+    onBoundaryOverflow,
   } = config;
 
   const [width, setWidth] = useState(() => {
@@ -179,6 +185,11 @@ export function usePanelResize(config: PanelResizeConfig): PanelResizeResult {
       const clamped = clampWidth(raw);
       if (clamped >= minWidth) {
         setWidth(clamped);
+      }
+      // Cross-boundary propagation: when drag exceeds the panel boundary
+      if (raw < minWidth && onBoundaryOverflow) {
+        const overflow = minWidth - raw;
+        onBoundaryOverflow(overflow, direction === "left" ? "left" : "right");
       }
     };
 
