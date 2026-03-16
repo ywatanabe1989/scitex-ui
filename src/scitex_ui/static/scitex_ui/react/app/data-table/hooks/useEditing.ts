@@ -111,23 +111,63 @@ export function useEditing(
             e.preventDefault();
             cancelEdit();
             return;
-          case "Enter":
-            e.preventDefault();
-            commitEdit();
-            if (!editing.isHeader && row < maxRow) {
-              moveCurrentCell(row + 1, col);
-            }
-            return;
-          case "Tab":
+          case "Enter": {
             e.preventDefault();
             commitEdit();
             if (!editing.isHeader) {
-              const next = e.shiftKey
-                ? Math.max(0, col - 1)
-                : Math.min(maxCol, col + 1);
-              moveCurrentCell(row, next);
+              // Selection-aware: wrap within bounds
+              const hasRange =
+                selection &&
+                (selection.startRow !== selection.endRow ||
+                  selection.startCol !== selection.endCol);
+              const mnR = hasRange
+                ? Math.min(selection!.startRow, selection!.endRow)
+                : 0;
+              const mxR = hasRange
+                ? Math.max(selection!.startRow, selection!.endRow)
+                : maxRow;
+              const mnC = hasRange
+                ? Math.min(selection!.startCol, selection!.endCol)
+                : 0;
+              const mxC = hasRange
+                ? Math.max(selection!.startCol, selection!.endCol)
+                : maxCol;
+              if (row < mxR) moveCurrentCell(row + 1, col);
+              else moveCurrentCell(mnR, col < mxC ? col + 1 : mnC);
             }
             return;
+          }
+          case "Tab": {
+            e.preventDefault();
+            commitEdit();
+            if (!editing.isHeader) {
+              // Selection-aware: wrap within bounds
+              const hasRange =
+                selection &&
+                (selection.startRow !== selection.endRow ||
+                  selection.startCol !== selection.endCol);
+              const mnR = hasRange
+                ? Math.min(selection!.startRow, selection!.endRow)
+                : 0;
+              const mxR = hasRange
+                ? Math.max(selection!.startRow, selection!.endRow)
+                : maxRow;
+              const mnC = hasRange
+                ? Math.min(selection!.startCol, selection!.endCol)
+                : 0;
+              const mxC = hasRange
+                ? Math.max(selection!.startCol, selection!.endCol)
+                : maxCol;
+              if (!e.shiftKey) {
+                if (col < mxC) moveCurrentCell(row, col + 1);
+                else moveCurrentCell(row < mxR ? row + 1 : mnR, mnC);
+              } else {
+                if (col > mnC) moveCurrentCell(row, col - 1);
+                else moveCurrentCell(row > mnR ? row - 1 : mxR, mxC);
+              }
+            }
+            return;
+          }
           case "F2":
             e.preventDefault();
             cancelEdit();
