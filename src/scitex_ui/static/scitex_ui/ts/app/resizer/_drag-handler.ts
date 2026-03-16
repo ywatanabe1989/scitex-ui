@@ -52,8 +52,13 @@ function onMouseDown(r: BaseResizer, e: MouseEvent): void {
   document.addEventListener("mouseup", onUp);
 }
 
+/** Track the last raw (un-snapped) mouse position for mouseUp finalization */
+let lastRawMousePos = 0;
+
 function handleMouseMove(r: BaseResizer, e: MouseEvent): void {
   if (!r.isDraggingNow()) return;
+
+  lastRawMousePos = r.getMousePosPublic(e);
 
   // If primary collapsed and propagation target exists, resize that instead
   if (r.isPrimaryCollapsed() && r.getPropagate()) {
@@ -62,7 +67,7 @@ function handleMouseMove(r: BaseResizer, e: MouseEvent): void {
   }
   if (r.isPrimaryCollapsed()) return;
 
-  const delta = r.getMousePosPublic(e) - r.getStartPos();
+  const delta = lastRawMousePos - r.getStartPos();
   applyResize(r, delta, e);
 }
 
@@ -72,6 +77,14 @@ function handleMouseUp(
   onUp: () => void,
 ): void {
   if (!r.isDraggingNow()) return;
+
+  // Apply final position using raw (un-snapped) mouse pos to respect
+  // the actual endpoint — fixes high-speed drag not reaching destination
+  if (!r.isPrimaryCollapsed()) {
+    const finalDelta = lastRawMousePos - r.getStartPos();
+    applyResizeRaw(r, finalDelta);
+  }
+
   r.endDrag();
 
   document.body.style.cursor = "";
@@ -235,6 +248,39 @@ function applyResize(r: BaseResizer, delta: number, e: MouseEvent): void {
     r.setSizePublic(second, newSecond);
     second.style.flexShrink = "0";
     second.style.flexGrow = "0";
+  }
+}
+
+/**
+ * Apply final resize without magnetic snap — respects exact mouse position.
+ * Used on mouseUp to ensure the final position matches where the user released.
+ */
+function applyResizeRaw(r: BaseResizer, delta: number): void {
+  const first = r.getFirstPanel();
+  const second = r.getSecondPanel();
+  const threshold = r.getThresholdPx();
+  const [startFirst, startSecond] = r.getStartSizes();
+  const firstCan = r.getFirstCanCollapse();
+  const secondCan = r.getSecondCanCollapse();
+
+  if (secondCan && !firstCan) {
+    const totalSize = startFirst + startSecond;
+    const maxSize = totalSize - threshold;
+    const newSize = Math.max(threshold, Math.min(startSecond - delta, maxSize));
+    r.setSizePublic(second, newSize);
+  } else if (firstCan && !secondCan) {
+    const totalSize = startFirst + startSecond;
+    const maxSize = totalSize - threshold;
+    const newSize = Math.max(threshold, Math.min(startFirst + delta, maxSize));
+    r.setSizePublic(first, newSize);
+  } else {
+    const newFirst = Math.max(threshold, startFirst + delta);
+    const newSecond = Math.max(
+      threshold,
+      startSecond - (newFirst - startFirst),
+    );
+    r.setSizePublic(first, newFirst);
+    r.setSizePublic(second, newSecond);
   }
 }
 

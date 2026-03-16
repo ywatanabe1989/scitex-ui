@@ -182,6 +182,10 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                     <Chat
                       backend={chatBackend}
                       storageKey={`${appName}-chat-messages`}
+                      onCameraClick={() => setShowCamera(true)}
+                      onSketchClick={() => setShowSketch(true)}
+                      onMicClick={voiceRecorder.toggle}
+                      micRecording={voiceRecorder.isRecording}
                     />
                   ) : (
                     <div className={`${CLS}__placeholder`}>
@@ -343,8 +347,17 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                 }}
                 onFileDoubleClick={(node) => {
                   if (node.type === "file") {
-                    setViewerFile(node.path);
-                    if (viewer.collapsed) expandViewer();
+                    if (viewerFile === node.path && !viewer.collapsed) {
+                      // Same file double-clicked again → collapse viewer
+                      setViewer((s) => ({
+                        ...s,
+                        collapsed: true,
+                        prevWidth: s.width,
+                      }));
+                    } else {
+                      setViewerFile(node.path);
+                      if (viewer.collapsed) expandViewer();
+                    }
                   }
                   onFileDoubleClick?.(node);
                 }}
