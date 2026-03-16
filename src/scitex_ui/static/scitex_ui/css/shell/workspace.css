@@ -64,7 +64,7 @@
   background: var(--workspace-bg-secondary);
   overflow: hidden;
   flex-shrink: 0;
-  transition: width 0.15s ease-out;
+  /* No transition — instant resize, no acceleration */
 }
 
 /* Console/Chat inner panel structure now uses stx-shell-ai-* classes.
@@ -88,7 +88,7 @@
   background: var(--workspace-bg-secondary);
   overflow: hidden;
   flex-shrink: 0;
-  transition: width 0.15s ease-out;
+  /* No transition — instant resize, no acceleration */
 }
 
 /* Sidebar header — ported from scitex-cloud stx-shell-sidebar.css */
@@ -207,7 +207,7 @@
   background: var(--workspace-bg-secondary);
   overflow: hidden;
   flex-shrink: 0;
-  transition: width 0.15s ease-out;
+  /* No transition — instant resize, no acceleration */
 }
 
 /* --- App Content (Column 4, flex) --- */
