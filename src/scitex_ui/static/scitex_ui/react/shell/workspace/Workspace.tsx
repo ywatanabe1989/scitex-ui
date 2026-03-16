@@ -312,7 +312,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                 <span className="stx-shell-sidebar__title">Files</span>
                 <div className="stx-shell-sidebar__header-actions">
                   <button
-                    className={`sort-toggle${sortMode === "mtime" ? " active" : ""}`}
+                    className={`stx-shell-sort-toggle${sortMode === "mtime" ? " active" : ""}`}
                     title={
                       sortMode === "mtime"
                         ? "Sort by name (A-Z)"
