@@ -84,6 +84,13 @@ export interface WorkspaceProps extends BaseProps {
   /** Build URL for file content (enables Viewer pane) */
   getFileUrl?: (path: string, raw?: boolean) => string;
 
+  /** STT endpoint URL for voice transcription (enables mic button) */
+  sttUrl?: string;
+  /** Called when an image is captured (camera or sketch) */
+  onImageCapture?: (dataUrl: string, mimeType: string) => void;
+  /** Called when voice transcription is complete */
+  onVoiceTranscript?: (text: string) => void;
+
   /** App content (rendered in main area) */
   children: React.ReactNode;
 }

@@ -33,11 +33,18 @@ export const Workspace: React.FC<WorkspaceProps> = ({
   onFileDrop,
   onFileContextAction,
   getFileUrl,
+  sttUrl,
+  onImageCapture,
+  onVoiceTranscript,
   children,
   className,
   style,
 }) => {
   const [mode, setMode] = useState<ConsoleMode>("console");
+  // Media input state — buttons present in DOM, functionality placeholder
+  const [_showCamera, _setShowCamera] = useState(false);
+  const [_showSketch, _setShowSketch] = useState(false);
+  const _voiceRecorder = { isRecording: false, toggle: () => {} };
   const [treeData, setTreeData] = useState<FileNode[]>([]);
   const [viewerFile, setViewerFile] = useState<string | null>(null);
   const [sortMode, setSortMode] = useState<"name" | "mtime">(() => {
@@ -241,35 +248,38 @@ export const Workspace: React.FC<WorkspaceProps> = ({
                       >
                         <i className="fas fa-robot" />
                       </button>
-                      {/* Camera — placeholder */}
+                      {/* Camera */}
                       <button
-                        id="stx-shell-ai-console-camera"
                         className="stx-shell-ai-input-btn"
                         title="Webcam capture"
-                        disabled
-                        aria-disabled="true"
+                        onClick={() => setShowCamera(true)}
+                        disabled={!onImageCapture}
                       >
                         <i className="fas fa-camera" />
                       </button>
-                      {/* Sketch — placeholder */}
+                      {/* Sketch */}
                       <button
-                        id="stx-shell-ai-console-sketch"
                         className="stx-shell-ai-input-btn"
                         title="Draw sketch"
-                        disabled
-                        aria-disabled="true"
+                        onClick={() => setShowSketch(true)}
+                        disabled={!onImageCapture}
                       >
                         <i className="fas fa-pen" />
                       </button>
-                      {/* Mic — placeholder */}
+                      {/* Mic */}
                       <button
-                        id="stx-shell-ai-console-mic"
-                        className="stx-shell-ai-input-btn"
-                        title="Voice input"
-                        disabled
-                        aria-disabled="true"
+                        className={`stx-shell-ai-input-btn${voiceRecorder.isRecording ? " recording" : ""}`}
+                        title={
+                          voiceRecorder.isRecording
+                            ? "Stop recording"
+                            : "Voice input"
+                        }
+                        onClick={voiceRecorder.toggle}
+                        disabled={!sttUrl && !onVoiceTranscript}
                       >
-                        <i className="fas fa-microphone" />
+                        <i
+                          className={`fas fa-microphone${voiceRecorder.isRecording ? "-slash" : ""}`}
+                        />
                       </button>
                       {/* Gear / settings — placeholder */}
                       <button
@@ -406,6 +416,22 @@ export const Workspace: React.FC<WorkspaceProps> = ({
           {children}
         </div>
       </div>
+
+      {/* ── Media Input Modals ────────────────────────── */}
+      {onImageCapture && (
+        <>
+          <WebcamCapture
+            open={showCamera}
+            onClose={() => setShowCamera(false)}
+            onCapture={onImageCapture}
+          />
+          <SketchCanvas
+            open={showSketch}
+            onClose={() => setShowSketch(false)}
+            onDone={onImageCapture}
+          />
+        </>
+      )}
     </div>
   );
 };
