@@ -157,7 +157,16 @@ export const Chat: React.FC<ChatProps> = ({
         }
       }
     } catch (e) {
-      const errorText = assistantText || `Error: ${e}`;
+      const raw = String(e);
+      let errorText: string;
+      if (raw.includes("Failed to fetch") || raw.includes("NetworkError")) {
+        errorText =
+          "Could not reach the chat backend. Check that the server is running and the API endpoint is accessible.";
+      } else {
+        errorText = assistantText
+          ? `${assistantText}\n\n[Error: ${raw}]`
+          : `Error: ${raw}`;
+      }
       updateMessages((prev) => {
         const updated = [...prev];
         updated[updated.length - 1] = {
