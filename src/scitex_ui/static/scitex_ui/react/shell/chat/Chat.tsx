@@ -27,6 +27,10 @@ export const Chat: React.FC<ChatProps> = ({
   placeholder = "Ask anything",
   initialMessages,
   storageKey,
+  onCameraClick,
+  onSketchClick,
+  onMicClick,
+  micRecording,
 }) => {
   // Multi-session state
   const [sessions, setSessions] = useState<ChatSession[]>(() => {
@@ -297,26 +301,26 @@ export const Chat: React.FC<ChatProps> = ({
           <button
             className="stx-shell-ai-input-btn"
             title="Attach image"
-            disabled
-            aria-disabled="true"
+            onClick={onCameraClick}
+            disabled={!onCameraClick}
           >
             <i className="fas fa-camera" />
           </button>
           <button
             className="stx-shell-ai-input-btn"
             title="Draw sketch"
-            disabled
-            aria-disabled="true"
+            onClick={onSketchClick}
+            disabled={!onSketchClick}
           >
             <i className="fas fa-pen" />
           </button>
           <button
-            className="stx-shell-ai-mic"
-            title="Voice input"
-            disabled
-            aria-disabled="true"
+            className={`stx-shell-ai-mic${micRecording ? " recording" : ""}`}
+            title={micRecording ? "Stop recording" : "Voice input"}
+            onClick={onMicClick}
+            disabled={!onMicClick}
           >
-            <i className="fas fa-microphone" />
+            <i className={`fas fa-microphone${micRecording ? "-slash" : ""}`} />
           </button>
           <button
             className="stx-shell-ai-input-btn stx-shell-ai-gear-btn"

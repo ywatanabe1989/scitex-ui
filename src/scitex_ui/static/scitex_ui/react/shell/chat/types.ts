@@ -14,4 +14,12 @@ export interface ChatProps extends BaseProps {
   initialMessages?: ChatMessage[];
   /** localStorage key for message persistence */
   storageKey?: string;
+  /** Open camera modal */
+  onCameraClick?: () => void;
+  /** Open sketch modal */
+  onSketchClick?: () => void;
+  /** Toggle voice recording */
+  onMicClick?: () => void;
+  /** Whether mic is recording */
+  micRecording?: boolean;
 }
