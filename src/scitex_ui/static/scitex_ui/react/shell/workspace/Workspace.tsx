@@ -7,7 +7,7 @@
  * global_ai_panel.html DOM structure exactly.
  */
 
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import type { WorkspaceProps } from "./types";
 import type { FileNode } from "../../app/file-browser/types";
 import { FileBrowser } from "../../app/file-browser";
@@ -20,6 +20,9 @@ import { useVoiceRecorder } from "../media-input/useVoiceRecorder";
 import { WebcamCapture } from "../media-input/WebcamCapture";
 import { SketchCanvas } from "../media-input/SketchCanvas";
 import { bootstrapContextZoom } from "../../../ts/utils/context-zoom";
+import { WorkspaceResizeProvider } from "./WorkspaceResizeContext";
+import { useShellPanes } from "./useShellPanes";
+import { useExpandCallbacks } from "./useExpandCallbacks";
 
 const CLS = "stx-workspace";
 type ConsoleMode = "console" | "chat";
@@ -66,6 +69,15 @@ export const Workspace: React.FC<WorkspaceProps> = ({
 
   const { onConsoleResizerDown, onTreeResizerDown, onViewerResizerDown } =
     useResizers(console_, tree, viewer, setConsole, setTree, setViewer);
+
+  const shellPanesRef = useShellPanes(
+    console_,
+    tree,
+    viewer,
+    setConsole,
+    setTree,
+    setViewer,
+  );
 
   useEffect(() => {
     if (accentColor) {
@@ -134,43 +146,13 @@ export const Workspace: React.FC<WorkspaceProps> = ({
     }
   }, [fileTreeBackend]);
 
-  const expandConsole = useCallback(() => {
-    setConsole((s) => ({
-      ...s,
-      collapsed: false,
-      width: s.prevWidth > COLLAPSE_WIDTH ? s.prevWidth : 380,
-    }));
-  }, [setConsole]);
-
-  const expandTree = useCallback(() => {
-    setTree((s) => ({
-      ...s,
-      collapsed: false,
-      width: s.prevWidth > COLLAPSE_WIDTH ? s.prevWidth : 240,
-    }));
-  }, [setTree]);
-
-  const expandViewer = useCallback(() => {
-    setViewer((s) => ({
-      ...s,
-      collapsed: false,
-      width: s.prevWidth > COLLAPSE_WIDTH ? s.prevWidth : 300,
-    }));
-  }, [setViewer]);
-
-  const handleDrop = useCallback(
-    (e: React.DragEvent) => {
-      e.preventDefault();
-      const path = e.dataTransfer.getData("text/plain");
-      if (path && onFileDrop) onFileDrop(path, "app");
-    },
-    [onFileDrop],
-  );
-
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = "copy";
-  }, []);
+  const {
+    expandConsole,
+    expandTree,
+    expandViewer,
+    handleDrop,
+    handleDragOver,
+  } = useExpandCallbacks(setConsole, setTree, setViewer, onFileDrop);
 
   const cW = console_.collapsed ? COLLAPSE_WIDTH : console_.width;
   const tW = tree.collapsed ? COLLAPSE_WIDTH : tree.width;
@@ -473,14 +455,16 @@ export const Workspace: React.FC<WorkspaceProps> = ({
           </>
         )}
 
-        {/* ── App Content ──────────────────── */}
-        <div
-          className={`${CLS}__app-content`}
-          onDrop={handleDrop}
-          onDragOver={handleDragOver}
-        >
-          {children}
-        </div>
+        {/* ── App Content (resize context for cross-boundary propagation) */}
+        <WorkspaceResizeProvider shellPanes={shellPanesRef}>
+          <div
+            className={`${CLS}__app-content`}
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+          >
+            {children}
+          </div>
+        </WorkspaceResizeProvider>
       </div>
 
       {/* ── Media Input Modals ──────────── */}
