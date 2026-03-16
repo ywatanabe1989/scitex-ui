@@ -47,6 +47,12 @@ export interface PanelResizeConfig {
     overflowPx: number,
     direction: "left" | "right",
   ) => void;
+  /** Ref to sibling panels that must stay visible (prevents pushing them off-screen) */
+  siblingRefs?: React.RefObject<HTMLElement | null>[];
+  /** Reserved width for siblings that must stay visible */
+  reservedWidth?: number;
+  /** CSS selector for sibling elements to preserve (alternative to siblingRefs) */
+  preserveSelector?: string;
 }
 
 export interface PanelResizeResult {
@@ -91,6 +97,8 @@ export function usePanelResize(config: PanelResizeConfig): PanelResizeResult {
     maxWidth,
     containerRef,
     onBoundaryOverflow,
+    siblingRefs,
+    reservedWidth = 0,
   } = config;
 
   const [width, setWidth] = useState(() => {
@@ -136,9 +144,27 @@ export function usePanelResize(config: PanelResizeConfig): PanelResizeResult {
         capped = Math.min(capped, containerW - 200);
       }
 
+      // Reserve space for sibling panels that must stay visible
+      if (siblingRefs?.length || reservedWidth > 0) {
+        const panelEl = panelRef.current;
+        if (panelEl?.parentElement) {
+          const containerW = panelEl.parentElement.clientWidth;
+          // Calculate total width needed by siblings
+          let siblingsWidth = reservedWidth;
+          siblingRefs?.forEach((ref) => {
+            if (ref.current) {
+              siblingsWidth += ref.current.offsetWidth;
+            }
+          });
+          // Max width = container - siblings - some buffer for center content
+          const maxAllowed = containerW - siblingsWidth - 100;
+          capped = Math.min(capped, Math.max(minWidth, maxAllowed));
+        }
+      }
+
       return capped;
     },
-    [minWidth, maxWidth, containerRef],
+    [minWidth, maxWidth, containerRef, siblingRefs, reservedWidth],
   );
 
   const toggleCollapse = useCallback(() => {

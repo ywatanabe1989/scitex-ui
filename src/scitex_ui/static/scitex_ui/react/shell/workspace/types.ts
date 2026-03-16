@@ -6,6 +6,7 @@
 import type { BaseProps } from "../../_base/types";
 export type { FileNode } from "../../app/file-browser/types";
 import type { FileNode } from "../../app/file-browser/types";
+export type { RecentEntry } from "../../app/recent-pane/RecentPane";
 
 // ── Terminal Backend Protocol ────────────────────────────────────
 
@@ -90,6 +91,11 @@ export interface WorkspaceProps extends BaseProps {
   onImageCapture?: (dataUrl: string, mimeType: string) => void;
   /** Called when voice transcription is complete */
   onVoiceTranscript?: (text: string) => void;
+
+  /** Recent file change entries (enables RecentPane below file tree) */
+  recentEntries?: import("../../app/recent-pane/RecentPane").RecentEntry[];
+  /** Called when a recent entry is clicked */
+  onRecentEntryClick?: (path: string) => void;
 
   /** App content (rendered in main area) */
   children: React.ReactNode;

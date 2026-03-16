@@ -14,5 +14,8 @@ export type { FileTabsProps, FileTab } from "./file-tabs";
 export { MediaViewer } from "./media-viewer";
 export type { MediaViewerProps, MediaFileType } from "./media-viewer";
 
+export { RecentPane } from "./recent-pane";
+export type { RecentPaneProps, RecentEntry } from "./recent-pane";
+
 export { Tooltip } from "./tooltip";
 export type { TooltipProps } from "./tooltip";
