@@ -195,11 +195,18 @@ export function usePanelResize(config: PanelResizeConfig): PanelResizeResult {
         // Direct DOM update — no React re-render during drag
         if (panelRef.current) {
           panelRef.current.style.width = `${clamped}px`;
+          // Dynamic collapse preview: add/remove collapsed class during drag
+          if (clamped <= minWidth + 10) {
+            panelRef.current.classList.add("collapsed");
+          } else {
+            panelRef.current.classList.remove("collapsed");
+          }
         }
       } else {
         liveWidth.current = minWidth;
         if (panelRef.current) {
           panelRef.current.style.width = `${minWidth}px`;
+          panelRef.current.classList.add("collapsed");
         }
       }
       // Cross-boundary propagation: when drag exceeds the panel boundary
