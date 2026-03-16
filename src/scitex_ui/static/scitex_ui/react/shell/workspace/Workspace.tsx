@@ -146,6 +146,24 @@ export const Workspace: React.FC<WorkspaceProps> = ({
     }
   }, [fileTreeBackend]);
 
+  // Listen for app-level resize overflow → cascade to shell panels
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const { direction, delta } = (e as CustomEvent).detail;
+      if (direction === "left") {
+        // App's left panel overflowed → shrink viewer, then tree, then console
+        setViewer((s) => {
+          const newW = s.width - delta;
+          if (newW < COLLAPSE_WIDTH)
+            return { ...s, collapsed: true, prevWidth: s.width };
+          return { ...s, width: Math.max(COLLAPSE_WIDTH, newW) };
+        });
+      }
+    };
+    window.addEventListener("stx-app-resize-overflow", handler);
+    return () => window.removeEventListener("stx-app-resize-overflow", handler);
+  }, [setViewer]);
+
   const {
     expandConsole,
     expandTree,
