@@ -16,32 +16,9 @@
  * Each resizer seesaws the nearest non-fixed panes on each side.
  */
 
-// ── Types ────────────────────────────────────────────────────────────
-
-interface PaneInfo {
-  el: HTMLElement;
-  id: string;
-  index: number;
-  fixed: boolean;
-  fixedSize: number;
-  minSize: number;
-  defaultSize: number;
-  canCollapse: boolean;
-  size: number;
-  collapsed: boolean;
-  collapseMode: "manual" | "auto" | null;
-}
-
-interface ResizerInfo {
-  el: HTMLElement;
-  leftPartner: PaneInfo;
-  rightPartner: PaneInfo;
-}
-
-const COLLAPSE_WIDTH = 40;
-const RESIZER_WIDTH = 1;
-
-// ── Main Class ───────────────────────────────────────────────────────
+import type { PaneInfo, ResizerInfo } from "./_types";
+import { COLLAPSE_WIDTH, RESIZER_WIDTH } from "./_types";
+import { computeLayout } from "./_layout-compute";
 
 export class PaneLayoutHandler {
   private container: HTMLElement;
@@ -54,8 +31,6 @@ export class PaneLayoutHandler {
   private dragStartPos = 0;
   private dragStartLeftSize = 0;
   private dragStartRightSize = 0;
-
-  // Bound handlers for cleanup
   private boundMouseMove: (e: MouseEvent) => void;
   private boundMouseUp: (e: MouseEvent) => void;
 
@@ -66,7 +41,6 @@ export class PaneLayoutHandler {
       "horizontal";
     this.storagePrefix = container.dataset.paneLayout || "pane";
 
-    // Ensure flex container
     container.style.display = "flex";
     container.style.flexDirection =
       this.direction === "horizontal" ? "row" : "column";
@@ -82,7 +56,7 @@ export class PaneLayoutHandler {
     );
     this.resizers = this.createResizers();
     this.restoreState();
-    this.computeLayout();
+    this.runLayout();
     this.applyLayout();
     console.log(
       `[PaneLayout] Sizes:`,
@@ -92,39 +66,32 @@ export class PaneLayoutHandler {
     );
   }
 
-  // ── Discovery ────────────────────────────────────────────────────
+  // ── Discovery ──────────────────────────────────────────────────────
 
   private discoverPanes(): PaneInfo[] {
     const sizeAttr = this.direction === "horizontal" ? "width" : "height";
     const minAttr = this.direction === "horizontal" ? "minWidth" : "minHeight";
     const defaultAttr =
       this.direction === "horizontal" ? "defaultWidth" : "defaultHeight";
-
     const panes: PaneInfo[] = [];
-    const children = Array.from(this.container.children) as HTMLElement[];
-
     let index = 0;
-    for (const el of children) {
+    for (const el of Array.from(this.container.children) as HTMLElement[]) {
       if (!el.hasAttribute("data-pane")) continue;
-
       const fixed = el.hasAttribute("data-fixed");
-      const fixedSize = parseInt(el.dataset[sizeAttr] || "0", 10);
-      const minSize = parseInt(el.dataset[minAttr] || "40", 10);
-      const defaultSize = parseInt(el.dataset[defaultAttr] || "0", 10);
-      const canCollapse = el.hasAttribute("data-can-collapse");
       const id =
         el.dataset.paneId || el.id || `pane-${this.storagePrefix}-${index}`;
-
       panes.push({
         el,
         id,
         index,
         fixed,
-        fixedSize,
-        minSize,
-        defaultSize,
-        canCollapse,
-        size: fixed ? fixedSize : defaultSize,
+        fixedSize: parseInt(el.dataset[sizeAttr] || "0", 10),
+        minSize: parseInt(el.dataset[minAttr] || "40", 10),
+        defaultSize: parseInt(el.dataset[defaultAttr] || "0", 10),
+        canCollapse: el.hasAttribute("data-can-collapse"),
+        size: fixed
+          ? parseInt(el.dataset[sizeAttr] || "0", 10)
+          : parseInt(el.dataset[defaultAttr] || "0", 10),
         collapsed: false,
         collapseMode: null,
       });
@@ -133,379 +100,254 @@ export class PaneLayoutHandler {
     return panes;
   }
 
-  // ── Resizer Creation ─────────────────────────────────────────────
+  // ── Resizer Creation ───────────────────────────────────────────────
 
   private createResizers(): ResizerInfo[] {
     const resizers: ResizerInfo[] = [];
-
     for (let i = 0; i < this.panes.length - 1; i++) {
       const left = this.findNonFixed(i, "left");
       const right = this.findNonFixed(i + 1, "right");
       if (!left || !right) continue;
-
-      // Don't create duplicate resizers for the same pair
-      if (
-        resizers.length > 0 &&
-        resizers[resizers.length - 1].leftPartner === left &&
-        resizers[resizers.length - 1].rightPartner === right
-      ) {
-        continue;
+      if (resizers.length > 0) {
+        const last = resizers[resizers.length - 1];
+        if (last.leftPartner === left && last.rightPartner === right) continue;
       }
-
-      const resizerEl = document.createElement("div");
-      resizerEl.className =
+      const el = document.createElement("div");
+      el.className =
         this.direction === "horizontal"
           ? "panel-resizer pane-resizer pane-resizer--h"
           : "panel-resizer pane-resizer pane-resizer--v";
-      resizerEl.setAttribute("data-pane-resizer", "");
-
-      // Insert after the left partner (resizer appears on its right edge)
-      left.el.after(resizerEl);
-
+      el.setAttribute("data-pane-resizer", "");
+      left.el.after(el);
       console.log(
         `[PaneLayout] Resizer ${resizers.length}: ${left.id} ↔ ${right.id}`,
       );
-
       const resizer: ResizerInfo = {
-        el: resizerEl,
+        el,
         leftPartner: left,
         rightPartner: right,
       };
       resizers.push(resizer);
-
-      // Bind events
-      resizerEl.addEventListener("mousedown", (e) => {
-        this.onMouseDown(e, resizer);
-      });
-      resizerEl.addEventListener("dblclick", () => {
-        this.onResizerDoubleClick(resizer);
-      });
+      el.addEventListener("mousedown", (e) => this.onMouseDown(e, resizer));
+      el.addEventListener("dblclick", () => this.onDblClick(resizer));
     }
-
     return resizers;
   }
 
-  /** Walk from index in given direction to find nearest non-fixed pane */
-  private findNonFixed(
-    fromIndex: number,
-    direction: "left" | "right",
-  ): PaneInfo | null {
-    const step = direction === "left" ? -1 : 1;
-    for (let i = fromIndex; i >= 0 && i < this.panes.length; i += step) {
+  private findNonFixed(from: number, dir: "left" | "right"): PaneInfo | null {
+    const step = dir === "left" ? -1 : 1;
+    for (let i = from; i >= 0 && i < this.panes.length; i += step) {
       if (!this.panes[i].fixed) return this.panes[i];
     }
     return null;
   }
 
-  // ── State Restoration ────────────────────────────────────────────
+  // ── State ──────────────────────────────────────────────────────────
 
   private restoreState(): void {
-    for (const pane of this.panes) {
-      if (pane.fixed) continue;
-
-      const savedSize = this.loadStorage(`${pane.id}-size`);
-      if (savedSize !== null) {
-        const s = parseInt(savedSize, 10);
-        if (s >= pane.minSize) pane.size = s;
+    for (const p of this.panes) {
+      if (p.fixed) continue;
+      const s = this.load(`${p.id}-size`);
+      if (s !== null) {
+        const v = parseInt(s, 10);
+        if (v >= p.minSize) p.size = v;
       }
-
-      const savedCollapsed = this.loadStorage(`${pane.id}-collapsed`);
-      if (savedCollapsed === "true") {
-        pane.collapsed = true;
-        pane.collapseMode = "manual";
+      if (this.load(`${p.id}-collapsed`) === "true") {
+        p.collapsed = true;
+        p.collapseMode = "manual";
       }
     }
   }
 
-  // ── Layout Computation ───────────────────────────────────────────
-
-  private computeLayout(): void {
-    const containerSize =
+  private runLayout(): void {
+    const sz =
       this.direction === "horizontal"
         ? this.container.clientWidth
         : this.container.clientHeight;
-
-    // Budget: container minus fixed panes minus resizers
-    const fixedTotal = this.panes
-      .filter((p) => p.fixed)
-      .reduce((s, p) => s + p.fixedSize, 0);
-    const resizerTotal = this.resizers.length * RESIZER_WIDTH;
-    const collapsedTotal = this.panes
-      .filter((p) => !p.fixed && p.collapsed)
-      .reduce(() => COLLAPSE_WIDTH, 0);
-    const available =
-      containerSize - fixedTotal - resizerTotal - collapsedTotal;
-
-    // Non-fixed, non-collapsed panes
-    const resizable = this.panes.filter((p) => !p.fixed && !p.collapsed);
-
-    // Find the "remaining space" pane (no defaultSize)
-    const remainingPane = resizable.find((p) => p.defaultSize === 0);
-    const explicitPanes = resizable.filter((p) => p.defaultSize > 0);
-
-    const explicitTotal = explicitPanes.reduce((s, p) => s + p.size, 0);
-
-    if (remainingPane) {
-      remainingPane.size = Math.max(
-        remainingPane.minSize,
-        available - explicitTotal,
-      );
-    } else if (resizable.length > 0) {
-      // No remaining-space pane — distribute proportionally
-      const total = resizable.reduce((s, p) => s + p.size, 0);
-      if (total > 0) {
-        const scale = available / total;
-        for (const p of resizable) {
-          p.size = Math.max(p.minSize, Math.round(p.size * scale));
-        }
-      }
-    }
+    computeLayout(this.panes, sz, this.resizers.length, RESIZER_WIDTH);
   }
 
   private applyLayout(): void {
     const prop = this.direction === "horizontal" ? "width" : "height";
-
-    for (const pane of this.panes) {
-      if (pane.fixed) {
-        pane.el.style[prop] = `${pane.fixedSize}px`;
-        pane.el.style.flexShrink = "0";
-        pane.el.style.flexGrow = "0";
-        pane.el.style.flexBasis = `${pane.fixedSize}px`;
-        pane.el.style.overflow = "hidden";
-      } else if (pane.collapsed) {
-        pane.el.style[prop] = `${COLLAPSE_WIDTH}px`;
-        pane.el.style.flexShrink = "0";
-        pane.el.style.flexGrow = "0";
-        pane.el.style.flexBasis = `${COLLAPSE_WIDTH}px`;
-        pane.el.style.overflow = "hidden";
-        pane.el.classList.add("pane-collapsed");
-        pane.el.style.cursor = "pointer";
+    for (const p of this.panes) {
+      if (p.fixed) {
+        this.setFlex(p.el, prop, p.fixedSize, "0", "0");
+      } else if (p.collapsed) {
+        this.setFlex(p.el, prop, COLLAPSE_WIDTH, "0", "0");
+        p.el.classList.add("pane-collapsed");
+        p.el.style.cursor = "pointer";
       } else {
-        pane.el.style[prop] = `${pane.size}px`;
-        pane.el.style.flexShrink = "0";
-        pane.el.style.flexGrow = pane.defaultSize === 0 ? "1" : "0";
-        pane.el.style.flexBasis = `${pane.size}px`;
-        pane.el.style.overflow = "hidden";
-        pane.el.classList.remove("pane-collapsed");
-        pane.el.style.cursor = "";
+        this.setFlex(p.el, prop, p.size, "0", p.defaultSize === 0 ? "1" : "0");
+        p.el.classList.remove("pane-collapsed");
+        p.el.style.cursor = "";
       }
+      p.el.style.overflow = "hidden";
     }
-
     for (const r of this.resizers) {
-      const prop2 = this.direction === "horizontal" ? "width" : "height";
-      r.el.style[prop2] = `${RESIZER_WIDTH}px`;
+      const p2 = this.direction === "horizontal" ? "width" : "height";
+      r.el.style[p2] = `${RESIZER_WIDTH}px`;
       r.el.style.flexShrink = "0";
     }
   }
 
-  // ── Drag Handling ────────────────────────────────────────────────
+  private setFlex(
+    el: HTMLElement,
+    prop: string,
+    size: number,
+    shrink: string,
+    grow: string,
+  ): void {
+    el.style[prop as any] = `${size}px`;
+    el.style.flexBasis = `${size}px`;
+    el.style.flexShrink = shrink;
+    el.style.flexGrow = grow;
+  }
 
-  private onMouseDown(e: MouseEvent, resizer: ResizerInfo): void {
+  private applyPane(p: PaneInfo): void {
+    const prop = this.direction === "horizontal" ? "width" : "height";
+    if (p.collapsed) {
+      this.setFlex(p.el, prop, COLLAPSE_WIDTH, "0", "0");
+      p.el.classList.add("pane-collapsed");
+      p.el.style.cursor = "pointer";
+    } else {
+      this.setFlex(p.el, prop, p.size, "0", p.defaultSize === 0 ? "1" : "0");
+      p.el.classList.remove("pane-collapsed");
+      p.el.style.cursor = "";
+    }
+  }
+
+  // ── Drag ───────────────────────────────────────────────────────────
+
+  private onMouseDown(e: MouseEvent, r: ResizerInfo): void {
     e.preventDefault();
     this.dragging = true;
-    this.dragResizer = resizer;
+    this.dragResizer = r;
     this.dragStartPos = this.direction === "horizontal" ? e.clientX : e.clientY;
-
-    // If either partner is auto-collapsed, expand it first
-    const { leftPartner, rightPartner } = resizer;
-    if (leftPartner.collapsed && leftPartner.collapseMode === "auto") {
-      leftPartner.collapsed = false;
-      leftPartner.collapseMode = null;
-      leftPartner.size = leftPartner.minSize;
-      this.applyPane(leftPartner);
+    const { leftPartner: L, rightPartner: R } = r;
+    if (L.collapsed && L.collapseMode === "auto") {
+      L.collapsed = false;
+      L.collapseMode = null;
+      L.size = L.minSize;
+      this.applyPane(L);
     }
-    if (rightPartner.collapsed && rightPartner.collapseMode === "auto") {
-      rightPartner.collapsed = false;
-      rightPartner.collapseMode = null;
-      rightPartner.size = rightPartner.minSize;
-      this.applyPane(rightPartner);
+    if (R.collapsed && R.collapseMode === "auto") {
+      R.collapsed = false;
+      R.collapseMode = null;
+      R.size = R.minSize;
+      this.applyPane(R);
     }
-
-    this.dragStartLeftSize = leftPartner.collapsed
-      ? COLLAPSE_WIDTH
-      : leftPartner.size;
-    this.dragStartRightSize = rightPartner.collapsed
-      ? COLLAPSE_WIDTH
-      : rightPartner.size;
-
+    this.dragStartLeftSize = L.collapsed ? COLLAPSE_WIDTH : L.size;
+    this.dragStartRightSize = R.collapsed ? COLLAPSE_WIDTH : R.size;
     document.body.style.cursor =
       this.direction === "horizontal" ? "col-resize" : "row-resize";
     document.body.style.userSelect = "none";
-
     document.addEventListener("mousemove", this.boundMouseMove);
     document.addEventListener("mouseup", this.boundMouseUp);
   }
 
   private onMouseMove(e: MouseEvent): void {
     if (!this.dragging || !this.dragResizer) return;
-
     const pos = this.direction === "horizontal" ? e.clientX : e.clientY;
     const delta = pos - this.dragStartPos;
-
-    const { leftPartner, rightPartner } = this.dragResizer;
-
-    let newLeft = this.dragStartLeftSize + delta;
-    let newRight = this.dragStartRightSize - delta;
-
-    // Clamp left
-    if (newLeft < leftPartner.minSize) {
-      const overflow = leftPartner.minSize - newLeft;
-      newLeft = leftPartner.minSize;
-      newRight = this.dragStartRightSize - delta + overflow;
+    const { leftPartner: L, rightPartner: R } = this.dragResizer;
+    let nL = this.dragStartLeftSize + delta;
+    let nR = this.dragStartRightSize - delta;
+    if (nL < L.minSize) {
+      nR += L.minSize - nL;
+      nL = L.minSize;
     }
-
-    // Clamp right
-    if (newRight < rightPartner.minSize) {
-      const overflow = rightPartner.minSize - newRight;
-      newRight = rightPartner.minSize;
-      newLeft = this.dragStartLeftSize + delta - overflow;
+    if (nR < R.minSize) {
+      nL += R.minSize - nR;
+      nR = R.minSize;
     }
-
-    // Auto-collapse left
-    if (
-      newLeft <= leftPartner.minSize &&
-      leftPartner.canCollapse &&
-      !leftPartner.collapsed
-    ) {
-      leftPartner.collapsed = true;
-      leftPartner.collapseMode = "auto";
-      this.applyPane(leftPartner);
-    } else if (
-      newLeft > leftPartner.minSize &&
-      leftPartner.collapsed &&
-      leftPartner.collapseMode === "auto"
-    ) {
-      leftPartner.collapsed = false;
-      leftPartner.collapseMode = null;
+    // Auto-collapse/expand
+    this.autoCollapse(L, nL);
+    this.autoCollapse(R, nR);
+    if (!L.collapsed) {
+      L.size = Math.max(L.minSize, nL);
+      this.applyPane(L);
     }
-
-    // Auto-collapse right
-    if (
-      newRight <= rightPartner.minSize &&
-      rightPartner.canCollapse &&
-      !rightPartner.collapsed
-    ) {
-      rightPartner.collapsed = true;
-      rightPartner.collapseMode = "auto";
-      this.applyPane(rightPartner);
-    } else if (
-      newRight > rightPartner.minSize &&
-      rightPartner.collapsed &&
-      rightPartner.collapseMode === "auto"
-    ) {
-      rightPartner.collapsed = false;
-      rightPartner.collapseMode = null;
-    }
-
-    // Apply sizes directly to DOM (no framework re-render)
-    if (!leftPartner.collapsed) {
-      leftPartner.size = Math.max(leftPartner.minSize, newLeft);
-      this.applyPane(leftPartner);
-    }
-    if (!rightPartner.collapsed) {
-      rightPartner.size = Math.max(rightPartner.minSize, newRight);
-      this.applyPane(rightPartner);
+    if (!R.collapsed) {
+      R.size = Math.max(R.minSize, nR);
+      this.applyPane(R);
     }
   }
 
-  private onMouseUp(_e: MouseEvent): void {
-    if (!this.dragging || !this.dragResizer) return;
+  private autoCollapse(p: PaneInfo, newSize: number): void {
+    if (newSize <= p.minSize && p.canCollapse && !p.collapsed) {
+      p.collapsed = true;
+      p.collapseMode = "auto";
+      this.applyPane(p);
+    } else if (
+      newSize > p.minSize &&
+      p.collapsed &&
+      p.collapseMode === "auto"
+    ) {
+      p.collapsed = false;
+      p.collapseMode = null;
+    }
+  }
 
+  private onMouseUp(): void {
+    if (!this.dragging || !this.dragResizer) return;
     this.dragging = false;
     document.body.style.cursor = "";
     document.body.style.userSelect = "";
     document.removeEventListener("mousemove", this.boundMouseMove);
     document.removeEventListener("mouseup", this.boundMouseUp);
-
-    // Persist final sizes
-    const { leftPartner, rightPartner } = this.dragResizer;
-    if (!leftPartner.collapsed) {
-      this.saveStorage(`${leftPartner.id}-size`, String(leftPartner.size));
-    }
-    if (!rightPartner.collapsed) {
-      this.saveStorage(`${rightPartner.id}-size`, String(rightPartner.size));
-    }
-
+    const { leftPartner: L, rightPartner: R } = this.dragResizer;
+    if (!L.collapsed) this.save(`${L.id}-size`, String(L.size));
+    if (!R.collapsed) this.save(`${R.id}-size`, String(R.size));
     this.dragResizer = null;
   }
 
-  /** Apply a single pane's style to DOM */
-  private applyPane(pane: PaneInfo): void {
-    const prop = this.direction === "horizontal" ? "width" : "height";
+  // ── Double-click ───────────────────────────────────────────────────
 
-    if (pane.collapsed) {
-      pane.el.style[prop] = `${COLLAPSE_WIDTH}px`;
-      pane.el.style.flexBasis = `${COLLAPSE_WIDTH}px`;
-      pane.el.style.flexGrow = "0";
-      pane.el.classList.add("pane-collapsed");
-      pane.el.style.cursor = "pointer";
+  private onDblClick(r: ResizerInfo): void {
+    const t =
+      r.leftPartner.size <= r.rightPartner.size
+        ? r.leftPartner
+        : r.rightPartner;
+    if (!t.canCollapse) return;
+    if (t.collapsed) {
+      t.collapsed = false;
+      t.collapseMode = null;
+      const s = this.load(`${t.id}-size`);
+      t.size = s
+        ? Math.max(t.minSize, parseInt(s, 10))
+        : t.defaultSize || t.minSize * 3;
+      this.save(`${t.id}-collapsed`, "false");
     } else {
-      pane.el.style[prop] = `${pane.size}px`;
-      pane.el.style.flexBasis = `${pane.size}px`;
-      pane.el.style.flexGrow = pane.defaultSize === 0 ? "1" : "0";
-      pane.el.classList.remove("pane-collapsed");
-      pane.el.style.cursor = "";
+      t.collapsed = true;
+      t.collapseMode = "manual";
+      this.save(`${t.id}-collapsed`, "true");
     }
-  }
-
-  // ── Double-click Collapse ────────────────────────────────────────
-
-  private onResizerDoubleClick(resizer: ResizerInfo): void {
-    // Toggle the smaller partner (or right if equal)
-    const { leftPartner, rightPartner } = resizer;
-    const target =
-      leftPartner.size <= rightPartner.size ? leftPartner : rightPartner;
-
-    if (!target.canCollapse) return;
-
-    if (target.collapsed) {
-      target.collapsed = false;
-      target.collapseMode = null;
-      // Restore from storage or use default
-      const saved = this.loadStorage(`${target.id}-size`);
-      target.size =
-        saved !== null
-          ? Math.max(target.minSize, parseInt(saved, 10))
-          : target.defaultSize || target.minSize * 3;
-      this.saveStorage(`${target.id}-collapsed`, "false");
-    } else {
-      target.collapsed = true;
-      target.collapseMode = "manual";
-      this.saveStorage(`${target.id}-collapsed`, "true");
-    }
-
-    this.applyPane(target);
-    // Recompute remaining-space pane
-    this.computeLayout();
+    this.applyPane(t);
+    this.runLayout();
     this.applyLayout();
   }
 
-  // ── localStorage ─────────────────────────────────────────────────
+  // ── Storage ────────────────────────────────────────────────────────
 
-  private loadStorage(key: string): string | null {
+  private load(k: string): string | null {
     try {
-      return localStorage.getItem(`${this.storagePrefix}-${key}`);
+      return localStorage.getItem(`${this.storagePrefix}-${k}`);
     } catch {
       return null;
     }
   }
-
-  private saveStorage(key: string, value: string): void {
+  private save(k: string, v: string): void {
     try {
-      localStorage.setItem(`${this.storagePrefix}-${key}`, value);
-    } catch {
-      /* quota exceeded */
-    }
+      localStorage.setItem(`${this.storagePrefix}-${k}`, v);
+    } catch {}
   }
 
-  // ── Cleanup ──────────────────────────────────────────────────────
+  // ── Cleanup ────────────────────────────────────────────────────────
 
   destroy(): void {
     document.removeEventListener("mousemove", this.boundMouseMove);
     document.removeEventListener("mouseup", this.boundMouseUp);
-    for (const r of this.resizers) {
-      r.el.remove();
-    }
+    for (const r of this.resizers) r.el.remove();
     this.resizers = [];
     this.panes = [];
   }
