@@ -252,6 +252,7 @@ export class PaneLayoutHandler {
     const { leftPartner: L, rightPartner: R } = this.dragResizer;
     let nL = this.dragStartLeftSize + delta;
     let nR = this.dragStartRightSize - delta;
+    // Clamp both sides — ensure neither goes below minSize
     if (nL < L.minSize) {
       nR += L.minSize - nL;
       nL = L.minSize;
@@ -260,6 +261,9 @@ export class PaneLayoutHandler {
       nL += R.minSize - nR;
       nR = R.minSize;
     }
+    // Final safety clamp (prevents cascading overflow)
+    nL = Math.max(L.minSize, nL);
+    nR = Math.max(R.minSize, nR);
     // Auto-collapse/expand
     this.autoCollapse(L, nL);
     this.autoCollapse(R, nR);
