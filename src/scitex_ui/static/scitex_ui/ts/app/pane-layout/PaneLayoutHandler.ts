@@ -278,7 +278,7 @@ export class PaneLayoutHandler {
   }
 
   private autoCollapse(p: PaneInfo, newSize: number): void {
-    if (newSize <= p.minSize && p.canCollapse && !p.collapsed) {
+    if (newSize < p.minSize && p.canCollapse && !p.collapsed) {
       p.collapsed = true;
       p.collapseMode = "auto";
       this.applyPane(p);
