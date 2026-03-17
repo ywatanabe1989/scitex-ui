@@ -25,6 +25,8 @@ function onMouseDown(r: BaseResizer, e: MouseEvent): void {
 
   e.preventDefault();
   r.startDrag(e);
+  collapsedWhich = null;
+  collapseMousePos = 0;
   const [sf, ss] = r.getStartSizes();
   console.log(
     `[Resizer:drag] mousedown on ${r.getStorageKey()} — firstSize=${sf}, secondSize=${ss}, firstCan=${r.getFirstCanCollapse()}, secondCan=${r.getSecondCanCollapse()}, threshold=${r.getThresholdPx()}, isInApp=${r.getIsInApp()}`,
@@ -46,26 +48,60 @@ function onMouseDown(r: BaseResizer, e: MouseEvent): void {
   r.fireOnDragStart();
 
   const onMove = (e: MouseEvent) => handleMouseMove(r, e);
-  const onUp = () => handleMouseUp(r, onMove, onUp);
+  const cleanup = () => handleMouseUp(r, onMove, cleanup);
 
   document.addEventListener("mousemove", onMove);
-  document.addEventListener("mouseup", onUp);
+  document.addEventListener("mouseup", cleanup);
+  // Also handle mouse leaving the window entirely (fixes "domino stuck" on mouse-off)
+  document.addEventListener("mouseleave", cleanup);
 }
 
 /** Track the last raw (un-snapped) mouse position for mouseUp finalization */
 let lastRawMousePos = 0;
+
+/** Track which panel was collapsed and the mouse position at collapse */
+let collapsedWhich: "first" | "second" | null = null;
+let collapseMousePos = 0;
 
 function handleMouseMove(r: BaseResizer, e: MouseEvent): void {
   if (!r.isDraggingNow()) return;
 
   lastRawMousePos = r.getMousePosPublic(e);
 
-  // If primary collapsed and propagation target exists, resize that instead
-  if (r.isPrimaryCollapsed() && r.getPropagate()) {
-    applyPropagation(r, e);
+  // If primary collapsed, check if user reversed direction to re-expand
+  if (r.isPrimaryCollapsed()) {
+    const reverseThreshold = 20; // px of reverse movement to trigger re-expand
+    const reverseDelta = lastRawMousePos - collapseMousePos;
+
+    // Detect reversal: if first collapsed, reverseDelta>0 means moving right (expand)
+    // If second collapsed, reverseDelta<0 means moving left (expand)
+    const shouldReExpand =
+      (collapsedWhich === "first" && reverseDelta > reverseThreshold) ||
+      (collapsedWhich === "second" && reverseDelta < -reverseThreshold);
+
+    if (shouldReExpand && collapsedWhich) {
+      console.log(
+        `[Resizer:drag] ${r.getStorageKey()} RE-EXPAND ${collapsedWhich} (reverseDelta=${reverseDelta.toFixed(0)})`,
+      );
+      // Clear propagation target
+      r.clearPropagate();
+      // Re-expand the collapsed panel
+      r.reExpandDuringDrag(collapsedWhich);
+      collapsedWhich = null;
+      collapseMousePos = 0;
+      // Continue with normal resize from current mouse position
+      // Reset start position to current for smooth continuation
+      r.resetDragStart(e);
+      return;
+    }
+
+    // If propagation target exists, resize that instead
+    if (r.getPropagate()) {
+      applyPropagation(r, e);
+      return;
+    }
     return;
   }
-  if (r.isPrimaryCollapsed()) return;
 
   const delta = lastRawMousePos - r.getStartPos();
   applyResize(r, delta, e);
@@ -74,7 +110,7 @@ function handleMouseMove(r: BaseResizer, e: MouseEvent): void {
 function handleMouseUp(
   r: BaseResizer,
   onMove: (e: MouseEvent) => void,
-  onUp: () => void,
+  cleanup: () => void,
 ): void {
   if (!r.isDraggingNow()) return;
 
@@ -100,7 +136,8 @@ function handleMouseUp(
   }
 
   document.removeEventListener("mousemove", onMove);
-  document.removeEventListener("mouseup", onUp);
+  document.removeEventListener("mouseup", cleanup);
+  document.removeEventListener("mouseleave", cleanup);
   console.log(
     `[Resizer:drag] mouseup on ${r.getStorageKey()} — first.collapsed=${r.getFirstPanel().classList.contains("collapsed")}, second.collapsed=${r.getSecondPanel().classList.contains("collapsed")}, firstSize=${r.getSizePublic(r.getFirstPanel())}, secondSize=${r.getSizePublic(r.getSecondPanel())}`,
   );
@@ -172,6 +209,8 @@ function applyResize(r: BaseResizer, delta: number, e: MouseEvent): void {
       );
       r.markPrimaryCollapsed();
       r.collapsePanelPublic("second");
+      collapsedWhich = "second";
+      collapseMousePos = r.getMousePosPublic(e);
       tryStartCascade(r, second, e);
       return;
     }
@@ -197,6 +236,8 @@ function applyResize(r: BaseResizer, delta: number, e: MouseEvent): void {
       );
       r.markPrimaryCollapsed();
       r.collapsePanelPublic("first");
+      collapsedWhich = "first";
+      collapseMousePos = r.getMousePosPublic(e);
       tryStartCascade(r, first, e);
       return;
     }
@@ -216,12 +257,16 @@ function applyResize(r: BaseResizer, delta: number, e: MouseEvent): void {
     if (firstCan && newFirst < threshold) {
       r.markPrimaryCollapsed();
       r.collapsePanelPublic("first");
+      collapsedWhich = "first";
+      collapseMousePos = r.getMousePosPublic(e);
       tryStartCascade(r, first, e);
       return;
     }
     if (secondCan && newSecond < threshold) {
       r.markPrimaryCollapsed();
       r.collapsePanelPublic("second");
+      collapsedWhich = "second";
+      collapseMousePos = r.getMousePosPublic(e);
       tryStartCascade(r, second, e);
       return;
     }
