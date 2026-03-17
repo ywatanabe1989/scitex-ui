@@ -27,6 +27,8 @@ function onMouseDown(r: BaseResizer, e: MouseEvent): void {
   r.startDrag(e);
   collapsedWhich = null;
   collapseMousePos = 0;
+  prevMousePos = r.getMousePosPublic(e);
+  consistentReverseCount = 0;
   const [sf, ss] = r.getStartSizes();
   console.log(
     `[Resizer:drag] mousedown on ${r.getStorageKey()} — firstSize=${sf}, secondSize=${ss}, firstCan=${r.getFirstCanCollapse()}, secondCan=${r.getSecondCanCollapse()}, threshold=${r.getThresholdPx()}, isInApp=${r.getIsInApp()}`,
@@ -63,49 +65,65 @@ let lastRawMousePos = 0;
 let collapsedWhich: "first" | "second" | null = null;
 let collapseMousePos = 0;
 
+/** Track previous mouse position to detect consistent direction */
+let prevMousePos = 0;
+let consistentReverseCount = 0;
+const REVERSE_FRAMES_REQUIRED = 3; // Must move in reverse for 3+ frames
+
 function handleMouseMove(r: BaseResizer, e: MouseEvent): void {
   if (!r.isDraggingNow()) return;
 
-  lastRawMousePos = r.getMousePosPublic(e);
+  const mousePos = r.getMousePosPublic(e);
+  const mouseDelta = mousePos - lastRawMousePos;
+  lastRawMousePos = mousePos;
 
-  // If primary collapsed, check if user reversed direction to re-expand
+  // If primary collapsed, check if user is consistently reversing direction
   if (r.isPrimaryCollapsed()) {
-    // Mouse must cross back past the collapse threshold point
-    // (not just move a few pixels in reverse — that could be jitter)
-    const threshold = r.getThresholdPx();
-    const reverseDelta = lastRawMousePos - collapseMousePos;
+    // Check if mouse is moving in the expand direction this frame
+    const isExpandDirection =
+      (collapsedWhich === "first" && mouseDelta > 0) ||
+      (collapsedWhich === "second" && mouseDelta < 0);
 
-    // Detect intentional reversal: mouse must move at least threshold px
-    // in the expand direction from the collapse point
-    const shouldReExpand =
+    if (isExpandDirection) {
+      consistentReverseCount++;
+    } else {
+      consistentReverseCount = 0;
+    }
+
+    // Re-expand requires: (1) enough distance from collapse AND (2) consistent direction
+    const threshold = r.getThresholdPx();
+    const reverseDelta = mousePos - collapseMousePos;
+    const farEnough =
       (collapsedWhich === "first" && reverseDelta > threshold) ||
       (collapsedWhich === "second" && reverseDelta < -threshold);
 
-    if (shouldReExpand && collapsedWhich) {
+    if (
+      farEnough &&
+      consistentReverseCount >= REVERSE_FRAMES_REQUIRED &&
+      collapsedWhich
+    ) {
       console.log(
-        `[Resizer:drag] ${r.getStorageKey()} RE-EXPAND ${collapsedWhich} (reverseDelta=${reverseDelta.toFixed(0)})`,
+        `[Resizer:drag] ${r.getStorageKey()} RE-EXPAND ${collapsedWhich} (reverseDelta=${reverseDelta.toFixed(0)}, frames=${consistentReverseCount})`,
       );
-      // Clear propagation target and collapsed state
       r.clearPropagate();
       r.reExpandDuringDrag(collapsedWhich);
       collapsedWhich = null;
       collapseMousePos = 0;
-      // Do NOT reset drag start — keep the original startPos/startSizes
-      // so that the resizer tracks the mouse position exactly.
-      // The next applyResize call (below) uses the original start values
-      // to compute panel size = startSize + (mousePos - startPos),
-      // placing the resizer precisely under the cursor.
+      consistentReverseCount = 0;
+      // Fall through to applyResize with original start values
     }
 
-    // If propagation target exists, resize that instead
-    if (r.getPropagate()) {
-      applyPropagation(r, e);
+    // If still collapsed (re-expand didn't trigger or wasn't needed)
+    if (r.isPrimaryCollapsed()) {
+      if (r.getPropagate()) {
+        applyPropagation(r, e);
+        return;
+      }
       return;
     }
-    return;
   }
 
-  const delta = lastRawMousePos - r.getStartPos();
+  const delta = mousePos - r.getStartPos();
   applyResize(r, delta, e);
 }
 
