@@ -177,7 +177,19 @@ export abstract class BaseResizer {
     this._isDragging = true;
     this._primaryCollapsed = false;
     this._propagationTarget = null;
-    this._startPos = this.getMousePos(e);
+
+    // Snap to resizer center: offset startPos so the resizer tracks the
+    // mouse from the resizer's center, not from where the user clicked
+    // in the hit area. This prevents initial offset drift.
+    const rect = this.resizerEl.getBoundingClientRect();
+    const resizerCenter =
+      this.getMousePos(e) > 0
+        ? this.getCursor() === "col-resize"
+          ? rect.left + rect.width / 2
+          : rect.top + rect.height / 2
+        : this.getMousePos(e);
+    this._startPos = resizerCenter;
+
     this._startFirstSize = this.getSize(this.firstPanel);
     this._startSecondSize = this.getSize(this.secondPanel);
   }
