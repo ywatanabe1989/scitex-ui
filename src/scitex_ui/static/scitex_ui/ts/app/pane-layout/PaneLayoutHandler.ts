@@ -76,10 +76,20 @@ export class PaneLayoutHandler {
     this.boundMouseUp = this.onMouseUp.bind(this);
 
     this.panes = this.discoverPanes();
+    console.debug(
+      `[PaneLayout] "${this.storagePrefix}" ${this.direction}: ${this.panes.length} panes`,
+      this.panes.map((p) => `${p.id}${p.fixed ? "(fixed)" : ""}`),
+    );
     this.resizers = this.createResizers();
     this.restoreState();
     this.computeLayout();
     this.applyLayout();
+    console.debug(
+      `[PaneLayout] Sizes:`,
+      this.panes.map(
+        (p) => `${p.id}=${p.collapsed ? "collapsed" : p.size + "px"}`,
+      ),
+    );
   }
 
   // ── Discovery ────────────────────────────────────────────────────
@@ -145,13 +155,16 @@ export class PaneLayoutHandler {
       const resizerEl = document.createElement("div");
       resizerEl.className =
         this.direction === "horizontal"
-          ? "pane-resizer pane-resizer--h"
-          : "pane-resizer pane-resizer--v";
+          ? "panel-resizer pane-resizer pane-resizer--h"
+          : "panel-resizer pane-resizer pane-resizer--v";
       resizerEl.setAttribute("data-pane-resizer", "");
 
-      // Insert after the left partner's element (or after the pane at index i)
-      const insertAfter = this.panes[i].el;
-      insertAfter.after(resizerEl);
+      // Insert before the right partner's element (resizer sits between the two partners)
+      right.el.before(resizerEl);
+
+      console.debug(
+        `[PaneLayout] Resizer ${resizers.length}: ${left.id} ↔ ${right.id}`,
+      );
 
       const resizer: ResizerInfo = {
         el: resizerEl,
