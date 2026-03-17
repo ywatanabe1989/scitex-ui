@@ -177,19 +177,7 @@ export abstract class BaseResizer {
     this._isDragging = true;
     this._primaryCollapsed = false;
     this._propagationTarget = null;
-
-    // Snap to resizer center: offset startPos so the resizer tracks the
-    // mouse from the resizer's center, not from where the user clicked
-    // in the hit area. This prevents initial offset drift.
-    const rect = this.resizerEl.getBoundingClientRect();
-    const resizerCenter =
-      this.getMousePos(e) > 0
-        ? this.getCursor() === "col-resize"
-          ? rect.left + rect.width / 2
-          : rect.top + rect.height / 2
-        : this.getMousePos(e);
-    this._startPos = resizerCenter;
-
+    this._startPos = this.getMousePos(e);
     this._startFirstSize = this.getSize(this.firstPanel);
     this._startSecondSize = this.getSize(this.secondPanel);
   }
@@ -212,34 +200,6 @@ export abstract class BaseResizer {
 
   collapsePanelPublic(which: "first" | "second"): void {
     this.collapsePanel(which);
-  }
-
-  /** Re-expand a panel during an active drag (reverse direction detected).
-   *  Only clears collapsed state — the actual size is set by applyResize()
-   *  using collapse-relative start values. */
-  reExpandDuringDrag(which: "first" | "second"): void {
-    const panel = which === "first" ? this.firstPanel : this.secondPanel;
-    panel.classList.remove("collapsed");
-    panel.style.flexShrink = "0";
-    panel.style.flexGrow = "0";
-
-    this._primaryCollapsed = false;
-    saveCollapsed(this.storageKey + `-${which}`, false);
-    this.syncToggleIcon();
-  }
-
-  /** Reset drag origin to collapse point so expansion grows from threshold.
-   *  After this, applyResize computes: size = threshold + (mouse - collapsePos). */
-  resetDragFromCollapse(collapsePos: number, which: "first" | "second"): void {
-    this._startPos = collapsePos;
-    if (which === "first") {
-      this._startFirstSize = this.thresholdPx;
-      this._startSecondSize = this.getSize(this.secondPanel);
-    } else {
-      this._startFirstSize = this.getSize(this.firstPanel);
-      this._startSecondSize = this.thresholdPx;
-    }
-    this._propagationTarget = null;
   }
 
   saveStatePublic(): void {
@@ -300,7 +260,7 @@ export abstract class BaseResizer {
     const firstCollapsed = restoreCollapsed(this.storageKey + "-first");
     const secondCollapsed = restoreCollapsed(this.storageKey + "-second");
 
-    // Also detect initial collapsed state from DOM (HTML may have class="collapsed")
+    // Also detect initial collapsed state from DOM (HTML may set class="collapsed")
     const firstDomCollapsed =
       this.firstCanCollapse && this.firstPanel.classList.contains("collapsed");
     const secondDomCollapsed =
