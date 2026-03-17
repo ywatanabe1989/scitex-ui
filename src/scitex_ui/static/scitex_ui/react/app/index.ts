@@ -19,3 +19,18 @@ export type { RecentPaneProps, RecentEntry } from "./recent-pane";
 
 export { Tooltip } from "./tooltip";
 export type { TooltipProps } from "./tooltip";
+
+// Bridge runtime for app docking
+export {
+  installFetchOverride,
+  mountReactApp,
+  unmountReactApp,
+  emitBridgeEvent,
+  onBridgeEvent,
+} from "./bridge";
+export type {
+  BridgeConfig,
+  BridgeMountOptions,
+  AppMounter,
+  AppUnmounter,
+} from "./bridge";
