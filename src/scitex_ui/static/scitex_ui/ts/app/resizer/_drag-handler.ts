@@ -106,11 +106,17 @@ function handleMouseMove(r: BaseResizer, e: MouseEvent): void {
         `[Resizer:drag] ${r.getStorageKey()} RE-EXPAND ${collapsedWhich} (reverseDelta=${reverseDelta.toFixed(0)}, frames=${consistentReverseCount})`,
       );
       r.clearPropagate();
+      // Reset drag start to collapse point: expansion grows from threshold
+      // size at the collapse position, not from the original drag start.
+      // This respects the collapsed cursor position as the new origin.
+      const savedCollapsePos = collapseMousePos;
+      const savedWhich = collapsedWhich;
       r.reExpandDuringDrag(collapsedWhich);
+      r.resetDragFromCollapse(savedCollapsePos, savedWhich);
       collapsedWhich = null;
       collapseMousePos = 0;
       consistentReverseCount = 0;
-      // Fall through to applyResize with original start values
+      // Fall through to applyResize with collapse-relative start values
     }
 
     // If still collapsed (re-expand didn't trigger or wasn't needed)

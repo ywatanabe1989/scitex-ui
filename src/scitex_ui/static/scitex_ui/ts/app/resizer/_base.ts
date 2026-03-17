@@ -216,7 +216,7 @@ export abstract class BaseResizer {
 
   /** Re-expand a panel during an active drag (reverse direction detected).
    *  Only clears collapsed state — the actual size is set by applyResize()
-   *  using the original drag start values, so the resizer stays under the cursor. */
+   *  using collapse-relative start values. */
   reExpandDuringDrag(which: "first" | "second"): void {
     const panel = which === "first" ? this.firstPanel : this.secondPanel;
     panel.classList.remove("collapsed");
@@ -226,6 +226,20 @@ export abstract class BaseResizer {
     this._primaryCollapsed = false;
     saveCollapsed(this.storageKey + `-${which}`, false);
     this.syncToggleIcon();
+  }
+
+  /** Reset drag origin to collapse point so expansion grows from threshold.
+   *  After this, applyResize computes: size = threshold + (mouse - collapsePos). */
+  resetDragFromCollapse(collapsePos: number, which: "first" | "second"): void {
+    this._startPos = collapsePos;
+    if (which === "first") {
+      this._startFirstSize = this.thresholdPx;
+      this._startSecondSize = this.getSize(this.secondPanel);
+    } else {
+      this._startFirstSize = this.getSize(this.firstPanel);
+      this._startSecondSize = this.thresholdPx;
+    }
+    this._propagationTarget = null;
   }
 
   saveStatePublic(): void {
