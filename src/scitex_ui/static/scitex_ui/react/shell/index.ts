@@ -14,3 +14,11 @@ export type { TerminalProps } from "./terminal";
 
 export { Chat } from "./chat";
 export type { ChatProps } from "./chat";
+
+export { AppSandbox } from "./app-sandbox";
+export type {
+  AppSandboxProps,
+  AppMountConfig,
+  AppMountFunction,
+  AppUnmountFunction,
+} from "./app-sandbox";
