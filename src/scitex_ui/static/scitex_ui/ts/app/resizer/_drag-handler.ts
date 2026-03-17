@@ -70,14 +70,16 @@ function handleMouseMove(r: BaseResizer, e: MouseEvent): void {
 
   // If primary collapsed, check if user reversed direction to re-expand
   if (r.isPrimaryCollapsed()) {
-    const reverseThreshold = 20; // px of reverse movement to trigger re-expand
+    // Mouse must cross back past the collapse threshold point
+    // (not just move a few pixels in reverse — that could be jitter)
+    const threshold = r.getThresholdPx();
     const reverseDelta = lastRawMousePos - collapseMousePos;
 
-    // Detect reversal: if first collapsed, reverseDelta>0 means moving right (expand)
-    // If second collapsed, reverseDelta<0 means moving left (expand)
+    // Detect intentional reversal: mouse must move at least threshold px
+    // in the expand direction from the collapse point
     const shouldReExpand =
-      (collapsedWhich === "first" && reverseDelta > reverseThreshold) ||
-      (collapsedWhich === "second" && reverseDelta < -reverseThreshold);
+      (collapsedWhich === "first" && reverseDelta > threshold) ||
+      (collapsedWhich === "second" && reverseDelta < -threshold);
 
     if (shouldReExpand && collapsedWhich) {
       console.log(
