@@ -188,6 +188,10 @@ export function usePanelResize(config: PanelResizeConfig): PanelResizeResult {
 
   const onMouseDown = useCallback(
     (e: React.MouseEvent) => {
+      console.debug(
+        `[usePanelResize] mousedown: ${storageKey} direction=${direction} ` +
+          `width=${width} collapsed=${collapsed} clientX=${e.clientX}`,
+      );
       if (collapsed) {
         setCollapsed(false);
         saveCollapsed(false);
@@ -203,7 +207,7 @@ export function usePanelResize(config: PanelResizeConfig): PanelResizeResult {
       document.body.style.userSelect = "none";
       e.preventDefault();
     },
-    [collapsed, width, minWidth, saveCollapsed],
+    [collapsed, width, minWidth, saveCollapsed, storageKey, direction],
   );
 
   useEffect(() => {
@@ -215,6 +219,14 @@ export function usePanelResize(config: PanelResizeConfig): PanelResizeResult {
           ? startWidth.current + delta
           : startWidth.current - delta;
       const clamped = clampWidth(raw);
+
+      // Debug: log resize direction on first significant movement
+      if (Math.abs(delta) > 5 && Math.abs(delta) < 10) {
+        console.debug(
+          `[usePanelResize] ${storageKey}: direction=${direction}, delta=${delta}, ` +
+            `startW=${startWidth.current}, raw=${raw}, clamped=${clamped}`,
+        );
+      }
 
       if (clamped >= minWidth) {
         liveWidth.current = clamped;
