@@ -1,0 +1,26 @@
+/**
+ * scitex-ui — shell CSS bundle (AUTO-GENERATED)
+ *
+ * Do not edit manually. Regenerate with: npx tsx css/_build-index.ts
+ */
+
+@import "./shell/ai-panel.css";
+@import "./shell/ai-panel/01-panel-layout.css";
+@import "./shell/ai-panel/02-mode-toggle.css";
+@import "./shell/ai-panel/03-chat-messages.css";
+@import "./shell/ai-panel/04-chat-input.css";
+@import "./shell/ai-panel/05-console-mode.css";
+@import "./shell/ai-panel/06-console-tabs.css";
+@import "./shell/ai-panel/07-sessions.css";
+@import "./shell/app-shell.css";
+@import "./shell/chat.css";
+@import "./shell/media-input.css";
+@import "./shell/resizer.css";
+@import "./shell/status-bar.css";
+@import "./shell/terminal.css";
+@import "./shell/theme.css";
+@import "./shell/viewer.css";
+@import "./shell/workspace.css";
+@import "./primitives/spacing.css";
+@import "./primitives/typography.css";
+@import "./primitives/z-index.css";
