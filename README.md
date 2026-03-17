@@ -166,6 +166,34 @@ MCP (Model Context Protocol) tools for AI agents to discover and query available
 
 </details>
 
+## Role in SciTeX Ecosystem
+
+`scitex-ui` is the **shared React/TypeScript component library** for all SciTeX web applications. It provides the visual building blocks that maintain consistency across the cloud dashboard, workspace editor, and third-party apps.
+
+```
+scitex (orchestrator, templates, CLI, MCP)
+  |-- scitex-app              -- runtime SDK for apps
+  |-- scitex-ui (this package) -- React/TS component library
+  |     |-- Shell (stx-shell-*) -- workspace frame, sidebar, header
+  |     |-- App (stx-app-*)     -- reusable widgets within app panes
+  |     |-- AppSandbox          -- Shadow DOM isolation for apps
+  |     +-- CSS bundles          -- shell.css, app.css, all.css
+  +-- figrecipe                -- reference app (consumes scitex-ui)
+```
+
+**What this package owns:**
+
+- Shell components (`stx-shell-*`): ThemeProvider, AppShell, StatusBar, Workspace
+- App components (`stx-app-*`): DataTable, FileBrowser, SelectorNav
+- `AppSandbox` for Shadow DOM isolation of third-party apps
+- CSS bundles: `shell.css` (host frame), `app.css` (in-app), `all.css` (combined)
+
+**What this package does NOT own:**
+
+- Backend/runtime SDK -- see [scitex-app](https://github.com/ywatanabe1989/scitex-app)
+- Orchestration, templates, CLI -- see [scitex](https://github.com/ywatanabe1989/scitex-python)
+- App-specific logic -- each app (e.g., [figrecipe](https://github.com/ywatanabe1989/figrecipe)) owns its own views
+
 ## Part of SciTeX
 
 `scitex-ui` is part of [SciTeX](https://scitex.ai). When used within the SciTeX ecosystem, components automatically integrate with the SciTeX cloud dashboard and documentation hub.
