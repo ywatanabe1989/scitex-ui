@@ -39,17 +39,20 @@ export function computeLayout(
   if (remainingPane) {
     const remainingSpace = available - explicitTotal;
     if (remainingSpace >= remainingPane.minSize) {
+      // Enough space — remaining pane gets the rest
       remainingPane.size = remainingSpace;
     } else {
-      // Not enough — scale ALL resizable panes proportionally
+      // Not enough — give remaining pane a fair virtual default
+      // (equal share among all resizable panes), then scale everyone
+      const fairShare = available / resizable.length;
       const allTotal = resizable.reduce(
-        (s, p) => s + (p.defaultSize || p.minSize),
+        (s, p) => s + (p.defaultSize || fairShare),
         0,
       );
       if (allTotal > 0) {
         const scale = available / allTotal;
         for (const p of resizable) {
-          const base = p.defaultSize || p.minSize;
+          const base = p.defaultSize || fairShare;
           p.size = Math.max(p.minSize, Math.round(base * scale));
         }
       }
