@@ -85,16 +85,16 @@ function handleMouseMove(r: BaseResizer, e: MouseEvent): void {
       console.log(
         `[Resizer:drag] ${r.getStorageKey()} RE-EXPAND ${collapsedWhich} (reverseDelta=${reverseDelta.toFixed(0)})`,
       );
-      // Clear propagation target
+      // Clear propagation target and collapsed state
       r.clearPropagate();
-      // Re-expand the collapsed panel
       r.reExpandDuringDrag(collapsedWhich);
       collapsedWhich = null;
       collapseMousePos = 0;
-      // Continue with normal resize from current mouse position
-      // Reset start position to current for smooth continuation
-      r.resetDragStart(e);
-      return;
+      // Do NOT reset drag start — keep the original startPos/startSizes
+      // so that the resizer tracks the mouse position exactly.
+      // The next applyResize call (below) uses the original start values
+      // to compute panel size = startSize + (mousePos - startPos),
+      // placing the resizer precisely under the cursor.
     }
 
     // If propagation target exists, resize that instead
