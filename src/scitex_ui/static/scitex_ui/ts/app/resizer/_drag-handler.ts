@@ -50,8 +50,6 @@ function onMouseDown(r: BaseResizer, e: MouseEvent): void {
 
   document.addEventListener("mousemove", onMove);
   document.addEventListener("mouseup", cleanup);
-  // End drag when mouse leaves the window (prevents stuck state)
-  document.addEventListener("mouseleave", cleanup);
 }
 
 /** Track the last raw (un-snapped) mouse position for mouseUp finalization */
@@ -103,7 +101,6 @@ function handleMouseUp(
 
   document.removeEventListener("mousemove", onMove);
   document.removeEventListener("mouseup", cleanup);
-  document.removeEventListener("mouseleave", cleanup);
   console.log(
     `[Resizer:drag] mouseup on ${r.getStorageKey()} — first.collapsed=${r.getFirstPanel().classList.contains("collapsed")}, second.collapsed=${r.getSecondPanel().classList.contains("collapsed")}, firstSize=${r.getSizePublic(r.getFirstPanel())}, secondSize=${r.getSizePublic(r.getSecondPanel())}`,
   );
