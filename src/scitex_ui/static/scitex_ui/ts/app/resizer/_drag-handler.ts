@@ -27,8 +27,6 @@ function onMouseDown(r: BaseResizer, e: MouseEvent): void {
   r.startDrag(e);
   collapsedWhich = null;
   collapseMousePos = 0;
-  prevMousePos = r.getMousePosPublic(e);
-  consistentReverseCount = 0;
   const [sf, ss] = r.getStartSizes();
   console.log(
     `[Resizer:drag] mousedown on ${r.getStorageKey()} — firstSize=${sf}, secondSize=${ss}, firstCan=${r.getFirstCanCollapse()}, secondCan=${r.getSecondCanCollapse()}, threshold=${r.getThresholdPx()}, isInApp=${r.getIsInApp()}`,
@@ -65,61 +63,38 @@ let lastRawMousePos = 0;
 let collapsedWhich: "first" | "second" | null = null;
 let collapseMousePos = 0;
 
-/** Track previous mouse position to detect consistent direction */
-let prevMousePos = 0;
-let consistentReverseCount = 0;
-const REVERSE_FRAMES_REQUIRED = 3; // Must move in reverse for 3+ frames
-
 function handleMouseMove(r: BaseResizer, e: MouseEvent): void {
   if (!r.isDraggingNow()) return;
 
   const mousePos = r.getMousePosPublic(e);
-  const mouseDelta = mousePos - lastRawMousePos;
   lastRawMousePos = mousePos;
 
-  // If primary collapsed, check if user is consistently reversing direction
+  // If primary collapsed, check if mouse crossed back past collapse point
   if (r.isPrimaryCollapsed()) {
-    // Check if mouse is moving in the expand direction this frame
-    const isExpandDirection =
-      (collapsedWhich === "first" && mouseDelta > 0) ||
-      (collapsedWhich === "second" && mouseDelta < 0);
-
-    if (isExpandDirection) {
-      consistentReverseCount++;
-    } else {
-      consistentReverseCount = 0;
-    }
-
-    // Re-expand requires: (1) enough distance from collapse AND (2) consistent direction
     const threshold = r.getThresholdPx();
     const reverseDelta = mousePos - collapseMousePos;
-    const farEnough =
+
+    // Immediate re-expand: mouse crossed threshold distance from collapse
+    const shouldReExpand =
       (collapsedWhich === "first" && reverseDelta > threshold) ||
       (collapsedWhich === "second" && reverseDelta < -threshold);
 
-    if (
-      farEnough &&
-      consistentReverseCount >= REVERSE_FRAMES_REQUIRED &&
-      collapsedWhich
-    ) {
+    if (shouldReExpand && collapsedWhich) {
       console.log(
-        `[Resizer:drag] ${r.getStorageKey()} RE-EXPAND ${collapsedWhich} (reverseDelta=${reverseDelta.toFixed(0)}, frames=${consistentReverseCount})`,
+        `[Resizer:drag] ${r.getStorageKey()} RE-EXPAND ${collapsedWhich} (reverseDelta=${reverseDelta.toFixed(0)})`,
       );
       r.clearPropagate();
-      // Reset drag start to collapse point: expansion grows from threshold
-      // size at the collapse position, not from the original drag start.
-      // This respects the collapsed cursor position as the new origin.
       const savedCollapsePos = collapseMousePos;
       const savedWhich = collapsedWhich;
       r.reExpandDuringDrag(collapsedWhich);
+      // Reset to collapse point: expansion grows from threshold at collapse pos
       r.resetDragFromCollapse(savedCollapsePos, savedWhich);
       collapsedWhich = null;
       collapseMousePos = 0;
-      consistentReverseCount = 0;
-      // Fall through to applyResize with collapse-relative start values
+      // Fall through to applyResize — works like dragging an open pane
     }
 
-    // If still collapsed (re-expand didn't trigger or wasn't needed)
+    // If still collapsed
     if (r.isPrimaryCollapsed()) {
       if (r.getPropagate()) {
         applyPropagation(r, e);
@@ -206,10 +181,14 @@ function snap(r: BaseResizer, raw: number, snaps: number[]): number {
 
 /**
  * Apply resize delta to primary panels.
- * Four cases via if/else if/else:
- *   1. Only second can collapse → size set on second
- *   2. Only first can collapse → size set on first
- *   3. Both/neither → proportional (snap first panel only to avoid conflicts)
+ *
+ * No max size — only min (threshold). When the opposite panel hits its
+ * threshold, the overflow cascades (domino) to shrink the next sibling.
+ *
+ * Three modes:
+ *   1. Only second can collapse → sized panel = second
+ *   2. Only first can collapse  → sized panel = first
+ *   3. Both/neither             → seesaw (first grows, second shrinks)
  */
 function applyResize(r: BaseResizer, delta: number, e: MouseEvent): void {
   const first = r.getFirstPanel();
@@ -222,17 +201,11 @@ function applyResize(r: BaseResizer, delta: number, e: MouseEvent): void {
   const snaps = getSnapPoints(r);
 
   if (secondCan && !firstCan) {
-    const totalSize = startFirst + startSecond;
-    const maxSize = totalSize - threshold; // protect first panel
-    const newSize = Math.min(snap(r, startSecond - delta, snaps), maxSize);
-    if (Math.abs(delta) % 50 < 2)
-      console.log(
-        `[Resizer:drag] ${key} mode=onlySecondCan delta=${delta.toFixed(0)} newSecondSize=${newSize.toFixed(0)} threshold=${threshold}`,
-      );
-    if (newSize < threshold) {
-      console.log(
-        `[Resizer:drag] ${key} COLLAPSE second (newSize=${newSize.toFixed(0)} < threshold=${threshold})`,
-      );
+    // Sized panel = second. No max — domino handles overflow.
+    const rawSize = snap(r, startSecond - delta, snaps);
+
+    // Collapse check
+    if (rawSize < threshold) {
       r.markPrimaryCollapsed();
       r.collapsePanelPublic("second");
       collapsedWhich = "second";
@@ -240,26 +213,44 @@ function applyResize(r: BaseResizer, delta: number, e: MouseEvent): void {
       tryStartCascade(r, second, e);
       return;
     }
+
     if (second.classList.contains("collapsed")) {
-      console.log(`[Resizer:drag] ${key} UN-COLLAPSE second`);
       second.classList.remove("collapsed");
       saveCollapsed(key + "-second", false);
     }
-    r.setSizePublic(second, newSize);
-    second.style.flexShrink = "0";
-    second.style.flexGrow = "0";
+
+    // Compute how much the opposite panel (first) needs to shrink
+    const oppositeNeeded = rawSize - startSecond; // negative = second shrank, positive = second grew
+    const oppositeNewSize = startFirst - oppositeNeeded;
+
+    if (oppositeNewSize >= threshold) {
+      // Opposite panel can absorb the resize
+      r.setSizePublic(second, rawSize);
+      second.style.flexShrink = "0";
+      second.style.flexGrow = "0";
+      r.setSizePublic(first, oppositeNewSize);
+      first.style.flexShrink = "0";
+      first.style.flexGrow = "0";
+    } else {
+      // Opposite hit threshold — clamp it, domino the overflow
+      const clamped = threshold;
+      const actualSecond = startFirst + startSecond - clamped;
+      r.setSizePublic(second, actualSecond);
+      second.style.flexShrink = "0";
+      second.style.flexGrow = "0";
+      r.setSizePublic(first, clamped);
+      first.style.flexShrink = "0";
+      first.style.flexGrow = "0";
+      // Domino: push overflow to next sibling
+      const overflow = threshold - oppositeNewSize;
+      tryExpandCascade(r, first, overflow, e);
+    }
   } else if (firstCan && !secondCan) {
-    const totalSize = startFirst + startSecond;
-    const maxSize = totalSize - threshold; // protect second panel
-    const newSize = Math.min(snap(r, startFirst + delta, snaps), maxSize);
-    if (Math.abs(delta) % 50 < 2)
-      console.log(
-        `[Resizer:drag] ${key} mode=onlyFirstCan delta=${delta.toFixed(0)} newFirstSize=${newSize.toFixed(0)} threshold=${threshold}`,
-      );
-    if (newSize < threshold) {
-      console.log(
-        `[Resizer:drag] ${key} COLLAPSE first (newSize=${newSize.toFixed(0)} < threshold=${threshold})`,
-      );
+    // Sized panel = first. No max — domino handles overflow.
+    const rawSize = snap(r, startFirst + delta, snaps);
+
+    // Collapse check
+    if (rawSize < threshold) {
       r.markPrimaryCollapsed();
       r.collapsePanelPublic("first");
       collapsedWhich = "first";
@@ -267,16 +258,38 @@ function applyResize(r: BaseResizer, delta: number, e: MouseEvent): void {
       tryStartCascade(r, first, e);
       return;
     }
+
     if (first.classList.contains("collapsed")) {
-      console.log(`[Resizer:drag] ${key} UN-COLLAPSE first`);
       first.classList.remove("collapsed");
       saveCollapsed(key + "-first", false);
     }
-    r.setSizePublic(first, newSize);
-    first.style.flexShrink = "0";
-    first.style.flexGrow = "0";
+
+    // Compute how much the opposite panel (second) needs to shrink
+    const oppositeNeeded = rawSize - startFirst;
+    const oppositeNewSize = startSecond - oppositeNeeded;
+
+    if (oppositeNewSize >= threshold) {
+      r.setSizePublic(first, rawSize);
+      first.style.flexShrink = "0";
+      first.style.flexGrow = "0";
+      r.setSizePublic(second, oppositeNewSize);
+      second.style.flexShrink = "0";
+      second.style.flexGrow = "0";
+    } else {
+      // Opposite hit threshold — clamp, domino overflow
+      const clamped = threshold;
+      const actualFirst = startFirst + startSecond - clamped;
+      r.setSizePublic(first, actualFirst);
+      first.style.flexShrink = "0";
+      first.style.flexGrow = "0";
+      r.setSizePublic(second, clamped);
+      second.style.flexShrink = "0";
+      second.style.flexGrow = "0";
+      const overflow = threshold - oppositeNewSize;
+      tryExpandCascade(r, second, overflow, e);
+    }
   } else {
-    // Snap first panel only; second adjusts to fill remaining space
+    // Seesaw: both or neither can collapse
     const newFirst = snap(r, startFirst + delta, snaps);
     let newSecond = startSecond - (newFirst - startFirst);
 
@@ -297,12 +310,8 @@ function applyResize(r: BaseResizer, delta: number, e: MouseEvent): void {
       return;
     }
 
-    if (!firstCan && newFirst < threshold) {
-      newSecond = startFirst + startSecond - threshold;
-    }
-    if (!secondCan && newSecond < threshold) newSecond = threshold;
-
-    const finalFirst = !firstCan && newFirst < threshold ? threshold : newFirst;
+    const finalFirst = Math.max(newFirst, threshold);
+    const finalSecond = Math.max(newSecond, threshold);
 
     if (first.classList.contains("collapsed")) {
       first.classList.remove("collapsed");
@@ -316,7 +325,7 @@ function applyResize(r: BaseResizer, delta: number, e: MouseEvent): void {
     r.setSizePublic(first, finalFirst);
     first.style.flexShrink = "0";
     first.style.flexGrow = "0";
-    r.setSizePublic(second, newSecond);
+    r.setSizePublic(second, finalSecond);
     second.style.flexShrink = "0";
     second.style.flexGrow = "0";
   }
@@ -326,6 +335,7 @@ function applyResize(r: BaseResizer, delta: number, e: MouseEvent): void {
  * Apply final resize without magnetic snap — respects exact mouse position.
  * Used on mouseUp to ensure the final position matches where the user released.
  */
+/** Apply final resize — no snap, no max. Only respects threshold (min). */
 function applyResizeRaw(r: BaseResizer, delta: number): void {
   const first = r.getFirstPanel();
   const second = r.getSecondPanel();
@@ -335,15 +345,15 @@ function applyResizeRaw(r: BaseResizer, delta: number): void {
   const secondCan = r.getSecondCanCollapse();
 
   if (secondCan && !firstCan) {
-    const totalSize = startFirst + startSecond;
-    const maxSize = totalSize - threshold;
-    const newSize = Math.max(threshold, Math.min(startSecond - delta, maxSize));
-    r.setSizePublic(second, newSize);
+    const newSize = Math.max(threshold, startSecond - delta);
+    const opposite = Math.max(threshold, startFirst + startSecond - newSize);
+    r.setSizePublic(second, startFirst + startSecond - opposite);
+    r.setSizePublic(first, opposite);
   } else if (firstCan && !secondCan) {
-    const totalSize = startFirst + startSecond;
-    const maxSize = totalSize - threshold;
-    const newSize = Math.max(threshold, Math.min(startFirst + delta, maxSize));
-    r.setSizePublic(first, newSize);
+    const newSize = Math.max(threshold, startFirst + delta);
+    const opposite = Math.max(threshold, startFirst + startSecond - newSize);
+    r.setSizePublic(first, startFirst + startSecond - opposite);
+    r.setSizePublic(second, opposite);
   } else {
     const newFirst = Math.max(threshold, startFirst + delta);
     const newSecond = Math.max(
@@ -388,6 +398,45 @@ function applyPropagation(r: BaseResizer, e: MouseEvent): void {
   r.setSizePublic(prop.panel, newSize);
   prop.panel.style.flexShrink = "0";
   prop.panel.style.flexGrow = "0";
+}
+
+/** Domino expansion: shrink the next sibling panel by overflow amount */
+function tryExpandCascade(
+  r: BaseResizer,
+  squeezedPanel: HTMLElement,
+  overflow: number,
+  e: MouseEvent,
+): void {
+  // Find the next non-collapsed resizable panel beyond the squeezed one
+  const target = r.findCascadeTargetPublic(
+    squeezedPanel,
+    r.getMousePosPublic(e),
+  );
+  if (!target) return;
+
+  const newSize = target.startSize - overflow;
+  if (newSize < target.thresholdPx) {
+    // Cascade further: collapse this panel, find next
+    cascadeCollapseTarget(r, target);
+    const remaining = target.thresholdPx - newSize;
+    const next = r.findCascadeTargetPublic(
+      target.panel,
+      r.getMousePosPublic(e),
+    );
+    if (next && remaining > 0) {
+      const nextSize = next.startSize - remaining;
+      if (nextSize >= next.thresholdPx) {
+        r.setSizePublic(next.panel, nextSize);
+        next.panel.style.flexShrink = "0";
+        next.panel.style.flexGrow = "0";
+      }
+    }
+    return;
+  }
+
+  r.setSizePublic(target.panel, newSize);
+  target.panel.style.flexShrink = "0";
+  target.panel.style.flexGrow = "0";
 }
 
 /** Collapse the current cascade propagation target */
