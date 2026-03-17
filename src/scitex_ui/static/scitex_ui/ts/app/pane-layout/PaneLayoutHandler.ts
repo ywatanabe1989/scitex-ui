@@ -76,7 +76,7 @@ export class PaneLayoutHandler {
     this.boundMouseUp = this.onMouseUp.bind(this);
 
     this.panes = this.discoverPanes();
-    console.debug(
+    console.log(
       `[PaneLayout] "${this.storagePrefix}" ${this.direction}: ${this.panes.length} panes`,
       this.panes.map((p) => `${p.id}${p.fixed ? "(fixed)" : ""}`),
     );
@@ -84,7 +84,7 @@ export class PaneLayoutHandler {
     this.restoreState();
     this.computeLayout();
     this.applyLayout();
-    console.debug(
+    console.log(
       `[PaneLayout] Sizes:`,
       this.panes.map(
         (p) => `${p.id}=${p.collapsed ? "collapsed" : p.size + "px"}`,
@@ -159,10 +159,10 @@ export class PaneLayoutHandler {
           : "panel-resizer pane-resizer pane-resizer--v";
       resizerEl.setAttribute("data-pane-resizer", "");
 
-      // Insert before the right partner's element (resizer sits between the two partners)
-      right.el.before(resizerEl);
+      // Insert after the left partner (resizer appears on its right edge)
+      left.el.after(resizerEl);
 
-      console.debug(
+      console.log(
         `[PaneLayout] Resizer ${resizers.length}: ${left.id} ↔ ${right.id}`,
       );
 
