@@ -106,8 +106,8 @@ function handleMouseMove(r: BaseResizer, e: MouseEvent): void {
     else if (firstCan && !secondCan) mode = "onlyFirstCan";
     console.log(
       `${D} → move #${moveCount} ${r.getStorageKey()}`,
-      `mouse=${lastRawMousePos} delta=${delta.toFixed(0)} mode=${mode}`,
-      `first.w=${r.getSizePublic(r.getFirstPanel())} second.w=${r.getSizePublic(r.getSecondPanel())}`,
+      `\n  cursor: x=${e.clientX} y=${e.clientY} axis=${lastRawMousePos} delta=${delta.toFixed(0)} mode=${mode}`,
+      `\n  first.w=${r.getSizePublic(r.getFirstPanel())} second.w=${r.getSizePublic(r.getSecondPanel())}`,
     );
   }
 
