@@ -7,7 +7,7 @@
  */
 
 import React, { useEffect, useRef } from "react";
-import { PaneLayoutHandler } from "../../ts/app/pane-layout/PaneLayoutHandler";
+import { PaneLayoutHandler } from "../../../ts/app/pane-layout/PaneLayoutHandler";
 
 interface PaneLayoutProps {
   storagePrefix: string;
