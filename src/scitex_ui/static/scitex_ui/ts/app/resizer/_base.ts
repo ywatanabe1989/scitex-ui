@@ -285,9 +285,22 @@ export abstract class BaseResizer {
     const firstCollapsed = restoreCollapsed(this.storageKey + "-first");
     const secondCollapsed = restoreCollapsed(this.storageKey + "-second");
 
-    if (firstCollapsed === true && this.firstCanCollapse) {
+    // Also detect initial collapsed state from DOM (HTML may have class="collapsed")
+    const firstDomCollapsed =
+      this.firstCanCollapse && this.firstPanel.classList.contains("collapsed");
+    const secondDomCollapsed =
+      this.secondCanCollapse &&
+      this.secondPanel.classList.contains("collapsed");
+
+    if (
+      (firstCollapsed === true || firstDomCollapsed) &&
+      this.firstCanCollapse
+    ) {
       this.collapsePanel("first");
-    } else if (secondCollapsed === true && this.secondCanCollapse) {
+    } else if (
+      (secondCollapsed === true || secondDomCollapsed) &&
+      this.secondCanCollapse
+    ) {
       this.collapsePanel("second");
     } else {
       // Guard: compute available space so a restored size can't squeeze
