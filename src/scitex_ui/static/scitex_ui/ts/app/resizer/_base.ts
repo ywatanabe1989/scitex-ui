@@ -324,6 +324,8 @@ export abstract class BaseResizer {
     const other = which === "first" ? this.secondPanel : this.firstPanel;
 
     panel.classList.add("collapsed");
+    // Disable transitions on collapsed panel to prevent CSS defaults from animating
+    panel.style.transition = "none";
     this.clearSize(panel);
     panel.style.flexShrink = "";
     panel.style.flexGrow = "";
@@ -346,6 +348,8 @@ export abstract class BaseResizer {
     const other = which === "first" ? this.secondPanel : this.firstPanel;
 
     panel.classList.remove("collapsed");
+    // Re-enable transitions when expanding (they were disabled during collapse)
+    panel.style.transition = "";
 
     if (this.accordion) {
       other.classList.remove("expanded");

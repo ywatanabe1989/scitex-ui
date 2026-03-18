@@ -148,12 +148,27 @@ function handleMouseUp(
   document.body.style.userSelect = "";
   r.getResizerEl().classList.remove("active");
   r.getResizerEl().classList.remove("snapped");
-  r.getFirstPanel().style.transition = "";
-  r.getSecondPanel().style.transition = "";
+
+  // Only re-enable transitions on non-collapsed panels to prevent
+  // CSS-default transitions from animating the collapsed state
+  const firstCollapsed = r.getFirstPanel().classList.contains("collapsed");
+  const secondCollapsed = r.getSecondPanel().classList.contains("collapsed");
+
+  if (!firstCollapsed) {
+    r.getFirstPanel().style.transition = "";
+  }
+  if (!secondCollapsed) {
+    r.getSecondPanel().style.transition = "";
+  }
+
   if (!r.getIsInApp()) {
     document
       .querySelectorAll<HTMLElement>(".stx-shell-sidebar")
-      .forEach((el) => (el.style.transition = ""));
+      .forEach((el) => {
+        if (!el.classList.contains("collapsed")) {
+          el.style.transition = "";
+        }
+      });
   }
 
   document.removeEventListener("mousemove", onMove);
