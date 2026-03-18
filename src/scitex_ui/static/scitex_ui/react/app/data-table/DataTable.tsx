@@ -367,17 +367,16 @@ export const DataTable: React.FC<DataTableProps> = ({
                               onChange={(e) => setEditValue(e.target.value)}
                               onBlur={commitEdit}
                               onKeyDown={(e) => {
-                                if (e.key === "Enter") {
-                                  e.preventDefault();
-                                  commitEdit();
+                                if (e.key === "Tab" || e.key === "Enter") {
+                                  // Don't stop propagation — let container's
+                                  // handleCellKeyDown handle commit + navigation
                                 } else if (e.key === "Escape") {
                                   e.preventDefault();
                                   cancelEdit();
-                                } else if (e.key === "Tab") {
-                                  e.preventDefault();
-                                  commitEdit();
+                                  e.stopPropagation();
+                                } else {
+                                  e.stopPropagation();
                                 }
-                                e.stopPropagation();
                               }}
                               style={{ width: "100%" }}
                             />
