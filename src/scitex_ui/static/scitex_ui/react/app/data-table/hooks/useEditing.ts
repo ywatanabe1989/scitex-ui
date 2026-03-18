@@ -118,8 +118,8 @@ export function useEditing(
               // Selection-aware: wrap within bounds
               const hasRange =
                 selection &&
-                (selection.startRow !== selection.endRow ||
-                  selection.startCol !== selection.endCol);
+                (selection.start.row !== selection.end.row ||
+                  selection.start.col !== selection.end.col);
               const mnR = hasRange
                 ? Math.min(selection!.startRow, selection!.endRow)
                 : 0;
@@ -144,8 +144,8 @@ export function useEditing(
               // Selection-aware: wrap within bounds
               const hasRange =
                 selection &&
-                (selection.startRow !== selection.endRow ||
-                  selection.startCol !== selection.endCol);
+                (selection.start.row !== selection.end.row ||
+                  selection.start.col !== selection.end.col);
               const mnR = hasRange
                 ? Math.min(selection!.startRow, selection!.endRow)
                 : 0;
@@ -200,8 +200,8 @@ export function useEditing(
           // Selection-aware: stay within selection bounds if range selected
           const hasRange =
             selection &&
-            (selection.startRow !== selection.endRow ||
-              selection.startCol !== selection.endCol);
+            (selection.start.row !== selection.end.row ||
+              selection.start.col !== selection.end.col);
           const minR = hasRange
             ? Math.min(selection!.startRow, selection!.endRow)
             : 0;
@@ -232,8 +232,8 @@ export function useEditing(
             // Shift+Enter: move up; Enter in readOnly: move down
             const hasRng =
               selection &&
-              (selection.startRow !== selection.endRow ||
-                selection.startCol !== selection.endCol);
+              (selection.start.row !== selection.end.row ||
+                selection.start.col !== selection.end.col);
             const mnR = hasRng
               ? Math.min(selection!.startRow, selection!.endRow)
               : 0;
