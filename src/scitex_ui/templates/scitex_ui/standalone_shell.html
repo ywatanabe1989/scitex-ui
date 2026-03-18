@@ -26,79 +26,17 @@
         {% block extra_css %}{% endblock %}
     </head>
     <body class="dark-theme">
-        <div class="workspace-shell"
-             id="workspace-shell"
-             data-active-module="{{ app_name|default:'app' }}">
-            <!-- Left: AI/Console pane -->
-            <div class="ws-ai-pane" id="ws-ai-pane">
-                <div id="scitex-ai-panel"
-                     class="scitex-ai-panel stx-shell-sidebar collapsed"
-                     aria-hidden="true">
-                    <div id="scitex-ai-resizer"
-                         class="panel-resizer stx-shell-resizer-right"
-                         data-panel-resizer
-                         data-target="#scitex-ai-panel"
-                         data-direction="left"
-                         data-min-width="40"
-                         data-default-width="300"
-                         data-storage-key="ws-ai-panel-width"
-                         data-collapse-key="ws-ai-panel-collapsed"></div>
-                    <div class="stx-shell-sidebar__header scitex-ai-panel-header">
-                        <button class="panel-toggle-btn"
-                                id="scitex-ai-toggle"
-                                title="Console (Alt+A)">
-                            <i class="fas fa-chevron-right"></i>
-                        </button>
-                        <span class="stx-shell-sidebar__title">Console</span>
-                    </div>
-                    <div class="stx-shell-sidebar__content scitex-ai-body">
-                        <div id="scitex-ai-messages" class="scitex-ai-messages">
-                            <div class="scitex-ai-empty">
-                                <i class="fas fa-terminal"></i>
-                                <span>Local terminal</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Middle: File tree pane -->
-            <div class="ws-worktree-pane" id="ws-worktree-pane">
-                <div class="stx-shell-sidebar" id="ws-worktree-sidebar">
-                    <div id="ws-worktree-resizer"
-                         class="panel-resizer stx-shell-resizer-right"
-                         data-panel-resizer
-                         data-target="#ws-worktree-sidebar"
-                         data-direction="left"
-                         data-min-width="40"
-                         data-default-width="250"
-                         data-storage-key="ws-worktree-width"
-                         data-collapse-key="ws-worktree-collapsed"></div>
-                    <div class="stx-shell-sidebar__header">
-                        <button class="panel-toggle-btn"
-                                id="ws-worktree-toggle"
-                                title="Toggle file tree">
-                            <i class="fas fa-chevron-right"></i>
-                        </button>
-                        <span class="stx-shell-sidebar__title">{{ working_dir_name|default:"Files" }}</span>
-                        <span class="stx-shell-sidebar__title-expanded">
-                            <i class="fas fa-folder-open"></i>
-                            {{ working_dir_name|default:"Files" }}
-                        </span>
-                    </div>
-                    <div class="stx-shell-sidebar__content">
-                        <div id="standalone-file-tree"></div>
-                    </div>
-                </div>
-            </div>
-            <!-- Right: App content pane -->
-            <div class="ws-module-pane" id="ws-module-pane">
-                {% block app_content %}
-                    <div id="app-mount"
-                         data-working-dir="{{ working_dir|default:'' }}"
-                         data-app-name="{{ app_name|default:'app' }}"></div>
-                {% endblock %}
-            </div>
-        </div>
+        <!--
+          Standalone shell: provides theme CSS + full-page mount point.
+          The React Workspace component (from scitex-ui) handles all panels
+          (Console, FileTree, Viewer, App content) via its own layout.
+          No duplicate Django panels — React is the single layout owner.
+        -->
+        {% block app_content %}
+            <div id="root"
+                 data-working-dir="{{ working_dir|default:'' }}"
+                 data-app-name="{{ app_name|default:'app' }}"></div>
+        {% endblock %}
         {% block extra_js %}{% endblock %}
     </body>
 </html>
