@@ -29,4 +29,5 @@ components (data-table, file-browser, selector-nav) with Shadow DOM isolation vi
    quickstart
    components
    architecture
+   app_developer_guide
    api/scitex_ui
