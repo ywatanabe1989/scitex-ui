@@ -239,3 +239,57 @@
   align-items: center;
   gap: 6px;
 }
+
+/* ── Module Tab Bar (multi-module shell) ─────────────────────── */
+
+.stx-workspace__module-tabs {
+  display: flex;
+  flex-direction: column;
+  width: 48px;
+  min-width: 48px;
+  background: var(--workspace-bg-secondary, #161b22);
+  border-right: 1px solid var(--workspace-border-default, #30363d);
+  padding: 4px 0;
+  gap: 2px;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+.stx-workspace__module-tabs__tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 8px 4px;
+  border: none;
+  background: transparent;
+  color: var(--workspace-text-secondary, #8b949e);
+  cursor: pointer;
+  border-left: 2px solid transparent;
+  transition:
+    color 0.15s,
+    border-color 0.15s;
+  font-size: 16px;
+  gap: 2px;
+}
+
+.stx-workspace__module-tabs__tab:hover {
+  color: var(--workspace-text-primary, #e6edf3);
+  background: var(--workspace-bg-tertiary, #1c2128);
+}
+
+.stx-workspace__module-tabs__tab--active {
+  color: var(--workspace-text-primary, #e6edf3);
+  border-left-color: var(--tab-accent, var(--color-accent-emphasis, #238636));
+  background: var(--workspace-bg-tertiary, #1c2128);
+}
+
+.stx-workspace__module-tabs__label {
+  font-size: 9px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 44px;
+}

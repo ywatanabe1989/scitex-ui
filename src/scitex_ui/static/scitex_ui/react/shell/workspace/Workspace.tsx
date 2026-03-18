@@ -23,6 +23,7 @@ import { bootstrapContextZoom } from "../../../ts/utils/context-zoom";
 import { WorkspaceResizeProvider } from "./WorkspaceResizeContext";
 import { useShellPanes } from "./useShellPanes";
 import { useExpandCallbacks } from "./useExpandCallbacks";
+import { ModuleTabBar } from "./ModuleTabBar";
 
 const CLS = "stx-workspace";
 
@@ -44,6 +45,9 @@ export const Workspace: React.FC<WorkspaceProps> = ({
   recentEntries,
   onRecentEntryClick,
   children,
+  modules,
+  activeModule,
+  onModuleChange,
   className,
   style,
 }) => {
@@ -341,6 +345,15 @@ export const Workspace: React.FC<WorkspaceProps> = ({
               onMouseDown={onViewerResizerDown}
             />
           </>
+        )}
+
+        {/* ── Module Tab Bar (multi-module mode) ── */}
+        {modules && modules.length > 0 && (
+          <ModuleTabBar
+            modules={modules}
+            activeModule={activeModule}
+            onModuleChange={onModuleChange}
+          />
         )}
 
         {/* ── App Content (resize context for cross-boundary propagation) */}

@@ -54,6 +54,21 @@ export interface FileTreeBackend {
   onTreeChange?: (callback: () => void) => void;
 }
 
+// ── Module Config (multi-module shell) ──────────────────────────
+
+export interface ModuleConfig {
+  /** URL slug (e.g., "writer", "scholar") */
+  name: string;
+  /** Display label (e.g., "Writer", "Scholar") */
+  label: string;
+  /** FontAwesome icon class (e.g., "fas fa-pen") */
+  icon: string;
+  /** CSS accent color (hex) */
+  accentColor?: string;
+  /** Keyboard shortcut (e.g., "w") */
+  shortcut?: string;
+}
+
 // ── Workspace Props ──────────────────────────────────────────────
 
 export interface WorkspaceProps extends BaseProps {
@@ -99,4 +114,12 @@ export interface WorkspaceProps extends BaseProps {
 
   /** App content (rendered in main area) */
   children: React.ReactNode;
+
+  // ── Multi-module shell (optional) ──────────────────────────────
+  /** Available modules (enables tab bar when provided) */
+  modules?: ModuleConfig[];
+  /** Currently active module name */
+  activeModule?: string;
+  /** Called when user switches module tab */
+  onModuleChange?: (name: string) => void;
 }
