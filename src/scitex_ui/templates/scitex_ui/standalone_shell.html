@@ -1,0 +1,104 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>{{ app_label|default:"SciTeX App" }}</title>
+        <link rel="stylesheet"
+              href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+        <!-- scitex-ui workspace shell CSS (canonical source) -->
+        <link rel="stylesheet" href="{% static 'scitex_ui/css/shell/theme.css' %}" />
+        <link rel="stylesheet"
+              href="{% static 'scitex_ui/css/shell/app-shell.css' %}" />
+        <link rel="stylesheet"
+              href="{% static 'scitex_ui/css/shell/stx-shell-sidebar.css' %}" />
+        <link rel="stylesheet"
+              href="{% static 'scitex_ui/css/shell/workspace-three-col.css' %}" />
+        <link rel="stylesheet"
+              href="{% static 'scitex_ui/css/shell/workspace.css' %}" />
+        <link rel="stylesheet"
+              href="{% static 'scitex_ui/css/shell/panel-resizer.css' %}" />
+        <link rel="stylesheet"
+              href="{% static 'scitex_ui/css/shell/resizer.css' %}" />
+        <link rel="stylesheet"
+              href="{% static 'scitex_ui/css/shell/standalone-resizer-pos.css' %}" />
+        {% block extra_css %}{% endblock %}
+    </head>
+    <body class="dark-theme">
+        <div class="workspace-shell"
+             id="workspace-shell"
+             data-active-module="{{ app_name|default:'app' }}">
+            <!-- Left: AI/Console pane -->
+            <div class="ws-ai-pane" id="ws-ai-pane">
+                <div id="scitex-ai-panel"
+                     class="scitex-ai-panel stx-shell-sidebar collapsed"
+                     aria-hidden="true">
+                    <div id="scitex-ai-resizer"
+                         class="panel-resizer stx-shell-resizer-right"
+                         data-panel-resizer
+                         data-target="#scitex-ai-panel"
+                         data-direction="left"
+                         data-min-width="40"
+                         data-default-width="300"
+                         data-storage-key="ws-ai-panel-width"
+                         data-collapse-key="ws-ai-panel-collapsed"></div>
+                    <div class="stx-shell-sidebar__header scitex-ai-panel-header">
+                        <button class="panel-toggle-btn"
+                                id="scitex-ai-toggle"
+                                title="Console (Alt+A)">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                        <span class="stx-shell-sidebar__title">Console</span>
+                    </div>
+                    <div class="stx-shell-sidebar__content scitex-ai-body">
+                        <div id="scitex-ai-messages" class="scitex-ai-messages">
+                            <div class="scitex-ai-empty">
+                                <i class="fas fa-terminal"></i>
+                                <span>Local terminal</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Middle: File tree pane -->
+            <div class="ws-worktree-pane" id="ws-worktree-pane">
+                <div class="stx-shell-sidebar" id="ws-worktree-sidebar">
+                    <div id="ws-worktree-resizer"
+                         class="panel-resizer stx-shell-resizer-right"
+                         data-panel-resizer
+                         data-target="#ws-worktree-sidebar"
+                         data-direction="left"
+                         data-min-width="40"
+                         data-default-width="250"
+                         data-storage-key="ws-worktree-width"
+                         data-collapse-key="ws-worktree-collapsed"></div>
+                    <div class="stx-shell-sidebar__header">
+                        <button class="panel-toggle-btn"
+                                id="ws-worktree-toggle"
+                                title="Toggle file tree">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                        <span class="stx-shell-sidebar__title">{{ working_dir_name|default:"Files" }}</span>
+                        <span class="stx-shell-sidebar__title-expanded">
+                            <i class="fas fa-folder-open"></i>
+                            {{ working_dir_name|default:"Files" }}
+                        </span>
+                    </div>
+                    <div class="stx-shell-sidebar__content">
+                        <div id="standalone-file-tree"></div>
+                    </div>
+                </div>
+            </div>
+            <!-- Right: App content pane -->
+            <div class="ws-module-pane" id="ws-module-pane">
+                {% block app_content %}
+                    <div id="app-mount"
+                         data-working-dir="{{ working_dir|default:'' }}"
+                         data-app-name="{{ app_name|default:'app' }}"></div>
+                {% endblock %}
+            </div>
+        </div>
+        {% block extra_js %}{% endblock %}
+    </body>
+</html>

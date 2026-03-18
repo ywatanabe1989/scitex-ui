@@ -1,0 +1,9 @@
+/* Resizer positioning — replaces inline styles from scitex-cloud shell.html */
+
+.stx-shell-resizer-right {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 1;
+}
