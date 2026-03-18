@@ -36,6 +36,20 @@ def get_static_dir() -> _Path:
     return _Path(__file__).parent / "static" / "scitex_ui"
 
 
-__all__ = ["get_component", "list_components", "get_static_dir"]
+def get_docs_path() -> _Path:
+    """Return the absolute path to scitex_ui's bundled documentation directory.
+
+    The directory contains ``APP_DEVELOPER_GUIDE.md`` and the Sphinx-built
+    HTML docs. Works for both pip-installed packages and editable (dev) installs.
+
+    Returns
+    -------
+    pathlib.Path
+        e.g. ``/usr/lib/python3.11/.../scitex_ui/_docs``
+    """
+    return _Path(__file__).parent / "_docs"
+
+
+__all__ = ["get_component", "list_components", "get_static_dir", "get_docs_path"]
 
 # EOF
