@@ -1,4 +1,4 @@
-/* Resizer positioning — replaces inline styles from scitex-cloud shell.html */
+/* Standalone shell overrides — no header/footer, full viewport */
 
 .stx-shell-resizer-right {
   position: absolute;
@@ -6,4 +6,18 @@
   top: 0;
   bottom: 0;
   z-index: 1;
+}
+
+/* Standalone: full viewport height (no Django header/footer) */
+body.workspace-page .workspace-three-col {
+  height: 100vh;
+  flex: 1 1 0%;
+  min-height: 0;
+}
+
+/* Reset margins for standalone */
+body.workspace-page {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
 }
