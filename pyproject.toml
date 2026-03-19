@@ -37,7 +37,11 @@ classifiers = [
 ]
 dependencies = []
 
+[project.scripts]
+scitex-ui = "scitex_ui._cli:main"
+
 [project.optional-dependencies]
+cli = ["click>=8.0.0", "scitex-dev"]
 dev = ["pytest>=7.0.0", "pytest-cov>=4.0.0", "scitex-dev"]
 docs = [
     "sphinx>=7.0",
