@@ -21,3 +21,8 @@ body.workspace-page {
   padding: 0;
   overflow: hidden;
 }
+
+/* Toolbar needs relative positioning for popover anchoring */
+.stx-shell-toolbar-relative {
+  position: relative;
+}

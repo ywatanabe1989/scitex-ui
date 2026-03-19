@@ -25,18 +25,191 @@
               href="{% static 'scitex_ui/css/shell/standalone-resizer-pos.css' %}" />
         {% block extra_css %}{% endblock %}
     </head>
-    <body class="dark-theme workspace-page footer-collapsed">
+    <body class="dark-theme workspace-page footer-collapsed no-transition">
         <!--
-          Standalone shell: theme CSS provided by scitex-ui.
-          The React Workspace component (from scitex-ui) handles all panels:
-          Console | FileTree | Viewer | App content
-          No Django panes — React is the single layout owner.
+          Standalone shell: vanilla TS layout matching scitex-cloud's global_base.html.
+          Structure: Console/Chat | Files | Viewer | App Content
+          The vanilla TS WorkspacePanelResizer initializes from data attributes.
+          App content (React or other) mounts into #app-content inside ws-module-pane.
         -->
-        {% block app_content %}
-            <div id="root"
-                 data-working-dir="{{ working_dir|default:'' }}"
-                 data-app-name="{{ app_name|default:'app' }}"></div>
-        {% endblock %}
+        <div id="workspace-three-col" class="workspace-three-col">
+            <!-- ── Console/Chat Pane ──────────────────── -->
+            <div class="ws-ai-pane" id="ws-ai-pane">
+                <div id="stx-shell-ai-panel"
+                     class="stx-shell-sidebar stx-shell-ai-panel"
+                     aria-hidden="false">
+                    <div id="stx-shell-ai-resizer"
+                         class="panel-resizer stx-shell-resizer-right"
+                         data-panel-resizer
+                         data-target="#stx-shell-ai-panel"
+                         data-direction="left"
+                         data-min-width="48"
+                         data-default-width="300"
+                         data-storage-key="ws-ai-panel-width"
+                         data-collapse-key="stx-shell-ai-panel-collapsed"
+                         data-toggle-btn="stx-shell-ai-toggle"></div>
+                    <div class="stx-shell-sidebar__header stx-shell-ai-panel-header"
+                         id="stx-shell-ai-panel-header">
+                        <button class="panel-toggle-btn"
+                                id="stx-shell-ai-toggle"
+                                title="Toggle Console (Alt+A)">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                        <span class="stx-shell-sidebar__title"
+                              id="stx-shell-ai-collapsed-title"
+                              title="Console">
+                            <i class="fas fa-terminal"></i> Console
+                        </span>
+                        <div class="stx-shell-ai-mode-toggle">
+                            <button class="stx-shell-ai-mode-btn active"
+                                    data-mode="console"
+                                    title="Terminal">
+                                <i class="fas fa-terminal"></i> Console
+                            </button>
+                            <button class="stx-shell-ai-mode-btn" data-mode="chat" title="AI Chat">
+                                <i class="fas fa-robot"></i> Chat
+                            </button>
+                        </div>
+                    </div>
+                    <div class="stx-shell-sidebar__content stx-shell-ai-body">
+                        <!-- Chat view -->
+                        <div id="stx-shell-ai-chat-view" class="stx-shell-ai-view">
+                            <div id="stx-shell-ai-messages" class="stx-shell-ai-messages">
+                                <div class="stx-shell-ai-empty">
+                                    <i class="fas fa-robot"></i>
+                                    <span>AI Chat</span>
+                                </div>
+                            </div>
+                            <div class="stx-shell-ai-input-area">
+                                <div class="stx-shell-ai-input-wrap">
+                                    <textarea id="stx-shell-ai-input"
+                                              class="stx-shell-ai-input"
+                                              rows="1"
+                                              placeholder="Ask anything"
+                                              autocomplete="off"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Console/Terminal view -->
+                        <div id="stx-shell-ai-console-view"
+                             class="stx-shell-ai-view active"
+                             data-view="console">
+                            <div class="stx-shell-ai-console-tabs-bar">
+                                <button class="stx-shell-ai-console-new-tab" title="New terminal">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                                <div id="stx-shell-ai-console-tabs-list"
+                                     class="stx-shell-ai-console-tabs-list">
+                                    <div class="stx-shell-ai-console-tab-item active">
+                                        <span class="stx-shell-ai-console-tab-title">T1</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="stx-shell-ai-console-terminal"
+                                 class="stx-shell-ai-console-terminal"></div>
+                            <div class="stx-shell-ai-console-toolbar stx-shell-toolbar-relative">
+                                <span id="stx-shell-ai-console-status" class="stx-shell-ai-console-status"></span>
+                                <div class="stx-shell-ai-console-toolbar-btns">
+                                    <button class="stx-shell-ai-input-btn" title="Webcam">
+                                        <i class="fas fa-camera"></i>
+                                    </button>
+                                    <button class="stx-shell-ai-input-btn" title="Sketch">
+                                        <i class="fas fa-pen"></i>
+                                    </button>
+                                    <button class="stx-shell-ai-input-btn" title="Voice">
+                                        <i class="fas fa-microphone"></i>
+                                    </button>
+                                    <button class="stx-shell-ai-input-btn stx-shell-ai-gear-btn"
+                                            title="Settings"
+                                            disabled>
+                                        <i class="fas fa-cog"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- ── File Tree Pane ─────────────────────── -->
+            <div class="ws-worktree-pane" id="ws-worktree-pane">
+                <div class="stx-shell-sidebar" id="ws-worktree-sidebar">
+                    <div id="ws-worktree-resizer"
+                         class="panel-resizer stx-shell-resizer-right"
+                         data-panel-resizer
+                         data-target="#ws-worktree-sidebar"
+                         data-direction="left"
+                         data-min-width="48"
+                         data-default-width="240"
+                         data-storage-key="ws-worktree-width"
+                         data-collapse-key="ws-worktree-collapsed"
+                         data-toggle-btn="ws-worktree-toggle"></div>
+                    <div class="stx-shell-sidebar__header">
+                        <button class="panel-toggle-btn"
+                                id="ws-worktree-toggle"
+                                title="Toggle file tree">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                        <span class="stx-shell-sidebar__title" title="Files">
+                            <i class="fas fa-folder"></i> Files
+                        </span>
+                        <span class="stx-shell-sidebar__title-full">
+                            <i class="fas fa-folder-open"></i> Files
+                        </span>
+                        <div class="stx-shell-sidebar__header-actions ws-worktree-actions">
+                            {% block worktree_actions %}{% endblock %}
+                        </div>
+                    </div>
+                    <div class="stx-shell-sidebar__content ws-worktree-split">
+                        <div class="ws-worktree-tree-area">
+                            <div id="ws-worktree-tree" data-workspace-tree></div>
+                        </div>
+                        {% block worktree_extra %}{% endblock %}
+                    </div>
+                </div>
+            </div>
+            <!-- ── Viewer Pane ────────────────────────── -->
+            <div class="ws-viewer-pane" id="ws-viewer-pane">
+                <div class="stx-shell-sidebar collapsed" id="ws-viewer-sidebar">
+                    <div id="ws-viewer-resizer"
+                         class="panel-resizer"
+                         data-panel-resizer
+                         data-target="#ws-viewer-sidebar"
+                         data-direction="left"
+                         data-min-width="48"
+                         data-default-width="480"
+                         data-storage-key="ws-viewer-width"
+                         data-collapse-key="ws-viewer-collapsed"
+                         data-toggle-btn="ws-viewer-toggle"></div>
+                    <div class="stx-shell-sidebar__header">
+                        <button class="panel-toggle-btn" id="ws-viewer-toggle" title="Toggle viewer">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                        <span class="stx-shell-sidebar__title" title="Viewer">
+                            <i class="fas fa-eye"></i> Viewer
+                        </span>
+                    </div>
+                    <div class="stx-shell-sidebar__content ws-viewer-body">
+                        <div id="ws-viewer-content" class="ws-viewer-content">
+                            <div id="ws-viewer-empty" class="ws-viewer-empty">
+                                <i class="fas fa-file-alt"></i>
+                                <span>Click a file to open</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- ── App Content (React or other app mounts here) ── -->
+            <main id="main-content" class="ws-module-pane">
+                {% block app_content %}
+                    <div id="root"
+                         data-working-dir="{{ working_dir|default:'' }}"
+                         data-app-name="{{ app_name|default:'app' }}"></div>
+                {% endblock %}
+            </main>
+        </div>
+        <!-- scitex-ui vanilla shell initialization -->
+        <script src="{% static 'scitex_ui/js/shell/standalone-shell-init.js' %}"
+                defer></script>
         {% block extra_js %}{% endblock %}
     </body>
 </html>
