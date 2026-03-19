@@ -1,14 +1,28 @@
 /**
- * MonacoView — Monaco editor loaded from CDN for text file viewing.
- * Self-installable: no npm dependency, loads from jsdelivr CDN.
- * Same pattern as Terminal.tsx (xterm.js from CDN).
+ * MonacoView — Monaco editor for text file viewing.
+ *
+ * Loading strategy:
+ * 1. Local: /static/scitex_ui/vendor/monaco-editor/vs/ (bundled in scitex-ui)
+ * 2. Fallback: CDN (https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min)
  */
 
 import React, { useRef, useEffect, useState } from "react";
 import { LANGUAGE_MAP } from "./types";
 
-const MONACO_CDN = "https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min";
+const MONACO_LOCAL = "/static/scitex_ui/vendor/monaco-editor/vs";
+const MONACO_CDN = "https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs";
 let monacoLoaded = false;
+
+/** Try local first, fall back to CDN */
+async function resolveMonacoBase(): Promise<string> {
+  try {
+    const resp = await fetch(`${MONACO_LOCAL}/loader.js`, { method: "HEAD" });
+    if (resp.ok) return MONACO_LOCAL;
+  } catch {
+    // local not available
+  }
+  return MONACO_CDN;
+}
 
 async function loadMonaco(): Promise<void> {
   if (monacoLoaded) return;
@@ -17,10 +31,12 @@ async function loadMonaco(): Promise<void> {
     return;
   }
 
+  const base = await resolveMonacoBase();
+
   // Load Monaco loader
   await new Promise<void>((resolve, reject) => {
     const script = document.createElement("script");
-    script.src = `${MONACO_CDN}/vs/loader.js`;
+    script.src = `${base}/loader.js`;
     script.onload = () => resolve();
     script.onerror = () => reject(new Error("Failed to load Monaco loader"));
     document.head.appendChild(script);
@@ -28,7 +44,7 @@ async function loadMonaco(): Promise<void> {
 
   // Configure and load Monaco
   const require = (window as any).require;
-  require.config({ paths: { vs: `${MONACO_CDN}/vs` } });
+  require.config({ paths: { vs: base } });
 
   await new Promise<void>((resolve) => {
     require(["vs/editor/editor.main"], () => {
