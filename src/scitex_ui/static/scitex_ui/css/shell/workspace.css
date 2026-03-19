@@ -215,6 +215,7 @@
 .stx-workspace__app-content {
   flex: 1;
   min-width: 0;
+  max-height: 100%; /* Never exceed workspace columns height */
   overflow: auto;
 }
 
