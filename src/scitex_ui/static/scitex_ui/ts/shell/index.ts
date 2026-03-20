@@ -16,3 +16,12 @@ export type {
 
 export { ShellFileTree } from "./file-tree";
 export type { FileTreeAdapter, ShellFileTreeConfig } from "./file-tree";
+
+export { ToolbarManager, KeyboardShortcuts } from "./toolbar";
+export type {
+  ToolbarCommand,
+  CommandEventDetail,
+  ButtonBinding,
+  KeyShortcut,
+  ToolbarConfig,
+} from "./toolbar";
