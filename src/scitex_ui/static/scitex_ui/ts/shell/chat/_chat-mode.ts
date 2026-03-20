@@ -18,6 +18,7 @@
  */
 
 import type { ChatAdapter, AiContext } from "./types";
+import type { SessionsPanel } from "./_sessions-panel";
 import { clearMessages, loadMessages, saveMessage } from "./_storage";
 import { loadHistory, pushHistory } from "./_history";
 import {
@@ -102,6 +103,9 @@ export class ChatMode {
 
   /* Context — mutated externally via setContext() */
   private context: AiContext = {};
+
+  /* Sessions panel — set externally for server-side session persistence */
+  private sessionsPanel: SessionsPanel | null = null;
 
   /* Auto-scroll: true when user is at/near bottom */
   private _userAtBottom = true;
@@ -200,6 +204,11 @@ export class ChatMode {
 
   getContext(): AiContext {
     return this.context;
+  }
+
+  /** Wire a SessionsPanel for server-side session persistence. */
+  setSessionsPanel(sp: SessionsPanel): void {
+    this.sessionsPanel = sp;
   }
 
   /* ── Clear / Restore / Copy / Print ────────────────────────── */
@@ -357,6 +366,7 @@ export class ChatMode {
     userEl.textContent = prompt;
     this.imageInput?.renderInlineThumbsInto(userEl);
     saveMessage({ role: "user", text: prompt });
+    void this.sessionsPanel?.saveMessage("user", prompt);
 
     /* Collect image attachments before clearing */
     const images = this.imageInput?.hasAttachments()
@@ -385,10 +395,11 @@ export class ChatMode {
         speak: (t) => void this.speak(t),
         scrollIfNeeded: () => this.scrollToBottomIfNeeded(),
         createMsgEl: (role) => this.createMsgEl(role),
-        onAssistantDone: () => {
+        onAssistantDone: (_msgEl, text) => {
           this.scrollToBottom();
           setTimeout(() => this.scrollToBottom(), 200);
           setTimeout(() => this.scrollToBottom(), 500);
+          if (text) void this.sessionsPanel?.saveMessage("assistant", text);
         },
       });
     } finally {
