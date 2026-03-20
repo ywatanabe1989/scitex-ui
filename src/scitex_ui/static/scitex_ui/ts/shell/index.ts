@@ -25,3 +25,10 @@ export type {
   KeyShortcut,
   ToolbarConfig,
 } from "./toolbar";
+
+export { initTerminal, loadXtermModules, loadXtermCSS } from "./terminal";
+export type {
+  TerminalInstance,
+  TerminalConnectionAdapter,
+  TerminalConfig,
+} from "./terminal";
