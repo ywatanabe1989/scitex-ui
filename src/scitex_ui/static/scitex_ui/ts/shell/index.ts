@@ -81,3 +81,10 @@ export type {
   ShortcutDef,
   ShortcutSection,
 } from "./keyboard-shortcuts";
+
+export { initRepoMonitor, initMonitorToggle } from "./repo-monitor";
+export type {
+  RepoMonitorAdapter,
+  RepoMonitorConfig,
+  RecentFileEntry,
+} from "./repo-monitor";
