@@ -32,3 +32,22 @@ export type {
   TerminalConnectionAdapter,
   TerminalConfig,
 } from "./terminal";
+
+export {
+  processStream,
+  renderMarkdown,
+  saveMessage,
+  loadMessages,
+  clearMessages,
+  loadHistory,
+  pushHistory,
+  appendToolTags,
+  setModelBadge,
+} from "./chat";
+export type {
+  ChatAdapter,
+  AiContext,
+  StoredMessage,
+  StreamContext,
+  ChatConfig,
+} from "./chat";
