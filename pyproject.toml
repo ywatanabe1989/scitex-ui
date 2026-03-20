@@ -42,6 +42,7 @@ scitex-ui = "scitex_ui._cli:main"
 
 [project.optional-dependencies]
 cli = ["click>=8.0.0", "scitex-dev"]
+mcp = ["fastmcp>=2.0.0"]
 dev = ["pytest>=7.0.0", "pytest-cov>=4.0.0", "scitex-dev"]
 docs = [
     "sphinx>=7.0",
@@ -62,6 +63,9 @@ all = [
 ]
 
 [project.entry-points."scitex_dev.docs"]
+scitex-ui = "scitex_ui"
+
+[project.entry-points."scitex_dev.skills"]
 scitex-ui = "scitex_ui"
 
 [project.urls]

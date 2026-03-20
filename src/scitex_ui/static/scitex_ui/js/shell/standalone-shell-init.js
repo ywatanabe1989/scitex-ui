@@ -4,12 +4,14 @@
  *  Wires:
  *  - Console/Chat mode toggle
  *  - Toolbar buttons (camera, sketch, mic) → custom DOM events
+ *  - Config popover gear toggle (direct, like scitex-cloud)
  *  - Sidebar header double-click → collapse
  *
  *  Apps listen for these events to implement actual functionality:
  *    window.addEventListener("stx-shell:camera", handler)
  *    window.addEventListener("stx-shell:sketch", handler)
  *    window.addEventListener("stx-shell:mic-toggle", handler)
+ *    window.addEventListener("stx-shell:settings", handler)
  */
 
 (function () {
@@ -35,6 +37,38 @@
     });
   });
 
+  /* ── Config popover gear toggle ────────────────────── */
+  var gearBtn = document.querySelector(".stx-shell-ai-gear-btn");
+  var configPopover = document.getElementById("stx-shell-ai-console-config");
+
+  if (gearBtn && configPopover) {
+    gearBtn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      // Close all other popovers first
+      document
+        .querySelectorAll(".stx-shell-ai-config-popover")
+        .forEach(function (p) {
+          if (p !== configPopover) p.classList.add("stx-hidden");
+        });
+      // Toggle this popover
+      configPopover.classList.toggle("stx-hidden");
+      // Also dispatch event for app-level handlers (e.g., populate skills)
+      window.dispatchEvent(new CustomEvent("stx-shell:settings"));
+    });
+
+    // Click-outside to close
+    document.addEventListener("mousedown", function (e) {
+      if (
+        configPopover &&
+        !configPopover.classList.contains("stx-hidden") &&
+        !configPopover.contains(e.target) &&
+        !gearBtn.contains(e.target)
+      ) {
+        configPopover.classList.add("stx-hidden");
+      }
+    });
+  }
+
   /* ── Toolbar buttons → custom events ──────────────── */
   var toolbarBtns = document.querySelectorAll(".stx-shell-ai-input-btn");
   toolbarBtns.forEach(function (btn) {
@@ -48,9 +82,8 @@
       eventName = "stx-shell:sketch";
     } else if (title.indexOf("voice") >= 0 || title.indexOf("mic") >= 0) {
       eventName = "stx-shell:mic-toggle";
-    } else if (title.indexOf("settings") >= 0 || title.indexOf("config") >= 0) {
-      eventName = "stx-shell:settings";
     }
+    // Settings/config handled by gear toggle above — skip
 
     if (eventName) {
       btn.addEventListener("click", function () {
