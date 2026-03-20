@@ -31,3 +31,9 @@ export { WebcamCapture } from "./_webcam-capture";
 export { SketchCanvas } from "./_sketch-canvas";
 export { ConfigMode } from "./_config-mode";
 export type { ConfigAdapter, McpPrefsGroup, SkillInfo } from "./_config-mode";
+
+// P3c: ChatMode — full chat orchestration
+export { ChatMode } from "./_chat-mode";
+export type { ChatModeRefs, ChatModeOptions } from "./_chat-mode";
+export { chatSend } from "./_chat-send";
+export type { SendOptions } from "./_chat-send";
