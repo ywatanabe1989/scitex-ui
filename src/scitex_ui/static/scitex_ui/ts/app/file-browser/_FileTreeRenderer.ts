@@ -1,8 +1,13 @@
 /**
  * DOM rendering logic for FileBrowser.
+ *
+ * Uses colorful file icons (VS Code / Gitea style) ported from scitex-cloud.
+ * Supports git status badges and symlink indicators.
  */
 
 import type { FileNode, FileBrowserConfig } from "./types";
+import { getFileIconDef } from "./_file-icons";
+import { createGitStatusBadge } from "./_git-status";
 
 const CLS = "stx-app-file-browser";
 
@@ -62,6 +67,8 @@ function renderNodes(
   onToggleDir: (path: string) => void,
 ): void {
   const sorted = [...nodes].sort((a, b) => {
+    // Directories first, then alphabetical
+    if (a.type !== b.type) return a.type === "directory" ? -1 : 1;
     return a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
   });
 
@@ -87,8 +94,12 @@ function renderNodes(
       if (expanded) chevron.classList.add(`${CLS}__chevron--expanded`);
       item.appendChild(chevron);
 
+      const iconDef = getFileIconDef(node.name, "directory", expanded);
       const icon = document.createElement("i");
-      icon.className = expanded ? "fas fa-folder-open" : "fas fa-folder";
+      icon.className = iconDef.icon;
+      icon.style.color = iconDef.color;
+      icon.style.width = "16px";
+      icon.style.textAlign = "center";
       item.appendChild(icon);
 
       item.addEventListener("click", (e) => {
@@ -96,8 +107,12 @@ function renderNodes(
         onToggleDir(node.path);
       });
     } else {
+      const iconDef = getFileIconDef(node.name, "file");
       const icon = document.createElement("i");
-      icon.className = getFileIcon(node.name);
+      icon.className = iconDef.icon;
+      icon.style.color = iconDef.color;
+      icon.style.width = "16px";
+      icon.style.textAlign = "center";
       item.appendChild(icon);
 
       if (node.is_current) {
@@ -119,6 +134,24 @@ function renderNodes(
     label.textContent = node.name;
     item.appendChild(label);
 
+    // Symlink indicator
+    if (node.is_symlink && node.symlink_target) {
+      const symlink = document.createElement("span");
+      symlink.className = `${CLS}__symlink`;
+      symlink.textContent = ` \u2192 ${node.symlink_target}`;
+      symlink.style.color = "var(--color-fg-muted, #656d76)";
+      symlink.style.fontSize = "11px";
+      symlink.style.marginLeft = "4px";
+      item.appendChild(symlink);
+    }
+
+    // Git status badge
+    const gitBadge = createGitStatusBadge(node.git_status);
+    if (gitBadge) {
+      item.appendChild(gitBadge);
+    }
+
+    // Image badge
     if (
       node.type === "file" &&
       node.has_image &&
@@ -148,26 +181,6 @@ function renderNodes(
       );
     }
   }
-}
-
-function getFileIcon(filename: string): string {
-  const ext = filename.split(".").pop()?.toLowerCase();
-  const map: Record<string, string> = {
-    py: "fab fa-python",
-    ts: "fas fa-code",
-    js: "fab fa-js",
-    css: "fab fa-css3-alt",
-    html: "fab fa-html5",
-    json: "fas fa-braces",
-    yaml: "fas fa-file-code",
-    yml: "fas fa-file-code",
-    md: "fas fa-file-lines",
-    png: "fas fa-image",
-    jpg: "fas fa-image",
-    svg: "fas fa-image",
-    pdf: "fas fa-file-pdf",
-  };
-  return map[ext ?? ""] ?? "fas fa-file";
 }
 
 function countFiles(nodes: FileNode[]): number {

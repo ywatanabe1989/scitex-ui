@@ -13,8 +13,8 @@
 // App components
 export * from "./app";
 
-// Shell components
-export * from "./shell";
+// Shell components — REMOVED: workspace shell is now vanilla TS only
+// (see ts/shell/ for the vanilla TS implementation)
 
 // Base types
 export type { BaseProps } from "./_base";

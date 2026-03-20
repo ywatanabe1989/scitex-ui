@@ -143,12 +143,16 @@
 
 /* Volume visualizer (shown during recording) */
 .stx-shell-ai-vol {
-  display: flex;
+  display: none;
   align-items: flex-end;
   gap: 2px;
   height: 24px;
   padding: 0 2px;
   flex-shrink: 0;
+}
+
+.stx-shell-ai-vol.recording {
+  display: flex;
 }
 
 .stx-shell-ai-vol-bar {
