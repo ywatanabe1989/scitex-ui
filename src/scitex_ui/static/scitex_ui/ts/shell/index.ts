@@ -51,3 +51,11 @@ export type {
   StreamContext,
   ChatConfig,
 } from "./chat";
+
+export {
+  ViewerManager,
+  renderImageViewer,
+  renderPdfViewer,
+  detectFileType,
+} from "./viewer";
+export type { ViewerAdapter, ViewerConfig, OpenFile, FileType } from "./viewer";
