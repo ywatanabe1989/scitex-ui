@@ -29,3 +29,5 @@ export type { TtsAdapter } from "./_speech";
 export { ImageInputManager } from "./_image-input";
 export { WebcamCapture } from "./_webcam-capture";
 export { SketchCanvas } from "./_sketch-canvas";
+export { ConfigMode } from "./_config-mode";
+export type { ConfigAdapter, McpPrefsGroup, SkillInfo } from "./_config-mode";
