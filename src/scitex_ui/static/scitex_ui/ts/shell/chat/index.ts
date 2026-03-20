@@ -37,3 +37,7 @@ export { ChatMode } from "./_chat-mode";
 export type { ChatModeRefs, ChatModeOptions } from "./_chat-mode";
 export { chatSend } from "./_chat-send";
 export type { SendOptions } from "./_chat-send";
+
+// P3d: Sessions — session management with adapter pattern
+export { SessionsPanel } from "./_sessions-panel";
+export type { SessionAdapter, SessionMessage } from "./_sessions-panel";
