@@ -60,6 +60,38 @@
   background: var(--bg-hover, rgba(255, 255, 255, 0.08));
 }
 
+.stx-shell-ai-action-btn.active {
+  color: #5a9a7e;
+}
+
+/* Model badge — inline in settings panel or input area */
+.stx-shell-ai-model-badge {
+  font-size: 0.6rem;
+  font-family: monospace;
+  font-weight: 400;
+  color: var(--text-dimmed, #484f58);
+  display: inline;
+  margin-left: 0.25rem;
+}
+
+.stx-shell-ai-model-badge:empty {
+  display: none;
+}
+
+/* Context chip in panel header */
+.stx-shell-ai-context-chip {
+  font-size: 0.65rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-muted, #8b949e);
+  font-family: monospace;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* Config popover (gear settings dropdown) */
 .stx-shell-ai-config-popover {
   position: absolute;
