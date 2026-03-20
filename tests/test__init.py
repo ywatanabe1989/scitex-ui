@@ -18,7 +18,12 @@ class TestPublicAPI:
         assert hasattr(scitex_ui, "register_component")
 
     def test_all_contains_expected(self):
-        expected = {"get_component", "list_components", "get_static_dir"}
+        expected = {
+            "get_component",
+            "list_components",
+            "get_static_dir",
+            "get_docs_path",
+        }
         assert expected == set(scitex_ui.__all__)
 
     def test_get_static_dir(self):

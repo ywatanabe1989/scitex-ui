@@ -1,6 +1,7 @@
 
 ### Source: /home/ywatanabe/.git-templates/.gitignore-templates/Custom/Specific.gitignore ###
 # Please add files here
+node_modules/
 
 
 ### Source: /home/ywatanabe/.git-templates/.gitignore-templates/Custom/Claude.gitignore ###
