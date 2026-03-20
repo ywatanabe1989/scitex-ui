@@ -1,0 +1,56 @@
+/**
+ * scitex-ui — Complete CSS bundle (AUTO-GENERATED)
+ *
+ * Do not edit manually. Regenerate with: npx tsx css/_build-index.ts
+ */
+
+@import "./app/collapsible-panel.css";
+@import "./app/confirm-modal.css";
+@import "./app/data-table.css";
+@import "./app/dropdown.css";
+@import "./app/file-browser.css";
+@import "./app/file-browser/base.css";
+@import "./app/file-browser/children.css";
+@import "./app/file-browser/context-menu.css";
+@import "./app/file-browser/search.css";
+@import "./app/file-browser/states.css";
+@import "./app/file-browser/themes.css";
+@import "./app/file-tabs.css";
+@import "./app/media-viewer.css";
+@import "./app/package-docs-sidebar.css";
+@import "./app/recent-pane.css";
+@import "./app/selector-nav.css";
+@import "./app/tooltip.css";
+@import "./primitives/spacing.css";
+@import "./primitives/typography.css";
+@import "./primitives/z-index.css";
+@import "./shell/11-shortcuts-modal.css";
+@import "./shell/ai-panel.css";
+@import "./shell/ai-panel/01-panel-layout.css";
+@import "./shell/ai-panel/02-mode-toggle.css";
+@import "./shell/ai-panel/03-chat-messages.css";
+@import "./shell/ai-panel/04-chat-input.css";
+@import "./shell/ai-panel/05-console-mode.css";
+@import "./shell/ai-panel/06-console-tabs.css";
+@import "./shell/ai-panel/07-sessions.css";
+@import "./shell/ai-panel/08-config-mode.css";
+@import "./shell/ai-panel/09-media.css";
+@import "./shell/ai-panel/10-print.css";
+@import "./shell/ai-panel/11-markdown.css";
+@import "./shell/ai-panel/12-sketch-canvas.css";
+@import "./shell/ai-panel/13-terminal-media.css";
+@import "./shell/app-shell.css";
+@import "./shell/chat.css";
+@import "./shell/media-input.css";
+@import "./shell/panel-resizer.css";
+@import "./shell/resizer.css";
+@import "./shell/standalone-resizer-pos.css";
+@import "./shell/status-bar.css";
+@import "./shell/stx-shell-sidebar.css";
+@import "./shell/terminal.css";
+@import "./shell/theme.css";
+@import "./shell/viewer.css";
+@import "./shell/workspace-three-col.css";
+@import "./shell/workspace.css";
+@import "./utils/element-inspector.css";
+@import "./utils/layout.css";

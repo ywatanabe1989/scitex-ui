@@ -60,14 +60,62 @@ class TestStatusBar:
         _check_metadata(StatusBar)
 
 
+class TestResizer:
+    def test_metadata_and_files(self):
+        from scitex_ui._components._resizer import Resizer
+
+        _check_metadata(Resizer)
+
+
+class TestMediaViewer:
+    def test_metadata_and_files(self):
+        from scitex_ui._components._media_viewer import MediaViewer
+
+        _check_metadata(MediaViewer)
+
+
+class TestConfirmModal:
+    def test_metadata_and_files(self):
+        from scitex_ui._components._confirm_modal import ConfirmModal
+
+        _check_metadata(ConfirmModal)
+
+
+class TestFileTabs:
+    def test_metadata_and_files(self):
+        from scitex_ui._components._file_tabs import FileTabs
+
+        _check_metadata(FileTabs)
+
+
+class TestDropdown:
+    def test_metadata_and_files(self):
+        from scitex_ui._components._dropdown import Dropdown
+
+        _check_metadata(Dropdown)
+
+
+class TestTooltip:
+    def test_metadata_and_files(self):
+        from scitex_ui._components._tooltip import Tooltip
+
+        _check_metadata(Tooltip)
+
+
 class TestAllComponentsRegistered:
-    def test_five_components_registered(self):
+    def test_eleven_components_registered(self):
         names = scitex_ui.list_components()
         expected = {
             "app-shell",
+            "confirm-modal",
+            "dropdown",
             "file-browser",
+            "file-tabs",
+            "media-viewer",
             "package-docs-sidebar",
+            "resizer",
             "status-bar",
             "theme-provider",
+            "tooltip",
         }
         assert expected.issubset(set(names))

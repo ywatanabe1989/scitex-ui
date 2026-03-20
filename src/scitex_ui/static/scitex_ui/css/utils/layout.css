@@ -1,0 +1,24 @@
+/* ── Layout Utilities ─────────────────────────────────────
+ * Reusable layout classes for scitex-ui apps.
+ * Prefix: stx-layout-*
+ * ──────────────────────────────────────────────────────── */
+
+/* Push element to the far right within a flex container */
+.stx-layout-most-right {
+  margin-left: auto !important;
+}
+
+/* Push element to the far left within a flex container */
+.stx-layout-most-left {
+  margin-right: auto !important;
+}
+
+/* Push element to the far bottom within a flex column container */
+.stx-layout-most-bottom {
+  margin-top: auto !important;
+}
+
+/* Push element to the far top within a flex column container */
+.stx-layout-most-top {
+  margin-bottom: auto !important;
+}

@@ -1,0 +1,442 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>API Reference &mdash; scitex-ui 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Architecture" href="../architecture.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            scitex-ui
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture.html">Architecture</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#scitex_ui.get_component"><code class="docutils literal notranslate"><span class="pre">get_component()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scitex_ui.list_components"><code class="docutils literal notranslate"><span class="pre">list_components()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scitex_ui.get_static_dir"><code class="docutils literal notranslate"><span class="pre">get_static_dir()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-scitex_ui._registry">Registry</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scitex_ui._registry.register_component"><code class="docutils literal notranslate"><span class="pre">register_component()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scitex_ui._registry.get_component"><code class="docutils literal notranslate"><span class="pre">get_component()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scitex_ui._registry.list_components"><code class="docutils literal notranslate"><span class="pre">list_components()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-scitex_ui._components._theme_provider">Components</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scitex_ui._components._theme_provider.ThemeProvider"><code class="docutils literal notranslate"><span class="pre">ThemeProvider</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scitex_ui._components._theme_provider.ThemeProvider.name"><code class="docutils literal notranslate"><span class="pre">ThemeProvider.name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scitex_ui._components._theme_provider.ThemeProvider.version"><code class="docutils literal notranslate"><span class="pre">ThemeProvider.version</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scitex_ui._components._theme_provider.ThemeProvider.description"><code class="docutils literal notranslate"><span class="pre">ThemeProvider.description</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scitex_ui._components._theme_provider.ThemeProvider.ts_entry"><code class="docutils literal notranslate"><span class="pre">ThemeProvider.ts_entry</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scitex_ui._components._theme_provider.ThemeProvider.css_file"><code class="docutils literal notranslate"><span class="pre">ThemeProvider.css_file</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#scitex_ui._components._app_shell.AppShell"><code class="docutils literal notranslate"><span class="pre">AppShell</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scitex_ui._components._app_shell.AppShell.name"><code class="docutils literal notranslate"><span class="pre">AppShell.name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scitex_ui._components._app_shell.AppShell.version"><code class="docutils literal notranslate"><span class="pre">AppShell.version</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scitex_ui._components._app_shell.AppShell.description"><code class="docutils literal notranslate"><span class="pre">AppShell.description</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scitex_ui._components._app_shell.AppShell.ts_entry"><code class="docutils literal notranslate"><span class="pre">AppShell.ts_entry</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scitex_ui._components._app_shell.AppShell.css_file"><code class="docutils literal notranslate"><span class="pre">AppShell.css_file</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#scitex_ui._components._status_bar.StatusBar"><code class="docutils literal notranslate"><span class="pre">StatusBar</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scitex_ui._components._status_bar.StatusBar.name"><code class="docutils literal notranslate"><span class="pre">StatusBar.name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scitex_ui._components._status_bar.StatusBar.version"><code class="docutils literal notranslate"><span class="pre">StatusBar.version</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scitex_ui._components._status_bar.StatusBar.description"><code class="docutils literal notranslate"><span class="pre">StatusBar.description</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scitex_ui._components._status_bar.StatusBar.ts_entry"><code class="docutils literal notranslate"><span class="pre">StatusBar.ts_entry</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scitex_ui._components._status_bar.StatusBar.css_file"><code class="docutils literal notranslate"><span class="pre">StatusBar.css_file</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#scitex_ui._components._file_browser.FileBrowser"><code class="docutils literal notranslate"><span class="pre">FileBrowser</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scitex_ui._components._file_browser.FileBrowser.name"><code class="docutils literal notranslate"><span class="pre">FileBrowser.name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scitex_ui._components._file_browser.FileBrowser.version"><code class="docutils literal notranslate"><span class="pre">FileBrowser.version</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scitex_ui._components._file_browser.FileBrowser.description"><code class="docutils literal notranslate"><span class="pre">FileBrowser.description</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scitex_ui._components._file_browser.FileBrowser.ts_entry"><code class="docutils literal notranslate"><span class="pre">FileBrowser.ts_entry</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scitex_ui._components._file_browser.FileBrowser.css_file"><code class="docutils literal notranslate"><span class="pre">FileBrowser.css_file</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#scitex_ui._components._package_docs_sidebar.PackageDocsSidebar"><code class="docutils literal notranslate"><span class="pre">PackageDocsSidebar</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scitex_ui._components._package_docs_sidebar.PackageDocsSidebar.name"><code class="docutils literal notranslate"><span class="pre">PackageDocsSidebar.name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scitex_ui._components._package_docs_sidebar.PackageDocsSidebar.version"><code class="docutils literal notranslate"><span class="pre">PackageDocsSidebar.version</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scitex_ui._components._package_docs_sidebar.PackageDocsSidebar.description"><code class="docutils literal notranslate"><span class="pre">PackageDocsSidebar.description</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scitex_ui._components._package_docs_sidebar.PackageDocsSidebar.api_endpoint"><code class="docutils literal notranslate"><span class="pre">PackageDocsSidebar.api_endpoint</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scitex_ui._components._package_docs_sidebar.PackageDocsSidebar.ts_entry"><code class="docutils literal notranslate"><span class="pre">PackageDocsSidebar.ts_entry</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scitex_ui._components._package_docs_sidebar.PackageDocsSidebar.css_file"><code class="docutils literal notranslate"><span class="pre">PackageDocsSidebar.css_file</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">scitex-ui</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">API Reference</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/scitex_ui.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-scitex_ui">
+<span id="api-reference"></span><h1>API Reference<a class="headerlink" href="#module-scitex_ui" title="Link to this heading"></a></h1>
+<p>scitex-ui — Shared frontend UI components for the SciTeX ecosystem.</p>
+<p>Components ship as TypeScript + CSS static assets, discoverable by Django’s
+AppDirectoriesFinder when added to INSTALLED_APPS.</p>
+<p>Python API provides component metadata and registration.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="scitex_ui.get_component">
+<span class="sig-prename descclassname"><span class="pre">scitex_ui.</span></span><span class="sig-name descname"><span class="pre">get_component</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scitex_ui/_registry.html#get_component"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scitex_ui.get_component" title="Link to this definition"></a></dt>
+<dd><p>Get metadata for a registered component.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scitex_ui.list_components">
+<span class="sig-prename descclassname"><span class="pre">scitex_ui.</span></span><span class="sig-name descname"><span class="pre">list_components</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scitex_ui/_registry.html#list_components"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scitex_ui.list_components" title="Link to this definition"></a></dt>
+<dd><p>List all registered component names.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scitex_ui.get_static_dir">
+<span class="sig-prename descclassname"><span class="pre">scitex_ui.</span></span><span class="sig-name descname"><span class="pre">get_static_dir</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scitex_ui.html#get_static_dir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scitex_ui.get_static_dir" title="Link to this definition"></a></dt>
+<dd><p>Return the absolute path to scitex_ui’s static asset directory.</p>
+<p>This is the directory containing <code class="docutils literal notranslate"><span class="pre">css/</span></code> and <code class="docutils literal notranslate"><span class="pre">ts/</span></code> subdirectories.
+Works for both pip-installed packages and editable (dev) installs.</p>
+<p>Useful for build tools (Vite, Webpack) that need to resolve
+scitex-ui source files at build time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>e.g. <code class="docutils literal notranslate"><span class="pre">/usr/lib/python3.11/.../scitex_ui/static/scitex_ui</span></code></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pathlib.Path</p>
+</dd>
+</dl>
+</dd></dl>
+
+<section id="module-scitex_ui._registry">
+<span id="registry"></span><h2>Registry<a class="headerlink" href="#module-scitex_ui._registry" title="Link to this heading"></a></h2>
+<p>Component metadata registry.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="scitex_ui._registry.register_component">
+<span class="sig-prename descclassname"><span class="pre">scitex_ui._registry.</span></span><span class="sig-name descname"><span class="pre">register_component</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scitex_ui/_registry.html#register_component"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scitex_ui._registry.register_component" title="Link to this definition"></a></dt>
+<dd><p>Register a frontend component’s metadata.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scitex_ui._registry.get_component">
+<span class="sig-prename descclassname"><span class="pre">scitex_ui._registry.</span></span><span class="sig-name descname"><span class="pre">get_component</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scitex_ui/_registry.html#get_component"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scitex_ui._registry.get_component" title="Link to this definition"></a></dt>
+<dd><p>Get metadata for a registered component.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scitex_ui._registry.list_components">
+<span class="sig-prename descclassname"><span class="pre">scitex_ui._registry.</span></span><span class="sig-name descname"><span class="pre">list_components</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scitex_ui/_registry.html#list_components"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scitex_ui._registry.list_components" title="Link to this definition"></a></dt>
+<dd><p>List all registered component names.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-scitex_ui._components._theme_provider">
+<span id="components"></span><h2>Components<a class="headerlink" href="#module-scitex_ui._components._theme_provider" title="Link to this heading"></a></h2>
+<p>ThemeProvider component metadata.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="scitex_ui._components._theme_provider.ThemeProvider">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scitex_ui._components._theme_provider.</span></span><span class="sig-name descname"><span class="pre">ThemeProvider</span></span><a class="reference internal" href="../_modules/scitex_ui/_components/_theme_provider.html#ThemeProvider"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scitex_ui._components._theme_provider.ThemeProvider" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Light/dark theme manager with semantic color tokens.</p>
+<p>Manages the data-theme attribute on &lt;html&gt;, persists preference
+to localStorage, and provides toggle/set/get API.</p>
+<p>TypeScript entry: scitex_ui/ts/shell/theme-provider/index.ts
+CSS: scitex_ui/css/shell/theme.css</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scitex_ui._components._theme_provider.ThemeProvider.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'theme-provider'</span></em><a class="headerlink" href="#scitex_ui._components._theme_provider.ThemeProvider.name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scitex_ui._components._theme_provider.ThemeProvider.version">
+<span class="sig-name descname"><span class="pre">version</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'0.1.0'</span></em><a class="headerlink" href="#scitex_ui._components._theme_provider.ThemeProvider.version" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scitex_ui._components._theme_provider.ThemeProvider.description">
+<span class="sig-name descname"><span class="pre">description</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Light/dark</span> <span class="pre">theme</span> <span class="pre">manager</span> <span class="pre">with</span> <span class="pre">semantic</span> <span class="pre">color</span> <span class="pre">tokens'</span></em><a class="headerlink" href="#scitex_ui._components._theme_provider.ThemeProvider.description" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scitex_ui._components._theme_provider.ThemeProvider.ts_entry">
+<span class="sig-name descname"><span class="pre">ts_entry</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'scitex_ui/ts/shell/theme-provider/index'</span></em><a class="headerlink" href="#scitex_ui._components._theme_provider.ThemeProvider.ts_entry" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scitex_ui._components._theme_provider.ThemeProvider.css_file">
+<span class="sig-name descname"><span class="pre">css_file</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'scitex_ui/css/shell/theme.css'</span></em><a class="headerlink" href="#scitex_ui._components._theme_provider.ThemeProvider.css_file" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<p id="module-scitex_ui._components._app_shell">AppShell component metadata.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="scitex_ui._components._app_shell.AppShell">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scitex_ui._components._app_shell.</span></span><span class="sig-name descname"><span class="pre">AppShell</span></span><a class="reference internal" href="../_modules/scitex_ui/_components/_app_shell.html#AppShell"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scitex_ui._components._app_shell.AppShell" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Workspace layout shell with collapsible sidebar.</p>
+<p>Creates the three-zone layout: sidebar, main content area,
+and status bar slot. Supports app-specific accent colors.</p>
+<p>TypeScript entry: scitex_ui/ts/shell/app-shell/index.ts
+CSS: scitex_ui/css/shell/app-shell.css</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scitex_ui._components._app_shell.AppShell.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'app-shell'</span></em><a class="headerlink" href="#scitex_ui._components._app_shell.AppShell.name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scitex_ui._components._app_shell.AppShell.version">
+<span class="sig-name descname"><span class="pre">version</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'0.1.0'</span></em><a class="headerlink" href="#scitex_ui._components._app_shell.AppShell.version" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scitex_ui._components._app_shell.AppShell.description">
+<span class="sig-name descname"><span class="pre">description</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Workspace</span> <span class="pre">layout</span> <span class="pre">shell</span> <span class="pre">with</span> <span class="pre">collapsible</span> <span class="pre">sidebar'</span></em><a class="headerlink" href="#scitex_ui._components._app_shell.AppShell.description" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scitex_ui._components._app_shell.AppShell.ts_entry">
+<span class="sig-name descname"><span class="pre">ts_entry</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'scitex_ui/ts/shell/app-shell/index'</span></em><a class="headerlink" href="#scitex_ui._components._app_shell.AppShell.ts_entry" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scitex_ui._components._app_shell.AppShell.css_file">
+<span class="sig-name descname"><span class="pre">css_file</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'scitex_ui/css/shell/app-shell.css'</span></em><a class="headerlink" href="#scitex_ui._components._app_shell.AppShell.css_file" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<p id="module-scitex_ui._components._status_bar">StatusBar component metadata.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="scitex_ui._components._status_bar.StatusBar">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scitex_ui._components._status_bar.</span></span><span class="sig-name descname"><span class="pre">StatusBar</span></span><a class="reference internal" href="../_modules/scitex_ui/_components/_status_bar.html#StatusBar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scitex_ui._components._status_bar.StatusBar" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Bottom status bar with left/center/right sections.</p>
+<p>Displays status items with optional icons and click handlers.
+Designed for workspace-level information display.</p>
+<p>TypeScript entry: scitex_ui/ts/shell/status-bar/index.ts
+CSS: scitex_ui/css/shell/status-bar.css</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scitex_ui._components._status_bar.StatusBar.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'status-bar'</span></em><a class="headerlink" href="#scitex_ui._components._status_bar.StatusBar.name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scitex_ui._components._status_bar.StatusBar.version">
+<span class="sig-name descname"><span class="pre">version</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'0.1.0'</span></em><a class="headerlink" href="#scitex_ui._components._status_bar.StatusBar.version" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scitex_ui._components._status_bar.StatusBar.description">
+<span class="sig-name descname"><span class="pre">description</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Bottom</span> <span class="pre">status</span> <span class="pre">bar</span> <span class="pre">with</span> <span class="pre">left/center/right</span> <span class="pre">sections'</span></em><a class="headerlink" href="#scitex_ui._components._status_bar.StatusBar.description" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scitex_ui._components._status_bar.StatusBar.ts_entry">
+<span class="sig-name descname"><span class="pre">ts_entry</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'scitex_ui/ts/shell/status-bar/index'</span></em><a class="headerlink" href="#scitex_ui._components._status_bar.StatusBar.ts_entry" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scitex_ui._components._status_bar.StatusBar.css_file">
+<span class="sig-name descname"><span class="pre">css_file</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'scitex_ui/css/shell/status-bar.css'</span></em><a class="headerlink" href="#scitex_ui._components._status_bar.StatusBar.css_file" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<p id="module-scitex_ui._components._file_browser">FileBrowser component metadata.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="scitex_ui._components._file_browser.FileBrowser">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scitex_ui._components._file_browser.</span></span><span class="sig-name descname"><span class="pre">FileBrowser</span></span><a class="reference internal" href="../_modules/scitex_ui/_components/_file_browser.html#FileBrowser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scitex_ui._components._file_browser.FileBrowser" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Tree view for navigating file hierarchies.</p>
+<p>Renders a collapsible file tree with directory expand/collapse,
+file selection, and file-type icons.</p>
+<p>TypeScript entry: scitex_ui/ts/app/file-browser/index.ts
+CSS: scitex_ui/css/app/file-browser.css</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scitex_ui._components._file_browser.FileBrowser.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'file-browser'</span></em><a class="headerlink" href="#scitex_ui._components._file_browser.FileBrowser.name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scitex_ui._components._file_browser.FileBrowser.version">
+<span class="sig-name descname"><span class="pre">version</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'0.1.0'</span></em><a class="headerlink" href="#scitex_ui._components._file_browser.FileBrowser.version" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scitex_ui._components._file_browser.FileBrowser.description">
+<span class="sig-name descname"><span class="pre">description</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Tree</span> <span class="pre">view</span> <span class="pre">for</span> <span class="pre">navigating</span> <span class="pre">file</span> <span class="pre">hierarchies'</span></em><a class="headerlink" href="#scitex_ui._components._file_browser.FileBrowser.description" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scitex_ui._components._file_browser.FileBrowser.ts_entry">
+<span class="sig-name descname"><span class="pre">ts_entry</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'scitex_ui/ts/app/file-browser/index'</span></em><a class="headerlink" href="#scitex_ui._components._file_browser.FileBrowser.ts_entry" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scitex_ui._components._file_browser.FileBrowser.css_file">
+<span class="sig-name descname"><span class="pre">css_file</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'scitex_ui/css/app/file-browser.css'</span></em><a class="headerlink" href="#scitex_ui._components._file_browser.FileBrowser.css_file" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<p id="module-scitex_ui._components._package_docs_sidebar">PackageDocsSidebar component metadata.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="scitex_ui._components._package_docs_sidebar.PackageDocsSidebar">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scitex_ui._components._package_docs_sidebar.</span></span><span class="sig-name descname"><span class="pre">PackageDocsSidebar</span></span><a class="reference internal" href="../_modules/scitex_ui/_components/_package_docs_sidebar.html#PackageDocsSidebar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scitex_ui._components._package_docs_sidebar.PackageDocsSidebar" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Navigable sidebar showing SciTeX Python package documentation.</p>
+<p>Fetches package data from a JSON API and renders a grouped,
+clickable sidebar. Reusable by any SciTeX app.</p>
+<p>TypeScript entry: scitex_ui/ts/app/package-docs-sidebar/index.ts
+CSS: scitex_ui/css/app/package-docs-sidebar.css
+API: /apps/docs/api/packages/</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scitex_ui._components._package_docs_sidebar.PackageDocsSidebar.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'package-docs-sidebar'</span></em><a class="headerlink" href="#scitex_ui._components._package_docs_sidebar.PackageDocsSidebar.name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scitex_ui._components._package_docs_sidebar.PackageDocsSidebar.version">
+<span class="sig-name descname"><span class="pre">version</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'0.1.0'</span></em><a class="headerlink" href="#scitex_ui._components._package_docs_sidebar.PackageDocsSidebar.version" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scitex_ui._components._package_docs_sidebar.PackageDocsSidebar.description">
+<span class="sig-name descname"><span class="pre">description</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Navigable</span> <span class="pre">sidebar</span> <span class="pre">for</span> <span class="pre">Python</span> <span class="pre">package</span> <span class="pre">documentation'</span></em><a class="headerlink" href="#scitex_ui._components._package_docs_sidebar.PackageDocsSidebar.description" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scitex_ui._components._package_docs_sidebar.PackageDocsSidebar.api_endpoint">
+<span class="sig-name descname"><span class="pre">api_endpoint</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'/apps/docs/api/packages/'</span></em><a class="headerlink" href="#scitex_ui._components._package_docs_sidebar.PackageDocsSidebar.api_endpoint" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scitex_ui._components._package_docs_sidebar.PackageDocsSidebar.ts_entry">
+<span class="sig-name descname"><span class="pre">ts_entry</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'scitex_ui/ts/app/package-docs-sidebar/index'</span></em><a class="headerlink" href="#scitex_ui._components._package_docs_sidebar.PackageDocsSidebar.ts_entry" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scitex_ui._components._package_docs_sidebar.PackageDocsSidebar.css_file">
+<span class="sig-name descname"><span class="pre">css_file</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'scitex_ui/css/app/package-docs-sidebar.css'</span></em><a class="headerlink" href="#scitex_ui._components._package_docs_sidebar.PackageDocsSidebar.css_file" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../architecture.html" class="btn btn-neutral float-left" title="Architecture" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024-2026, Yusuke Watanabe.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

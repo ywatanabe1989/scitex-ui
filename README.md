@@ -34,9 +34,32 @@ Each component ships with:
 - **CSS styles** — scoped via BEM-like class prefixes (`stx-shell-*`, `stx-app-*`)
 - **Python metadata** — version, file paths, descriptions
 
-### Current Components
+### Architecture
 
-Components are organized into two categories:
+```mermaid
+graph TB
+    subgraph shell ["Shell (stx-shell-*) — Workspace Frame"]
+        theme["ThemeProvider<br/>Light/Dark + Tokens"]
+        appshell["AppShell<br/>Sidebar + Content"]
+        statusbar["StatusBar<br/>L | C | R Sections"]
+    end
+
+    subgraph app ["App (stx-app-*) — In-App Components"]
+        filebrowser["FileBrowser<br/>Tree Navigation"]
+        pkgsidebar["PackageDocsSidebar<br/>Package Browser"]
+    end
+
+    base{{"BaseComponent<br/>Container + Events + Lifecycle"}}
+
+    appshell -->|extends| base
+    statusbar -->|extends| base
+    filebrowser -->|extends| base
+    pkgsidebar -->|extends| base
+```
+
+<p align="center"><sub><b>Figure 1.</b> Component architecture. Shell components provide workspace framing (theme, layout, status bar). App components are reusable in-app widgets. All extend BaseComponent for shared container resolution, event dispatch, and lifecycle management.</sub></p>
+
+### Current Components
 
 | Category | Component | Prefix | Description |
 |----------|-----------|--------|-------------|
@@ -142,6 +165,34 @@ scitex-ui version             # Show version
 MCP (Model Context Protocol) tools for AI agents to discover and query available UI components.
 
 </details>
+
+## Role in SciTeX Ecosystem
+
+`scitex-ui` is the **shared React/TypeScript component library** for all SciTeX web applications. It provides the visual building blocks that maintain consistency across the cloud dashboard, workspace editor, and third-party apps.
+
+```
+scitex (orchestrator, templates, CLI, MCP)
+  |-- scitex-app              -- runtime SDK for apps
+  |-- scitex-ui (this package) -- React/TS component library
+  |     |-- Shell (stx-shell-*) -- workspace frame, sidebar, header
+  |     |-- App (stx-app-*)     -- reusable widgets within app panes
+  |     |-- AppSandbox          -- Shadow DOM isolation for apps
+  |     +-- CSS bundles          -- shell.css, app.css, all.css
+  +-- figrecipe                -- reference app (consumes scitex-ui)
+```
+
+**What this package owns:**
+
+- Shell components (`stx-shell-*`): ThemeProvider, AppShell, StatusBar, Workspace
+- App components (`stx-app-*`): DataTable, FileBrowser, SelectorNav
+- `AppSandbox` for Shadow DOM isolation of third-party apps
+- CSS bundles: `shell.css` (host frame), `app.css` (in-app), `all.css` (combined)
+
+**What this package does NOT own:**
+
+- Backend/runtime SDK -- see [scitex-app](https://github.com/ywatanabe1989/scitex-app)
+- Orchestration, templates, CLI -- see [scitex](https://github.com/ywatanabe1989/scitex-python)
+- App-specific logic -- each app (e.g., [figrecipe](https://github.com/ywatanabe1989/figrecipe)) owns its own views
 
 ## Part of SciTeX
 

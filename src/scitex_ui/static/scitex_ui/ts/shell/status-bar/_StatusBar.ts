@@ -36,6 +36,18 @@ export class StatusBar extends BaseComponent<StatusBarConfig> {
       right: config.items?.right ?? [],
     };
 
+    if (config.showThemeToggle) {
+      const isDark =
+        document.documentElement.getAttribute("data-theme") === "dark";
+      this.items.right.push({
+        id: "__theme-toggle",
+        text: "",
+        icon: isDark ? "fas fa-sun" : "fas fa-moon",
+        title: "Toggle theme",
+        onClick: () => this.toggleTheme(),
+      });
+    }
+
     this.renderAll();
   }
 
@@ -74,6 +86,21 @@ export class StatusBar extends BaseComponent<StatusBarConfig> {
   override destroy(): void {
     this.container.classList.remove(CLS);
     super.destroy();
+  }
+
+  private toggleTheme(): void {
+    const html = document.documentElement;
+    const current = html.getAttribute("data-theme");
+    const next = current === "dark" ? "light" : "dark";
+    html.setAttribute("data-theme", next);
+    try {
+      localStorage.setItem("stx-theme", next);
+    } catch {
+      /* noop */
+    }
+    this.updateItem("__theme-toggle", {
+      icon: next === "dark" ? "fas fa-sun" : "fas fa-moon",
+    });
   }
 
   private createSection(name: StatusBarSection): HTMLElement {
