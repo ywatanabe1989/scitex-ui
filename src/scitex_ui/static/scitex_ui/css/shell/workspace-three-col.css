@@ -38,7 +38,6 @@
 
 /* Override any global fixed positioning applied by global-ai-chat.css
    so the panel flows inside the three-col layout instead */
-.workspace-three-col .stx-shell-ai-panel.stx-shell-sidebar,
 .workspace-three-col .stx-shell-ai-panel.stx-shell-sidebar {
   position: relative !important;
   top: auto !important;
@@ -431,6 +430,18 @@ body.stx-shell-ai-open #workspace-three-col #main-content {
 .workspace-three-col > .ws-module-pane {
   height: 100%;
   max-height: 100%;
+}
+
+/* Module content that uses min-height: 100vh is designed for standalone pages.
+   Inside the workspace three-col layout, these rules push content beyond the
+   viewport cap. Override them to respect the flex container height instead. */
+.ws-module-pane .writer-container,
+.ws-module-pane .version-control-container,
+.ws-module-pane .arxiv-index,
+.ws-module-pane .writer-fullscreen-message,
+.ws-module-pane .writer-collaboration-session,
+.ws-module-pane .docs-container {
+  min-height: 0;
 }
 
 /* --- Responsive: collapse panes on narrow viewports --- */
