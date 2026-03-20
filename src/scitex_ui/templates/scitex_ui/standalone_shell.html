@@ -25,6 +25,10 @@
               href="{% static 'scitex_ui/css/shell/standalone-resizer-pos.css' %}" />
         <link rel="stylesheet"
               href="{% static 'scitex_ui/css/shell/11-shortcuts-modal.css' %}" />
+        <link rel="stylesheet"
+              href="{% static 'scitex_ui/css/shell/workspace-files-tree/index.css' %}" />
+        <link rel="stylesheet"
+              href="{% static 'scitex_ui/css/shell/repo-monitor.css' %}" />
         {% block extra_css %}{% endblock %}
     </head>
     <body class="dark-theme workspace-page footer-collapsed no-transition">
@@ -301,21 +305,64 @@
                                 title="Toggle file tree">
                             <i class="fas fa-chevron-right"></i>
                         </button>
-                        <span class="stx-shell-sidebar__title" title="Files">
-                            <i class="fas fa-folder"></i> Files
-                        </span>
+                        <span class="stx-shell-sidebar__title" title="Files"><i class="fas fa-folder"></i> Files</span>
                         <span class="stx-shell-sidebar__title-full">
-                            <i class="fas fa-folder-open"></i> Files
+                            <i class="fas fa-folder-open"></i>
+                            {% block worktree_title_full %}Files{% endblock %}
                         </span>
                         <div class="stx-shell-sidebar__header-actions ws-worktree-actions">
-                            {% block worktree_actions %}{% endblock %}
+                            {% block worktree_actions %}
+                                <button class="stx-shell-ai-action-btn"
+                                        title="Keyboard Shortcuts"
+                                        onclick="window.showShortcutsModal && window.showShortcutsModal()">
+                                    <i class="fas fa-keyboard"></i>
+                                </button>
+                            {% endblock %}
                         </div>
                     </div>
                     <div class="stx-shell-sidebar__content ws-worktree-split">
                         <div class="ws-worktree-tree-area">
-                            <div id="ws-worktree-tree" data-workspace-tree></div>
+                            {% block worktree_preseed %}{% endblock %}
+                            <div id="ws-worktree-tree"
+                                 data-workspace-tree
+                                 {% block worktree_data_attrs %}{% endblock %}></div>
                         </div>
-                        {% block worktree_extra %}{% endblock %}
+                        <!-- Vertical resizer: tree / repo monitor split -->
+                        <div class="v-resizer"
+                             id="repo-monitor-resizer"
+                             data-v-resizer
+                             data-in-app
+                             data-top=".ws-worktree-tree-area"
+                             data-bottom=".ws-repo-monitor-area"
+                             data-most-bottom
+                             data-threshold="48"
+                             data-storage-key="ws-repo-monitor-split"></div>
+                        <!-- Repository Monitor -->
+                        <div class="ws-repo-monitor-area collapsed"
+                             id="ws-repo-monitor"
+                             {% block repo_monitor_data_attrs %}{% endblock %}>
+                            <div class="repo-monitor-header" id="repo-monitor-header">
+                                <i class="fas fa-clock-rotate-left"></i>
+                                <span>Recent</span>
+                                <span class="repo-monitor-status" id="repo-monitor-status"></span>
+                                <span class="repo-monitor-toolbar">
+                                    <button id="repo-monitor-config-toggle"
+                                            class="rm-toolbar-btn"
+                                            title="Filter settings">
+                                        <i class="fas fa-gear"></i>
+                                    </button>
+                                    <button id="repo-monitor-pause-toggle"
+                                            class="rm-toolbar-btn"
+                                            title="Pause/resume monitor">
+                                        <i class="fas fa-pause"></i>
+                                    </button>
+                                    <button id="repo-monitor-clear" class="rm-toolbar-btn" title="Clear feed">
+                                        <i class="fas fa-trash-can"></i>
+                                    </button>
+                                </span>
+                            </div>
+                            <div class="repo-monitor-content" id="repo-monitor-feed"></div>
+                        </div>
                     </div>
                 </div>
             </div>
