@@ -79,21 +79,40 @@
                         </button>
                     </div>
                     <div class="stx-shell-sidebar__content stx-shell-ai-body">
-                        <!-- Chat view -->
+                        <!-- Chat view (matches scitex-cloud workspace_ai_pane.html) -->
                         <div id="stx-shell-ai-chat-view" class="stx-shell-ai-view">
                             <div class="stx-shell-ai-sessions-bar">
                                 <button class="stx-shell-ai-new-chat" title="New chat">
                                     <i class="fas fa-plus"></i>
                                 </button>
                                 <div id="stx-shell-ai-sessions-list" class="stx-shell-ai-sessions-list"></div>
+                                <div class="stx-shell-ai-panel-actions">
+                                    <button class="stx-shell-ai-action-btn"
+                                            id="stx-shell-ai-copy-chat"
+                                            title="Copy chat">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                    <button class="stx-shell-ai-action-btn"
+                                            id="stx-shell-ai-print-chat"
+                                            title="Print chat">
+                                        <i class="fas fa-print"></i>
+                                    </button>
+                                    <button class="stx-shell-ai-action-btn"
+                                            id="stx-shell-ai-clear-chat"
+                                            title="Clear chat">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </div>
                             </div>
                             <div id="stx-shell-ai-messages" class="stx-shell-ai-messages">
                                 <div class="stx-shell-ai-empty">
                                     <i class="fas fa-robot"></i>
-                                    <span>AI Chat</span>
+                                    <span>Ask anything about SciTeX.</span>
+                                    <span>I can take actions: stats, plots, literature, and your current work.</span>
                                 </div>
                             </div>
                             <div class="stx-shell-ai-input-area">
+                                <span id="stx-shell-ai-model-badge" class="stx-shell-ai-model-badge"></span>
                                 <div id="stx-shell-ai-image-preview" class="stx-shell-ai-image-preview"></div>
                                 <div class="stx-shell-ai-input-wrap">
                                     <textarea id="stx-shell-ai-input"
@@ -101,12 +120,38 @@
                                               rows="1"
                                               placeholder="Ask anything"
                                               autocomplete="off"></textarea>
+                                    <button id="stx-shell-ai-camera"
+                                            class="stx-shell-ai-input-btn"
+                                            title="Attach image">
+                                        <i class="fas fa-camera"></i>
+                                    </button>
+                                    <button id="stx-shell-ai-sketch"
+                                            class="stx-shell-ai-input-btn"
+                                            title="Draw sketch">
+                                        <i class="fas fa-pen"></i>
+                                    </button>
                                     <input id="stx-shell-ai-file-input"
                                            type="file"
                                            accept="image/*"
                                            multiple
                                            hidden>
+                                    <button id="stx-shell-ai-mic" class="stx-shell-ai-mic" title="Voice input">
+                                        <i class="fas fa-microphone"></i>
+                                    </button>
+                                    <button id="stx-shell-ai-chat-gear"
+                                            class="stx-shell-ai-input-btn stx-shell-ai-gear-btn"
+                                            title="Chat settings">
+                                        <i class="fas fa-cog"></i>
+                                    </button>
                                 </div>
+                                <div class="stx-shell-ai-vol">
+                                    <span class="stx-shell-ai-vol-bar" hidden></span>
+                                    <span class="stx-shell-ai-vol-bar" hidden></span>
+                                    <span class="stx-shell-ai-vol-bar" hidden></span>
+                                    <span class="stx-shell-ai-vol-bar" hidden></span>
+                                    <span class="stx-shell-ai-vol-bar" hidden></span>
+                                </div>
+                                <button id="stx-shell-ai-send" class="stx-shell-ai-send" hidden></button>
                             </div>
                         </div>
                         <!-- Console/Terminal view -->
