@@ -168,25 +168,23 @@ MCP (Model Context Protocol) tools for AI agents to discover and query available
 
 ## Role in SciTeX Ecosystem
 
-`scitex-ui` is the **shared React/TypeScript component library** for all SciTeX web applications. It provides the visual building blocks that maintain consistency across the cloud dashboard, workspace editor, and third-party apps.
+`scitex-ui` is the **shared TypeScript + CSS component library** for all SciTeX web applications. It provides the visual building blocks that maintain consistency across the cloud dashboard, workspace editor, and third-party apps.
 
 ```
 scitex (orchestrator, templates, CLI, MCP)
   |-- scitex-app              -- runtime SDK for apps
-  |-- scitex-ui (this package) -- React/TS component library
-  |     |-- Shell (stx-shell-*) -- workspace frame, sidebar, header
-  |     |-- App (stx-app-*)     -- reusable widgets within app panes
-  |     |-- AppSandbox          -- Shadow DOM isolation for apps
-  |     +-- CSS bundles          -- shell.css, app.css, all.css
+  |-- scitex-ui (this package) -- TS + CSS component library
+  |     |-- Shell (stx-shell-*) -- ThemeProvider, AppShell, StatusBar
+  |     |-- App (stx-app-*)     -- FileBrowser, PackageDocsSidebar
+  |     +-- Design tokens        -- spacing, typography, z-index, colors
   +-- figrecipe                -- reference app (consumes scitex-ui)
 ```
 
 **What this package owns:**
 
-- Shell components (`stx-shell-*`): ThemeProvider, AppShell, StatusBar, Workspace
-- App components (`stx-app-*`): DataTable, FileBrowser, SelectorNav
-- `AppSandbox` for Shadow DOM isolation of third-party apps
-- CSS bundles: `shell.css` (host frame), `app.css` (in-app), `all.css` (combined)
+- Shell components (`stx-shell-*`): ThemeProvider, AppShell, StatusBar
+- App components (`stx-app-*`): FileBrowser, PackageDocsSidebar
+- Design token CSS: theme colors, spacing, typography, z-index primitives
 
 **What this package does NOT own:**
 
