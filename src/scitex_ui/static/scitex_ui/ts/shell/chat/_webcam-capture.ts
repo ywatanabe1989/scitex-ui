@@ -1,0 +1,144 @@
+/**
+ * WebcamCapture — live camera feed with snapshot for AI chat.
+ *
+ * Ported from scitex-cloud's webcam-capture.ts.
+ * Opens modal overlay with getUserMedia, capture button, camera flip.
+ * Falls back to file picker if camera denied.
+ */
+
+import type { ImageInputManager } from "./_image-input";
+
+export class WebcamCapture {
+  private overlay: HTMLElement | null = null;
+  private video: HTMLVideoElement | null = null;
+  private stream: MediaStream | null = null;
+  private imageInput: ImageInputManager;
+  private fileInput: HTMLInputElement;
+
+  constructor(imageInput: ImageInputManager, fileInput: HTMLInputElement) {
+    this.imageInput = imageInput;
+    this.fileInput = fileInput;
+  }
+
+  async open(): Promise<void> {
+    if (this.overlay) return;
+
+    try {
+      this.stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "environment", width: { ideal: 1280 } },
+        audio: false,
+      });
+    } catch {
+      this.fileInput.click();
+      return;
+    }
+
+    this.overlay = this.buildUI();
+    document.body.appendChild(this.overlay);
+    this.video!.srcObject = this.stream;
+  }
+
+  close(): void {
+    this.stopStream();
+    this.overlay?.remove();
+    this.overlay = null;
+    this.video = null;
+  }
+
+  private buildUI(): HTMLElement {
+    const overlay = document.createElement("div");
+    overlay.className = "stx-shell-webcam-overlay";
+    overlay.style.cssText =
+      "position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:10000;display:flex;align-items:center;justify-content:center;";
+
+    const panel = document.createElement("div");
+    panel.className = "stx-shell-webcam-panel";
+    panel.style.cssText =
+      "display:flex;flex-direction:column;align-items:center;gap:12px;padding:16px;background:var(--bg-secondary,#161b22);border-radius:8px;";
+    overlay.appendChild(panel);
+
+    this.video = document.createElement("video");
+    this.video.autoplay = true;
+    this.video.playsInline = true;
+    this.video.muted = true;
+    this.video.style.cssText =
+      "max-width:640px;max-height:480px;border-radius:4px;";
+    panel.appendChild(this.video);
+
+    const actions = document.createElement("div");
+    actions.style.cssText = "display:flex;gap:12px;";
+
+    const cancelBtn = document.createElement("button");
+    cancelBtn.textContent = "Cancel";
+    cancelBtn.style.cssText =
+      "padding:8px 16px;border-radius:4px;border:1px solid var(--border-default,#30363d);background:none;color:var(--fg-default,#c9d1d9);cursor:pointer;";
+    cancelBtn.addEventListener("click", () => this.close());
+
+    const captureBtn = document.createElement("button");
+    captureBtn.innerHTML = '<i class="fas fa-circle"></i> Capture';
+    captureBtn.style.cssText =
+      "padding:8px 16px;border-radius:4px;border:none;background:#ef4444;color:#fff;cursor:pointer;font-size:16px;";
+    captureBtn.addEventListener("click", () => this.capture());
+
+    const flipBtn = document.createElement("button");
+    flipBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Flip';
+    flipBtn.style.cssText =
+      "padding:8px 16px;border-radius:4px;border:1px solid var(--border-default,#30363d);background:none;color:var(--fg-default,#c9d1d9);cursor:pointer;";
+    flipBtn.addEventListener("click", () => this.switchCamera());
+
+    actions.append(cancelBtn, captureBtn, flipBtn);
+    panel.appendChild(actions);
+
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) this.close();
+    });
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        this.close();
+        document.removeEventListener("keydown", onKey);
+      }
+    };
+    document.addEventListener("keydown", onKey);
+
+    return overlay;
+  }
+
+  private capture(): void {
+    if (!this.video) return;
+    const canvas = document.createElement("canvas");
+    canvas.width = this.video.videoWidth || 640;
+    canvas.height = this.video.videoHeight || 480;
+    const ctx = canvas.getContext("2d")!;
+    ctx.drawImage(this.video, 0, 0, canvas.width, canvas.height);
+    const dataUrl = canvas.toDataURL("image/jpeg", 0.9);
+    this.imageInput.addImageFromDataUrl(dataUrl, "image/jpeg");
+    this.close();
+  }
+
+  private async switchCamera(): Promise<void> {
+    if (!this.stream || !this.video) return;
+    const currentTrack = this.stream.getVideoTracks()[0];
+    const currentFacing =
+      currentTrack.getSettings().facingMode || "environment";
+    const newFacing = currentFacing === "environment" ? "user" : "environment";
+
+    this.stopStream();
+    try {
+      this.stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: newFacing, width: { ideal: 1280 } },
+        audio: false,
+      });
+      this.video.srcObject = this.stream;
+    } catch {
+      /* only one camera — ignore */
+    }
+  }
+
+  private stopStream(): void {
+    if (this.stream) {
+      for (const track of this.stream.getTracks()) track.stop();
+      this.stream = null;
+    }
+  }
+}

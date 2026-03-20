@@ -1,5 +1,5 @@
 /**
- * Shell chat — barrel export (P3a: Core).
+ * Shell chat — barrel export (P3a: Core + P3b: Media Extensions).
  */
 
 export { processStream } from "./_stream-handler";
@@ -20,3 +20,11 @@ export type {
   StreamContext,
   ChatConfig,
 } from "./types";
+
+// P3b: Media Extensions
+export { VoiceRecorder } from "./_recorder";
+export type { SttAdapter } from "./_recorder";
+export { speakText, cleanForSpeech } from "./_speech";
+export type { TtsAdapter } from "./_speech";
+export { ImageInputManager } from "./_image-input";
+export { WebcamCapture } from "./_webcam-capture";
