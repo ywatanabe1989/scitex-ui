@@ -29,6 +29,12 @@
               href="{% static 'scitex_ui/css/shell/workspace-files-tree/index.css' %}" />
         <link rel="stylesheet"
               href="{% static 'scitex_ui/css/shell/repo-monitor.css' %}" />
+        <link rel="stylesheet"
+              href="{% static 'scitex_ui/css/shell/workspace-viewer.css' %}" />
+        <link rel="stylesheet"
+              href="{% static 'scitex_ui/css/shell/workspace-viewer-preview.css' %}" />
+        <link rel="stylesheet"
+              href="{% static 'scitex_ui/css/shell/media-viewer.css' %}" />
         {% block extra_css %}{% endblock %}
     </head>
     <body class="dark-theme workspace-page footer-collapsed no-transition">
@@ -368,7 +374,10 @@
             </div>
             <!-- ── Viewer Pane ────────────────────────── -->
             <div class="ws-viewer-pane" id="ws-viewer-pane">
-                <div class="stx-shell-sidebar collapsed" id="ws-viewer-sidebar">
+                <div class="stx-shell-sidebar collapsed"
+                     id="ws-viewer-sidebar"
+                     data-ai-hint="General Editor Pane: shared file viewer across all modules (Writer, Scholar, Console, etc.). Supports text (.py .js .ts .html .css .json .md .yaml .sh .tex .bib .txt), images (.png .jpg .gif .webp .svg), PDF (.pdf), tables (.csv .tsv), diagrams (.mmd .mermaid), audio (.mp3 .wav .ogg .flac), video (.mp4 .webm .avi .mov). Open files via ui_action(steps=[{action:'open-file', path:'relative/path'}]). The currently open file path is tracked in data-ai-viewer-active on this element."
+                     data-ai-viewer-active="">
                     <div id="ws-viewer-resizer"
                          class="panel-resizer"
                          data-panel-resizer
@@ -383,12 +392,31 @@
                         <button class="panel-toggle-btn" id="ws-viewer-toggle" title="Toggle viewer">
                             <i class="fas fa-chevron-right"></i>
                         </button>
-                        <span class="stx-shell-sidebar__title" title="Viewer">
-                            <i class="fas fa-eye"></i> Viewer
-                        </span>
+                        <span id="ws-viewer-title-short"
+                              class="stx-shell-sidebar__title"
+                              title="Viewer"><i class="fas fa-eye"></i> Viewer</span>
+                        <span id="ws-viewer-mode-toggle"
+                              class="stx-shell-sidebar__title-full ws-viewer-mode-toggle-title"
+                              title="Switch to Editor"><i class="fas fa-eye"></i> Viewer</span>
+                        <div class="stx-shell-sidebar__header-actions ws-viewer-header-actions">
+                            <div id="ws-viewer-tabs" class="ws-viewer-tabs"></div>
+                            <button class="ws-viewer-formats-info-btn"
+                                    data-tooltip="Supported formats:&#10;Text: .py .js .ts .html .css .json .md .yaml .sh .tex .bib .txt&#10;Image: .png .jpg .jpeg .gif .webp .svg .bmp .ico&#10;PDF: .pdf&#10;Table: .csv .tsv&#10;Diagram: .mmd .mermaid .dot .gv&#10;Audio: .mp3 .wav .ogg .flac .m4a .aac .wma&#10;Video: .mp4 .webm .avi .mov .mkv .ogv"
+                                    title="">
+                                <i class="fas fa-info-circle"></i>
+                            </button>
+                            <button id="ws-viewer-shortcuts-btn"
+                                    class="ws-viewer-shortcuts-btn"
+                                    title="Keyboard shortcuts (Alt+/)">
+                                <i class="fas fa-keyboard"></i>
+                            </button>
+                        </div>
                     </div>
                     <div class="stx-shell-sidebar__content ws-viewer-body">
                         <div id="ws-viewer-content" class="ws-viewer-content">
+                            <div id="ws-viewer-monaco" class="ws-viewer-monaco"></div>
+                            <div id="ws-viewer-preview" class="ws-viewer-preview"></div>
+                            <div id="ws-viewer-media" class="ws-viewer-media"></div>
                             <div id="ws-viewer-empty" class="ws-viewer-empty">
                                 <i class="fas fa-file-alt"></i>
                                 <span>Click a file to open</span>

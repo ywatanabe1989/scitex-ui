@@ -1,176 +1,487 @@
 /**
- * ViewerManager — routes files to the correct viewer based on type.
+ * ViewerManager - Coordinates tab management and file viewing.
  *
- * Manages the viewer pane (ws-viewer-content) and routes to:
- *  - ImageViewer for images
- *  - PdfViewer for PDFs
- *  - Text display for code/text files
- *  - Raw download for unknown types
- *
+ * Ported from scitex-cloud's WorkspaceViewer (index.ts).
  * Uses ViewerAdapter for backend abstraction.
+ *
+ * Responsibilities:
+ * - Open/close files via TabManager
+ * - Route to text fallback or dedicated media viewer
+ * - Manage show/hide of textContainer vs mediaContainer vs previewContainer
+ * - Edit / Preview mode toggle for markdown files
  */
 
-import type { ViewerAdapter, ViewerConfig, OpenFile, FileType } from "./types";
-import { detectFileType } from "./types";
-import { renderImageViewer } from "./_ImageViewer";
-import { renderPdfViewer } from "./_PdfViewer";
+import { MarkdownPreviewPanel } from "./_MarkdownPreview";
+import { TabManager } from "./_TabManager";
+import { ViewerRouter } from "./_ViewerRouter";
+import {
+  detectFileType,
+  detectShebang,
+  FILENAME_LANGUAGE_MAP,
+  LANGUAGE_MAP,
+  type ViewerAdapter,
+  type ViewerConfig,
+  type OpenFile,
+  type TabInfo,
+} from "./types";
 
-const DEFAULT_CONTAINER = "#ws-viewer-content";
+type ViewMode = "edit" | "preview";
+
+/** Extensions that support edit + preview toggle */
+const PREVIEWABLE_EXTENSIONS = new Set([
+  ".md",
+  ".mmd",
+  ".mermaid",
+  ".dot",
+  ".gv",
+  ".csv",
+  ".tsv",
+]);
+
+function isPreviewable(filePath: string): boolean {
+  const ext = filePath.substring(filePath.lastIndexOf(".")).toLowerCase();
+  return PREVIEWABLE_EXTENSIONS.has(ext);
+}
 
 export class ViewerManager {
-  private container: HTMLElement;
+  private tabManager: TabManager;
+  private router: ViewerRouter;
   private adapter: ViewerAdapter;
+  private textContainer: HTMLElement;
+  private mediaContainer: HTMLElement;
+  private previewContainer: HTMLElement | null;
+  private previewPanel: MarkdownPreviewPanel | null = null;
+  private modeToggle: HTMLElement | null;
+  private viewMode: ViewMode = "edit";
+  private tabsContainer: HTMLElement;
   private config: ViewerConfig;
-  private currentCleanup: (() => void) | null = null;
   private currentFile: string | null = null;
 
   constructor(config: ViewerConfig) {
     this.config = config;
     this.adapter = config.adapter;
 
-    const el =
-      typeof config.container === "string"
-        ? document.querySelector<HTMLElement>(
-            config.container || DEFAULT_CONTAINER,
-          )
-        : (config.container ??
-          document.querySelector<HTMLElement>(DEFAULT_CONTAINER));
+    // Resolve containers
+    const contentEl = document.getElementById("ws-viewer-content");
+    const tabsEl = document.getElementById("ws-viewer-tabs");
+    const textEl = document.getElementById("ws-viewer-monaco");
+    const mediaEl = document.getElementById("ws-viewer-media");
+    const previewEl = document.getElementById("ws-viewer-preview");
+    const modeToggleEl = document.getElementById("ws-viewer-mode-toggle");
 
-    if (!el) {
-      throw new Error(
-        `[ViewerManager] Container not found: ${config.container || DEFAULT_CONTAINER}`,
-      );
+    if (!contentEl) {
+      throw new Error("[ViewerManager] #ws-viewer-content not found");
     }
-    this.container = el;
+
+    this.tabsContainer = tabsEl || contentEl;
+    this.textContainer = textEl || contentEl;
+    this.mediaContainer = mediaEl || contentEl;
+    this.previewContainer = previewEl ?? null;
+    this.modeToggle = modeToggleEl ?? null;
+
+    if (this.previewContainer) {
+      this.previewPanel = new MarkdownPreviewPanel(this.previewContainer);
+      this.previewPanel.setAdapter(this.adapter);
+    }
+
+    // Restore saved view mode
+    const savedMode = localStorage.getItem("ws-viewer-mode") as ViewMode | null;
+    if (savedMode && ["edit", "preview"].includes(savedMode)) {
+      this.viewMode = savedMode;
+    }
+
+    this.initModeToggle();
+    this.initDoubleClickToggle();
+    this.router = new ViewerRouter();
+
+    this.tabManager = new TabManager({
+      container: this.tabsContainer,
+      storageKey: "ws-viewer-tabs",
+      onSwitch: (path) => this.handleTabSwitch(path),
+      onClose: (path) => this.handleTabClose(path),
+    });
+
+    // Wire keyboard shortcuts button
+    const shortcutsBtn = document.getElementById("ws-viewer-shortcuts-btn");
+    shortcutsBtn?.addEventListener("click", () => {
+      (window as any).toggleShortcutsModal?.();
+    });
+
+    // Listen for file-open events from file tree
+    document.addEventListener("file-open", ((e: CustomEvent) => {
+      const path = e.detail?.path;
+      if (path) this.openFileFromTree(path);
+    }) as EventListener);
+
+    document.addEventListener("workspace-file-open", ((e: CustomEvent) => {
+      const path = e.detail?.path;
+      if (path) this.openFileFromTree(path);
+    }) as EventListener);
   }
 
-  /** Open a file in the viewer pane. */
-  async openFile(path: string): Promise<void> {
-    // Cleanup previous viewer
-    this.cleanup();
-    this.currentFile = path;
+  async openFile(filePath: string): Promise<void> {
+    const fileType = detectFileType(filePath);
+    const title = filePath.split("/").pop() || filePath;
+    const tabInfo: TabInfo = { path: filePath, title, fileType };
+    this.tabManager.openTab(tabInfo);
+    this.currentFile = filePath;
+    await this.renderFile(filePath);
+    this.updateActiveFileHint(filePath, fileType);
 
-    const name = path.split("/").pop() || path;
-    const fileType = detectFileType(name);
-
-    // Show the viewer pane (uncollapse if collapsed)
-    this.showViewerPane();
-
-    try {
-      switch (fileType) {
-        case "image":
-          this.renderImage(path);
-          break;
-        case "pdf":
-          await this.renderPdf(path);
-          break;
-        case "text":
-          await this.renderText(path, name);
-          break;
-        default:
-          this.renderDownload(path, name);
-          break;
-      }
-
-      this.config.onFileOpen?.({
-        path,
-        name,
-        content: "",
-        fileType,
-      });
-    } catch (err) {
-      this.container.innerHTML = `<div class="stx-shell-viewer-error"><i class="fas fa-exclamation-triangle"></i> ${err instanceof Error ? err.message : "Failed to open file"}</div>`;
-    }
+    this.config.onFileOpen?.({
+      path: filePath,
+      name: title,
+      content: "",
+      fileType,
+    });
   }
 
-  /** Get the currently open file path. */
+  closeFile(filePath: string): void {
+    this.tabManager.closeTab(filePath);
+  }
+
   getCurrentFile(): string | null {
     return this.currentFile;
   }
 
-  /** Clean up the current viewer. */
-  cleanup(): void {
-    if (this.currentCleanup) {
-      this.currentCleanup();
-      this.currentCleanup = null;
-    }
-    this.container.innerHTML = "";
-  }
-
-  /** Destroy the viewer manager. */
   destroy(): void {
-    this.cleanup();
+    this.router.destroyAll();
     this.currentFile = null;
   }
 
   /* ── Private ──────────────────────────────────── */
 
-  private showViewerPane(): void {
-    // Uncollapse the viewer pane if it's collapsed
-    const pane = document.getElementById("ws-viewer-pane");
-    if (pane?.classList.contains("collapsed")) {
-      const toggleBtn = document.getElementById("ws-viewer-toggle");
-      if (toggleBtn) toggleBtn.click();
+  private openFileFromTree(path: string): void {
+    const sidebar = document.getElementById("ws-viewer-sidebar");
+
+    // Toggle: if same file is already open, collapse
+    const activeFile = sidebar?.dataset.aiViewerActive?.split(" (")[0] ?? "";
+    const isCollapsed = sidebar?.classList.contains("collapsed");
+    if (activeFile === path && !isCollapsed) {
+      sidebar?.classList.add("collapsed");
+      sidebar!.style.width = "";
+      return;
     }
 
-    // Hide empty state, show content
-    const empty = document.getElementById("ws-viewer-empty");
-    if (empty) empty.style.display = "none";
-    this.container.style.display = "block";
+    // Hide empty state
+    const emptyState = document.getElementById("ws-viewer-empty");
+    if (emptyState) emptyState.style.display = "none";
+
+    // Auto-expand viewer pane if collapsed
+    if (sidebar?.classList.contains("collapsed")) {
+      sidebar.classList.remove("collapsed");
+      const savedWidth = localStorage.getItem("ws-viewer-width");
+      sidebar.style.width = savedWidth ? `${savedWidth}px` : "480px";
+    }
+
+    void this.openFile(path);
   }
 
-  private renderImage(path: string): void {
-    const url = this.adapter.getFileUrl(path);
-    const { cleanup } = renderImageViewer(this.container, url);
-    this.currentCleanup = cleanup;
+  private async handleTabSwitch(path: string): Promise<void> {
+    await this.renderFile(path);
+    this.updateActiveFileHint(path, detectFileType(path));
   }
 
-  private async renderPdf(path: string): Promise<void> {
-    const url = this.adapter.getFileUrl(path);
-    const { cleanup } = await renderPdfViewer(this.container, url);
-    this.currentCleanup = cleanup;
+  private handleTabClose(_path: string): void {
+    if (!this.tabManager.getActiveTab()) {
+      this.textContainer.style.display = "none";
+      this.mediaContainer.style.display = "none";
+      if (this.previewContainer) this.previewContainer.style.display = "none";
+      this.updateActiveFileHint("", "text");
+      this.currentFile = null;
+      const emptyState = document.getElementById("ws-viewer-empty");
+      if (emptyState) emptyState.style.display = "";
+    }
   }
 
-  private async renderText(path: string, name: string): Promise<void> {
-    const { content, language } = await this.adapter.readFile(path);
+  private updateActiveFileHint(filePath: string, fileType: string): void {
+    const sidebar = document.getElementById("ws-viewer-sidebar");
+    if (sidebar) {
+      sidebar.dataset.aiViewerActive = filePath
+        ? `${filePath} (${fileType})`
+        : "";
+    }
+  }
 
-    const wrapper = document.createElement("div");
-    wrapper.className = "stx-shell-viewer-text-wrapper";
-    wrapper.style.cssText =
-      "width:100%;height:100%;overflow:auto;padding:12px;font-family:monospace;font-size:13px;white-space:pre-wrap;color:var(--fg-default,#c9d1d9);background:var(--bg-primary,#0d1117);";
+  private async renderFile(filePath: string): Promise<void> {
+    const previewable = isPreviewable(filePath);
+    const fileType = detectFileType(filePath);
+    this.showModeToggle(previewable, fileType);
+
+    // Hide empty state
+    const emptyState = document.getElementById("ws-viewer-empty");
+    if (emptyState) emptyState.style.display = "none";
+
+    if (previewable && fileType !== "text") {
+      if (this.viewMode === "edit") {
+        await this.showTextFile(filePath);
+      } else {
+        await this.showMediaFile(filePath);
+      }
+      return;
+    }
+
+    if (fileType === "text") {
+      await this.showTextFile(filePath);
+    } else {
+      await this.showMediaFile(filePath);
+    }
+  }
+
+  private async showTextFile(filePath: string): Promise<void> {
+    this.mediaContainer.style.display = "none";
+    if (this.previewContainer) this.previewContainer.style.display = "none";
+    this.textContainer.style.display = "block";
+    this.textContainer.style.width = "100%";
+
+    let content = "";
+    try {
+      const result = await this.adapter.readFile(filePath);
+      content = result.content;
+    } catch (err) {
+      console.error("[ViewerManager] Failed to load file:", filePath, err);
+      content = `// Error loading file: ${filePath}\n// ${err}`;
+    }
+
+    this.showFallbackPre(content, filePath);
+  }
+
+  private async showMediaFile(filePath: string): Promise<void> {
+    this.textContainer.style.display = "none";
+    if (this.previewContainer) this.previewContainer.style.display = "none";
+    this.mediaContainer.style.display = "block";
+
+    const viewer = this.router.getViewer(filePath);
+    if (!viewer) {
+      this.mediaContainer.innerHTML = `
+        <div class="ws-viewer-placeholder">
+          <p>Cannot preview: <code>${filePath.split("/").pop()}</code></p>
+        </div>`;
+      return;
+    }
+    try {
+      await viewer.render(this.mediaContainer, filePath, this.adapter);
+    } catch (err) {
+      console.error("[ViewerManager] Viewer render error:", err);
+      this.mediaContainer.innerHTML = `
+        <div class="ws-viewer-placeholder">
+          <p>Error rendering file: ${err instanceof Error ? err.message : String(err)}</p>
+        </div>`;
+    }
+  }
+
+  /* ── View mode toggle ──────────────────────────── */
+
+  private initDoubleClickToggle(): void {
+    const toggleIfPreviewable = () => {
+      const active = this.tabManager.getActiveTab();
+      if (!active) return;
+      if (isPreviewable(active)) {
+        this.setViewMode(this.viewMode === "edit" ? "preview" : "edit");
+      }
+    };
+
+    let lastRightClick = 0;
+    const handleRightDblClick = (e: MouseEvent) => {
+      const now = Date.now();
+      if (now - lastRightClick < 400) {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleIfPreviewable();
+        lastRightClick = 0;
+      } else {
+        lastRightClick = now;
+      }
+    };
+    this.textContainer.addEventListener(
+      "contextmenu",
+      handleRightDblClick,
+      true,
+    );
+    this.mediaContainer.addEventListener(
+      "contextmenu",
+      handleRightDblClick,
+      true,
+    );
+    if (this.previewContainer) {
+      this.previewContainer.addEventListener(
+        "contextmenu",
+        handleRightDblClick,
+        true,
+      );
+    }
+
+    this.tabsContainer.addEventListener("dblclick", (e: MouseEvent) => {
+      const tab = (e.target as HTMLElement).closest(".ws-viewer-tab");
+      if (!tab) return;
+      e.preventDefault();
+      toggleIfPreviewable();
+    });
+
+    let lastTabRightClick = 0;
+    this.tabsContainer.addEventListener("contextmenu", (e: MouseEvent) => {
+      const tab = (e.target as HTMLElement).closest(".ws-viewer-tab");
+      if (!tab) return;
+      const now = Date.now();
+      if (now - lastTabRightClick < 400) {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleIfPreviewable();
+        lastTabRightClick = 0;
+      } else {
+        lastTabRightClick = now;
+      }
+    });
+  }
+
+  private initModeToggle(): void {
+    if (!this.modeToggle) return;
+    this.updateToggleIcon();
+
+    const isTitle = this.modeToggle.classList.contains(
+      "ws-viewer-mode-toggle-title",
+    );
+
+    if (isTitle) {
+      let clickTimer: ReturnType<typeof setTimeout> | null = null;
+
+      this.modeToggle.addEventListener("click", () => {
+        if (clickTimer) clearTimeout(clickTimer);
+        clickTimer = setTimeout(() => {
+          this.setViewMode(this.viewMode === "edit" ? "preview" : "edit");
+          clickTimer = null;
+        }, 250);
+      });
+
+      this.modeToggle.addEventListener("dblclick", () => {
+        if (clickTimer) {
+          clearTimeout(clickTimer);
+          clickTimer = null;
+        }
+        const toggleBtn = document.getElementById("ws-viewer-toggle");
+        toggleBtn?.click();
+      });
+    } else {
+      this.modeToggle.addEventListener("click", () => {
+        this.setViewMode(this.viewMode === "edit" ? "preview" : "edit");
+      });
+    }
+  }
+
+  private setViewMode(mode: ViewMode): void {
+    this.viewMode = mode;
+    localStorage.setItem("ws-viewer-mode", mode);
+    this.updateToggleIcon();
+    const active = this.tabManager.getActiveTab();
+    if (active && isPreviewable(active)) {
+      this.applyViewMode(active);
+    }
+  }
+
+  private updateToggleIcon(): void {
+    if (!this.modeToggle) return;
+    const isEdit = this.viewMode === "edit";
+    const iconClass = isEdit ? "fas fa-eye" : "fas fa-pencil-alt";
+    const label = isEdit ? " Viewer" : " Editor";
+
+    if (this.modeToggle.classList.contains("ws-viewer-mode-toggle-title")) {
+      this.modeToggle.innerHTML = `<i class="${iconClass}"></i>${label}`;
+    } else {
+      const icon = this.modeToggle.querySelector("i");
+      if (icon) icon.className = iconClass;
+    }
+
+    this.modeToggle.title = isEdit ? "Switch to Editor" : "Switch to Viewer";
+
+    const shortTitle = document.getElementById("ws-viewer-title-short");
+    if (shortTitle) {
+      shortTitle.innerHTML = `<i class="${iconClass}"></i>${label}`;
+      shortTitle.title = isEdit ? "Viewer" : "Editor";
+    }
+  }
+
+  private showModeToggle(show: boolean, fileType?: string): void {
+    if (!this.modeToggle) return;
+    if (this.modeToggle.classList.contains("ws-viewer-mode-toggle-title")) {
+      if (show) {
+        this.modeToggle.style.cursor = "";
+        this.updateToggleIcon();
+      } else {
+        const isEditor = fileType === "text";
+        const iconClass = isEditor ? "fas fa-pencil-alt" : "fas fa-eye";
+        const label = isEditor ? " Editor" : " Viewer";
+        this.viewMode = isEditor ? "edit" : "preview";
+        this.modeToggle.innerHTML = `<i class="${iconClass}"></i>${label}`;
+        this.modeToggle.title = label.trim();
+        this.modeToggle.style.cursor = "default";
+        const shortTitle = document.getElementById("ws-viewer-title-short");
+        if (shortTitle) {
+          shortTitle.innerHTML = `<i class="${iconClass}"></i>${label}`;
+          shortTitle.title = label.trim();
+        }
+      }
+    } else {
+      this.modeToggle.style.display = show ? "inline-flex" : "none";
+    }
+  }
+
+  private async applyViewMode(filePath?: string): Promise<void> {
+    const active = filePath || this.tabManager.getActiveTab() || "";
+    const isMd = active.endsWith(".md");
+    const hasPreview = !!this.previewContainer && !!this.previewPanel;
+
+    if (this.viewMode === "edit") {
+      this.mediaContainer.style.display = "none";
+      if (this.previewContainer) this.previewContainer.style.display = "none";
+      this.textContainer.style.display = "block";
+      this.textContainer.style.width = "100%";
+      if (!isMd && active) {
+        await this.showTextFile(active);
+      }
+    } else {
+      this.textContainer.style.display = "none";
+      if (isMd && hasPreview) {
+        this.mediaContainer.style.display = "none";
+        this.previewContainer!.style.display = "block";
+        this.previewContainer!.style.width = "100%";
+        // Re-read file for preview
+        try {
+          const result = await this.adapter.readFile(active);
+          this.previewPanel!.render(result.content);
+        } catch (err) {
+          console.error("[ViewerManager] Failed to load for preview:", err);
+        }
+      } else if (active) {
+        if (this.previewContainer) this.previewContainer.style.display = "none";
+        await this.showMediaFile(active);
+      }
+    }
+  }
+
+  /* ── Text fallback (no Monaco — uses <pre>) ──── */
+
+  private showFallbackPre(content: string, filePath: string): void {
+    this.textContainer.innerHTML = "";
+    const ext = filePath.substring(filePath.lastIndexOf(".")).toLowerCase();
+    const filename = filePath.split("/").pop()?.toLowerCase() ?? "";
+    const language =
+      LANGUAGE_MAP[ext] ??
+      FILENAME_LANGUAGE_MAP[filename] ??
+      detectShebang(content) ??
+      "plaintext";
 
     const pre = document.createElement("pre");
+    pre.className = "ws-viewer-fallback-pre";
+    pre.style.cssText =
+      "margin:0;padding:12px 16px;font-family:'JetBrains Mono',Monaco,Menlo,monospace;font-size:13px;line-height:1.5;color:var(--text-primary,#c9d1d9);background:var(--bg-primary,#0d1117);white-space:pre-wrap;word-wrap:break-word;overflow:auto;height:100%;";
     const code = document.createElement("code");
-    if (language) code.className = `language-${language}`;
+    if (language !== "plaintext") code.className = `language-${language}`;
     code.textContent = content;
     pre.appendChild(code);
-    wrapper.appendChild(pre);
-    this.container.appendChild(wrapper);
+    this.textContainer.appendChild(pre);
 
     // Highlight if hljs is available
     const hljs = (window as any).hljs;
     if (hljs) hljs.highlightElement(code);
-
-    this.currentCleanup = () => {
-      this.container.innerHTML = "";
-    };
-  }
-
-  private renderDownload(path: string, name: string): void {
-    const url = this.adapter.getFileUrl(path);
-    const wrapper = document.createElement("div");
-    wrapper.className = "stx-shell-viewer-download";
-    wrapper.style.cssText =
-      "display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:12px;color:var(--fg-muted,#8b949e);";
-    wrapper.innerHTML = `
-      <i class="fas fa-file-download" style="font-size:48px;opacity:0.5;"></i>
-      <span>${name}</span>
-      <a href="${url}" download="${name}" style="color:var(--color-accent-fg,#58a6ff);">Download file</a>
-    `;
-    this.container.appendChild(wrapper);
-
-    this.currentCleanup = () => {
-      this.container.innerHTML = "";
-    };
   }
 }
