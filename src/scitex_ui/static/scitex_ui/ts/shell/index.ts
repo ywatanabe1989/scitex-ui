@@ -1,6 +1,15 @@
 /**
- * Shell components — workspace chrome (theme, layout, status, file tree).
+ * Shell components — complete workspace shell framework.
+ *
+ * High-level entry point:
+ *   import { initShell } from "scitex-ui/ts/shell";
+ *   await initShell({ fileTree: {...}, terminal: {...}, ... });
  */
+
+// Shell orchestrator
+export { initShell } from "./_shell-init";
+export type { ShellInstances } from "./_shell-init";
+export type { ShellConfig } from "./types";
 export { ThemeProvider } from "./theme-provider";
 export type { Theme, ThemeProviderConfig } from "./theme-provider";
 
