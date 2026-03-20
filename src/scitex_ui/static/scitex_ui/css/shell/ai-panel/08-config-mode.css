@@ -348,6 +348,138 @@
   color: var(--fg-muted, var(--text-muted, #8b949e));
 }
 
+/* ── Settings Label (stx-shell-ai prefix) ──── */
+
+.stx-shell-ai-config-popover .stx-shell-ai-settings-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text-secondary, #8b949e);
+  white-space: nowrap;
+}
+
+.stx-shell-ai-config-popover .stx-shell-ai-settings-label i {
+  width: 14px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-muted, #6e7681);
+}
+
+.stx-shell-ai-config-popover .ai-settings-select,
+.stx-shell-ai-config-popover .ai-settings-input {
+  flex: 1;
+  max-width: 160px;
+  padding: 3px 6px;
+  font-size: 11px;
+  color: var(--text-primary);
+  background: var(--bg-page, #0d1117);
+  border: 1px solid var(--border-default, #30363d);
+  border-radius: 4px;
+}
+
+.stx-shell-ai-config-popover .ai-settings-links {
+  display: flex;
+  gap: 12px;
+  padding: 6px 4px 2px;
+}
+
+.stx-shell-ai-config-popover .ai-settings-links a {
+  font-size: 10px;
+  color: var(--text-muted, #8b949e);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.stx-shell-ai-config-popover .ai-settings-links a:hover {
+  color: var(--color-accent-fg, #58a6ff);
+}
+
+/* ── Auto-Accept Toggle ────────────────────── */
+
+.stx-shell-ai-auto-accept-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.stx-shell-ai-auto-accept-btn.active {
+  color: var(--success-color, #3fb950);
+}
+
+.stx-shell-ai-auto-accept-btn.active i {
+  color: var(--success-color, #3fb950);
+}
+
+.stx-shell-ai-auto-accept-state {
+  font-size: 8px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  max-width: 48px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Jobs Section (collapsible inside console) ── */
+
+.stx-shell-ai-jobs-section {
+  flex-shrink: 0;
+  border-top: 1px solid var(--border-default, #30363d);
+  background: var(--bg-tertiary, #0d1117);
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.stx-shell-ai-jobs-section-summary {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  font-size: 11px;
+  color: var(--text-muted, #8b949e);
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+}
+
+.stx-shell-ai-jobs-section-summary::-webkit-details-marker {
+  display: none;
+}
+
+.stx-shell-ai-jobs-section-summary::before {
+  content: "\25B8";
+  font-size: 10px;
+  transition: transform 0.15s;
+}
+
+.stx-shell-ai-jobs-section[open] .stx-shell-ai-jobs-section-summary::before {
+  transform: rotate(90deg);
+}
+
+.stx-shell-ai-jobs-section-summary i.fa-tasks {
+  font-size: 10px;
+}
+
+.stx-shell-ai-jobs-section-summary .stx-shell-ai-jobs-summary {
+  flex: 1;
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.stx-shell-ai-jobs-section-summary .stx-shell-ai-action-btn {
+  font-size: 10px;
+  padding: 2px 4px;
+}
+
+.stx-shell-ai-jobs-section .stx-shell-ai-jobs-list {
+  padding: 2px 8px 6px;
+}
+
 /* ── Toolbar relative positioning for popover ── */
 
 .stx-shell-toolbar-relative {
