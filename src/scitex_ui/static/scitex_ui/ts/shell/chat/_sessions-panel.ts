@@ -97,6 +97,11 @@ export class SessionsPanel {
     try {
       const sessions = await this.adapter.listSessions();
       this.sessions = sessions;
+      // Auto-select first session if none is active
+      if (!this.currentSessionId && sessions.length > 0) {
+        this.currentSessionId = sessions[0].id;
+        sessionStorage.setItem("scitex_ai_session_id", String(sessions[0].id));
+      }
       this.render(sessions);
       // Auto-create C1 if no sessions exist
       if (sessions.length === 0) {
