@@ -137,8 +137,9 @@ export class ChatMode {
     /* Context */
     if (context) this.context = context;
 
-    /* Recorder */
+    /* Recorder + mic button click */
     this.recorder = new VoiceRecorder(refs.volBars, this.micBtn);
+    this.micBtn?.addEventListener("click", () => this.toggleRecording());
 
     /* History */
     this.history = loadHistory();

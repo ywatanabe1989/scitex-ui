@@ -152,6 +152,11 @@
                                     <span class="stx-shell-ai-vol-bar" hidden></span>
                                 </div>
                                 <button id="stx-shell-ai-send" class="stx-shell-ai-send" hidden></button>
+                                <!-- Chat config popover (inside input-area for positioning) -->
+                                <div id="stx-shell-ai-chat-config"
+                                     class="stx-shell-ai-config-popover stx-hidden">
+                                    {% block chat_config %}{% endblock %}
+                                </div>
                             </div>
                         </div>
                         <!-- Console/Terminal view -->

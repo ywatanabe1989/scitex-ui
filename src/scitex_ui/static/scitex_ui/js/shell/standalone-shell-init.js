@@ -37,37 +37,52 @@
     });
   });
 
-  /* ── Config popover gear toggle ────────────────────── */
-  var gearBtn = document.querySelector(".stx-shell-ai-gear-btn");
-  var configPopover = document.getElementById("stx-shell-ai-console-config");
+  /* ── Config popover gear toggles (console + chat) ──── */
+  var gearPairs = [
+    {
+      btn: document.querySelector(
+        "#stx-shell-ai-console-view .stx-shell-ai-gear-btn",
+      ),
+      popover: document.getElementById("stx-shell-ai-console-config"),
+    },
+    {
+      btn: document.getElementById("stx-shell-ai-chat-gear"),
+      popover: document.getElementById("stx-shell-ai-chat-config"),
+    },
+  ];
 
-  if (gearBtn && configPopover) {
-    gearBtn.addEventListener("click", function (e) {
+  gearPairs.forEach(function (pair) {
+    if (!pair.btn || !pair.popover) return;
+    var btn = pair.btn;
+    var popover = pair.popover;
+    btn.addEventListener("click", function (e) {
       e.stopPropagation();
       // Close all other popovers first
       document
         .querySelectorAll(".stx-shell-ai-config-popover")
         .forEach(function (p) {
-          if (p !== configPopover) p.classList.add("stx-hidden");
+          if (p !== popover) p.classList.add("stx-hidden");
         });
-      // Toggle this popover
-      configPopover.classList.toggle("stx-hidden");
-      // Also dispatch event for app-level handlers (e.g., populate skills)
+      popover.classList.toggle("stx-hidden");
       window.dispatchEvent(new CustomEvent("stx-shell:settings"));
     });
+  });
 
-    // Click-outside to close
-    document.addEventListener("mousedown", function (e) {
-      if (
-        configPopover &&
-        !configPopover.classList.contains("stx-hidden") &&
-        !configPopover.contains(e.target) &&
-        !gearBtn.contains(e.target)
-      ) {
-        configPopover.classList.add("stx-hidden");
-      }
-    });
-  }
+  // Click-outside to close any open popover
+  document.addEventListener("mousedown", function (e) {
+    document
+      .querySelectorAll(".stx-shell-ai-config-popover")
+      .forEach(function (p) {
+        if (p.classList.contains("stx-hidden")) return;
+        var isGear = false;
+        gearPairs.forEach(function (pair) {
+          if (pair.btn && pair.btn.contains(e.target)) isGear = true;
+        });
+        if (!p.contains(e.target) && !isGear) {
+          p.classList.add("stx-hidden");
+        }
+      });
+  });
 
   /* ── Toolbar buttons → custom events ──────────────── */
   var toolbarBtns = document.querySelectorAll(".stx-shell-ai-input-btn");
