@@ -4,6 +4,7 @@
  * Do not edit manually. Regenerate with: npx tsx css/_build-index.ts
  */
 
+@import "./shell/11-shortcuts-modal.css";
 @import "./shell/ai-panel.css";
 @import "./shell/ai-panel/01-panel-layout.css";
 @import "./shell/ai-panel/02-mode-toggle.css";

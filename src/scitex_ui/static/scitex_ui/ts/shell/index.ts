@@ -68,3 +68,16 @@ export {
   detectFileType,
 } from "./viewer";
 export type { ViewerAdapter, ViewerConfig, OpenFile, FileType } from "./viewer";
+
+export {
+  initKeyboardShortcuts,
+  showShortcutsModal,
+  toggleShortcutsModal,
+  registerShortcuts,
+  setContextDetector,
+} from "./keyboard-shortcuts";
+export type {
+  ShortcutContext,
+  ShortcutDef,
+  ShortcutSection,
+} from "./keyboard-shortcuts";

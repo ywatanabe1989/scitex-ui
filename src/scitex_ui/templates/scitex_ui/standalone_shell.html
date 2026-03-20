@@ -23,6 +23,8 @@
               href="{% static 'scitex_ui/css/shell/resizer.css' %}" />
         <link rel="stylesheet"
               href="{% static 'scitex_ui/css/shell/standalone-resizer-pos.css' %}" />
+        <link rel="stylesheet"
+              href="{% static 'scitex_ui/css/shell/11-shortcuts-modal.css' %}" />
         {% block extra_css %}{% endblock %}
     </head>
     <body class="dark-theme workspace-page footer-collapsed no-transition">
@@ -70,6 +72,11 @@
                                 <i class="fas fa-robot"></i> Chat
                             </button>
                         </div>
+                        <button class="stx-shell-ai-input-btn stx-shell-shortcuts-btn"
+                                id="stx-shell-shortcuts-btn"
+                                title="Keyboard Shortcuts">
+                            <i class="fas fa-keyboard"></i>
+                        </button>
                     </div>
                     <div class="stx-shell-sidebar__content stx-shell-ai-body">
                         <!-- Chat view -->

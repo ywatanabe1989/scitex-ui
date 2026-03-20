@@ -91,4 +91,14 @@
       });
     }
   });
+
+  /* ── Keyboard shortcuts button → toggle modal ────────── */
+  var shortcutsBtn = document.getElementById("stx-shell-shortcuts-btn");
+  if (shortcutsBtn) {
+    shortcutsBtn.addEventListener("click", function () {
+      if (typeof window.toggleShortcutsModal === "function") {
+        window.toggleShortcutsModal();
+      }
+    });
+  }
 })();
