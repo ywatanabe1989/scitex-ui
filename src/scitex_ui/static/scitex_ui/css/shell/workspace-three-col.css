@@ -38,7 +38,8 @@
 
 /* Override any global fixed positioning applied by global-ai-chat.css
    so the panel flows inside the three-col layout instead */
-.workspace-three-col .scitex-ai-panel.stx-shell-sidebar {
+.workspace-three-col .scitex-ai-panel.stx-shell-sidebar,
+.workspace-three-col .stx-shell-ai-panel.stx-shell-sidebar {
   position: relative !important;
   top: auto !important;
   left: auto !important;

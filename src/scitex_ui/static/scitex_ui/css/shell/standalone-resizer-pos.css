@@ -15,11 +15,19 @@ body.workspace-page .workspace-three-col {
   min-height: 0;
 }
 
-/* Reset margins for standalone */
+/* Reset margins for standalone — dark background to prevent white flash */
 body.workspace-page {
   margin: 0;
   padding: 0;
   overflow: hidden;
+  background: var(--bg-primary, #0d1117);
+  color: var(--text-primary, #e6edf3);
+  height: 100vh;
+}
+
+/* HTML root also needs dark background */
+html[data-theme="dark"] {
+  background: #0d1117;
 }
 
 /* Toolbar needs relative positioning for popover anchoring */
