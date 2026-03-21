@@ -33,10 +33,14 @@
   color: var(--status-error);
 }
 
-/* xterm.js overrides — must fill container height */
+/* xterm.js overrides — must fill container height.
+   padding on .xterm breaks cursor click-to-position because xterm.js
+   measures character cells without accounting for CSS padding.
+   line-height must be normal so xterm-char-measure-element computes correct cell height. */
 .stx-shell-terminal .xterm {
   height: 100%;
-  padding: 4px;
+  padding: 0;
+  line-height: normal;
 }
 
 .stx-shell-terminal .xterm-viewport {

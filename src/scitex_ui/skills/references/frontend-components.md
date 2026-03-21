@@ -316,3 +316,21 @@ useEffect(() => {
 ```
 
 Only needed when your app's inner resizers should push/pull shell column widths.
+
+## 7. Packaging Requirement for Bridge Apps
+
+Apps with a `bridge` key in `_django/manifest.json` must keep `_django/frontend/src/` in their source tree. scitex-cloud discovers bridge paths by scanning sibling directories for `manifest.json` files, so the frontend TypeScript source must be present in the repo.
+
+**For pip packaging**, use an `[app]` optional extra for Python dependencies needed by the platform integration:
+
+```toml
+[project.optional-dependencies]
+app = [
+    "django>=4.2.0",
+    "Pillow>=9.0.0",
+    "scitex-app>=0.1.0",
+    "scitex-ui>=0.1.0",
+]
+```
+
+**For CI**, clone the app repo as a sibling directory so the bridge discovery finds `manifest.json` and `frontend/src/`. Not all apps are pip packages, so sibling cloning is the standard approach.
