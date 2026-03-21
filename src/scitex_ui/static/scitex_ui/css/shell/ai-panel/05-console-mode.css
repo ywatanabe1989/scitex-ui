@@ -18,6 +18,13 @@
   background: var(--terminal-bg, var(--workspace-bg-tertiary, #0d1117));
 }
 
+/* xterm.js cursor alignment: padding and inherited line-height
+   break character cell measurements, causing cursor position drift. */
+.stx-shell-ai-console-terminal .xterm {
+  padding: 0;
+  line-height: normal;
+}
+
 .stx-shell-ai-console-terminal.drop-target {
   outline: 2px dashed var(--accent-primary, #3b82f6);
   outline-offset: -2px;
