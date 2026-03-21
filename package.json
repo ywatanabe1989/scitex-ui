@@ -5,6 +5,10 @@
   "description": "Shared React UI components for the SciTeX ecosystem",
   "type": "module",
   "main": "src/scitex_ui/static/scitex_ui/react/index.ts",
+  "dependencies": {
+    "mermaid": "^11.0.0",
+    "@hpcc-js/wasm-graphviz": "^1.6.0"
+  },
   "peerDependencies": {
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0"
