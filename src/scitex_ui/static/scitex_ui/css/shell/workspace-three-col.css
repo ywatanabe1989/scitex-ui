@@ -444,18 +444,6 @@ body.stx-shell-ai-open #workspace-three-col #main-content {
   min-height: 0;
 }
 
-/* --- Responsive: collapse panes on narrow viewports --- */
-
-@media (max-width: 768px) {
-  .workspace-three-col {
-    height: calc(100vh - 56px);
-    max-height: calc(100vh - 56px);
-  }
-
-  .ws-ai-pane,
-  .ws-worktree-pane,
-  .ws-viewer-pane,
-  .ws-apps-pane {
-    display: none;
-  }
-}
+/* --- Responsive: mobile layout handled by mobile.css ---
+   Panes are repositioned as absolute stacked layers with swipe navigation.
+   See: css/shell/mobile.css */

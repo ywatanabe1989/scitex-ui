@@ -1,0 +1,183 @@
+/**
+ * @component Mobile Workspace Layout
+ * @description Swipe-based pane navigation for mobile viewports (<=768px).
+ *   Replaces the desktop five-column flex layout with a single visible pane
+ *   plus a bottom tab bar for switching between panes.
+ * @category Layouts
+ * @darkmode true
+ */
+
+/* ============================================================================
+ * Mobile pane layout — all rules scoped inside @media (max-width: 768px)
+ * Desktop layout is never affected.
+ * ========================================================================== */
+
+@media (max-width: 768px) {
+  /* --- Container: becomes a stacking context for absolute panes --- */
+  .workspace-three-col {
+    position: relative;
+    overflow: hidden;
+    /* Leave room for bottom tab bar (56px) + safe area */
+    height: calc(100vh - 56px - 56px - env(safe-area-inset-bottom, 0px));
+    max-height: calc(100vh - 56px - 56px - env(safe-area-inset-bottom, 0px));
+  }
+
+  /* Collapsed header variant */
+  .global-header.collapsed ~ .workspace-three-col {
+    height: calc(100vh - 6px - 56px - env(safe-area-inset-bottom, 0px));
+    max-height: calc(100vh - 6px - 56px - env(safe-area-inset-bottom, 0px));
+  }
+
+  /* --- All panes: full-screen stacked, hidden by default --- */
+  .workspace-three-col > .ws-ai-pane,
+  .workspace-three-col > .ws-worktree-pane,
+  .workspace-three-col > .ws-viewer-pane,
+  .workspace-three-col > .ws-apps-pane,
+  .workspace-three-col > .ws-module-pane {
+    position: absolute !important;
+    top: 0;
+    left: 0;
+    width: 100% !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    flex: none !important;
+    transform: translateX(100%);
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    visibility: hidden;
+    z-index: 1;
+  }
+
+  /* Active pane: visible and in position */
+  .workspace-three-col > .mobile-active {
+    transform: translateX(0);
+    visibility: visible;
+    z-index: 2;
+  }
+
+  /* Swiping state: disable transition for real-time tracking */
+  .workspace-three-col > .mobile-swiping {
+    transition: none !important;
+    visibility: visible;
+  }
+
+  /* --- Override inner panel widths to fill mobile viewport --- */
+  #stx-shell-ai-panel,
+  #ws-worktree-sidebar,
+  #ws-viewer-sidebar,
+  #ws-apps-sidebar {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Un-collapse viewer on mobile — always show full */
+  #ws-viewer-sidebar.collapsed {
+    width: 100% !important;
+  }
+
+  /* --- Hide desktop-only elements --- */
+  .workspace-three-col .panel-resizer,
+  .workspace-three-col .panel-toggle-btn,
+  .workspace-three-col .v-resizer {
+    display: none !important;
+  }
+
+  /* --- Touch target minimums (Apple HIG: 44px) --- */
+  .workspace-three-col button,
+  .workspace-three-col a.selector-nav-item,
+  .workspace-three-col select,
+  .workspace-three-col input[type="text"],
+  .workspace-three-col textarea {
+    min-height: 44px;
+  }
+
+  .workspace-three-col a.selector-nav-item {
+    min-width: 44px;
+  }
+
+  /* --- Apps pane: horizontal scroll on mobile --- */
+  .ws-apps-nav {
+    flex-direction: row !important;
+    flex-wrap: wrap;
+    overflow-y: auto;
+    padding: 8px;
+    gap: 8px;
+  }
+
+  .ws-apps-nav .selector-nav-item {
+    width: auto;
+    flex-direction: column;
+    padding: 8px 12px;
+  }
+
+  .ws-apps-nav .selector-nav-label {
+    display: inline !important;
+    font-size: 0.7rem;
+  }
+}
+
+/* ============================================================================
+ * Bottom Tab Bar — fixed navigation for mobile workspace
+ * ========================================================================== */
+
+.mobile-tab-bar {
+  display: none; /* hidden on desktop */
+}
+
+@media (max-width: 768px) {
+  .mobile-tab-bar {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 56px;
+    background: var(--bg-secondary, #161b22);
+    border-top: 1px solid var(--border-default, #30363d);
+    z-index: 1000;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    justify-content: space-around;
+    align-items: center;
+  }
+
+  .mobile-tab-bar__item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    flex: 1;
+    height: 100%;
+    padding: 4px 0;
+    background: none;
+    border: none;
+    color: var(--text-muted, #8b949e);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .mobile-tab-bar__item i {
+    font-size: 1.1rem;
+  }
+
+  .mobile-tab-bar__item span {
+    font-size: 0.6rem;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .mobile-tab-bar__item.active {
+    color: var(--accent-color, #58a6ff);
+  }
+
+  .mobile-tab-bar__item:active {
+    opacity: 0.7;
+  }
+
+  /* Header/footer collapse toggles: hide on mobile */
+  #header-collapse-toggle,
+  #footer-collapse-toggle {
+    display: none !important;
+  }
+}
