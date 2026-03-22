@@ -42,9 +42,9 @@
     flex-direction: column !important;
     width: 100% !important;
     max-width: 100% !important;
-    flex: 1 1 0%; /* no !important — JS resizer must be able to override */
-    height: 0; /* flex-basis controls height, not content */
-    min-height: 44px;
+    flex: 1 1 0% !important; /* JS uses inline !important which wins over CSS !important */
+    height: 0 !important;
+    min-height: 44px !important;
     position: relative !important;
     transform: none !important;
     visibility: visible !important;
