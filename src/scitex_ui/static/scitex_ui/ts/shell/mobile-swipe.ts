@@ -135,6 +135,78 @@ function onDblClick(e: MouseEvent): void {
   }
 }
 
+// --- Vertical resizer drag (single finger on resizer elements) ---
+
+let resizerTarget: HTMLElement | null = null;
+let resizerStartY = 0;
+let resizerPrevPane: HTMLElement | null = null;
+let resizerNextPane: HTMLElement | null = null;
+let resizerPrevStartH = 0;
+let resizerNextStartH = 0;
+
+function onResizerTouchStart(e: TouchEvent): void {
+  if (!isMobile) return;
+  const resizer = (e.target as HTMLElement).closest<HTMLElement>(
+    ".panel-resizer",
+  );
+  if (!resizer) return;
+
+  // Find adjacent panes
+  resizerPrevPane = resizer.previousElementSibling as HTMLElement;
+  resizerNextPane = resizer.nextElementSibling as HTMLElement;
+  if (!resizerPrevPane || !resizerNextPane) return;
+
+  resizerTarget = resizer;
+  resizerStartY = e.touches[0].clientY;
+  resizerPrevStartH = resizerPrevPane.offsetHeight;
+  resizerNextStartH = resizerNextPane.offsetHeight;
+  e.preventDefault();
+}
+
+function onResizerTouchMove(e: TouchEvent): void {
+  if (!resizerTarget || !resizerPrevPane || !resizerNextPane) return;
+  e.preventDefault();
+
+  const dy = e.touches[0].clientY - resizerStartY;
+  const newPrevH = Math.max(44, resizerPrevStartH + dy);
+  const newNextH = Math.max(44, resizerNextStartH - dy);
+
+  resizerPrevPane.style.height = newPrevH + "px";
+  resizerPrevPane.style.flex = "none";
+  resizerNextPane.style.height = newNextH + "px";
+  resizerNextPane.style.flex = "none";
+}
+
+function onResizerTouchEnd(): void {
+  if (!resizerTarget) return;
+
+  // Collapse if too small
+  if (resizerPrevPane && resizerPrevPane.offsetHeight < 60) {
+    const sidebar =
+      resizerPrevPane.querySelector<HTMLElement>(".stx-shell-sidebar");
+    if (sidebar) {
+      sidebar.classList.add("collapsed");
+      resizerPrevPane.style.height = "";
+      resizerPrevPane.style.flex = "";
+      saveMobileCollapseState();
+    }
+  }
+  if (resizerNextPane && resizerNextPane.offsetHeight < 60) {
+    const sidebar =
+      resizerNextPane.querySelector<HTMLElement>(".stx-shell-sidebar");
+    if (sidebar) {
+      sidebar.classList.add("collapsed");
+      resizerNextPane.style.height = "";
+      resizerNextPane.style.flex = "";
+      saveMobileCollapseState();
+    }
+  }
+
+  resizerTarget = null;
+  resizerPrevPane = null;
+  resizerNextPane = null;
+}
+
 // --- Media query listener ---
 
 function onMediaChange(mql: MediaQueryList | MediaQueryListEvent): void {
@@ -168,6 +240,21 @@ function enableMobile(): void {
   container.addEventListener("touchmove", onTouchMove, { passive: false });
   container.addEventListener("touchend", onTouchEnd, { passive: true });
   container.addEventListener("dblclick", onDblClick);
+
+  // Vertical resizer drag on panel-resizer elements
+  container
+    .querySelectorAll<HTMLElement>(".panel-resizer")
+    .forEach((resizer) => {
+      resizer.addEventListener("touchstart", onResizerTouchStart, {
+        passive: false,
+      });
+      resizer.addEventListener("touchmove", onResizerTouchMove, {
+        passive: false,
+      });
+      resizer.addEventListener("touchend", onResizerTouchEnd, {
+        passive: true,
+      });
+    });
 }
 
 function disableMobile(): void {
