@@ -190,7 +190,18 @@ function onMediaChange(mql: MediaQueryList | MediaQueryListEvent): void {
 }
 
 function enableMobile(): void {
+  console.log("[MobileSwipe] Enabling mobile mode");
   collectPanes();
+  console.log(`[MobileSwipe] Found ${paneElements.length} panes`);
+
+  // Force-uncollapse all inner panels (desktop collapse state breaks mobile)
+  const collapsedPanels = document.querySelectorAll(
+    "#stx-shell-ai-panel.collapsed, #ws-worktree-sidebar.collapsed, #ws-viewer-sidebar.collapsed, #ws-apps-sidebar.collapsed",
+  );
+  collapsedPanels.forEach((panel) => {
+    panel.classList.remove("collapsed");
+    console.log(`[MobileSwipe] Uncollapsed panel: ${panel.id}`);
+  });
 
   // Determine initial pane from URL or default to Content
   const url = new URL(window.location.href);
@@ -254,9 +265,15 @@ window.addEventListener("popstate", (e) => {
 
 function init(): void {
   const container = getContainer();
-  if (!container) return; // not a workspace page
+  if (!container) {
+    console.log("[MobileSwipe] No workspace container found, skipping");
+    return;
+  }
 
   const mql = window.matchMedia(MOBILE_QUERY);
+  console.log(
+    `[MobileSwipe] Init: viewport ${window.innerWidth}x${window.innerHeight}, mobile=${mql.matches}`,
+  );
   onMediaChange(mql);
   mql.addEventListener("change", onMediaChange);
 }

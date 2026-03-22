@@ -17,9 +17,9 @@
   .workspace-three-col {
     position: relative;
     overflow: hidden;
-    /* Leave room for bottom tab bar (56px) + safe area */
-    height: calc(100vh - 56px - 56px - env(safe-area-inset-bottom, 0px));
-    max-height: calc(100vh - 56px - 56px - env(safe-area-inset-bottom, 0px));
+    /* Leave room for header (44px on mobile) + bottom tab bar (56px) + safe area */
+    height: calc(100vh - 44px - 56px - env(safe-area-inset-bottom, 0px));
+    max-height: calc(100vh - 44px - 56px - env(safe-area-inset-bottom, 0px));
   }
 
   /* Collapsed header variant */
@@ -60,18 +60,34 @@
     visibility: visible;
   }
 
-  /* --- Override inner panel widths to fill mobile viewport --- */
+  /* --- Force all panes uncollapsed on mobile --- */
+  /* Desktop collapse state (width: 40-48px, overflow: hidden) must not apply */
   #stx-shell-ai-panel,
   #ws-worktree-sidebar,
   #ws-viewer-sidebar,
   #ws-apps-sidebar {
     width: 100% !important;
     max-width: 100% !important;
+    overflow: visible !important;
+    overflow-y: auto !important;
   }
 
-  /* Un-collapse viewer on mobile — always show full */
-  #ws-viewer-sidebar.collapsed {
+  /* Override .collapsed class entirely on mobile */
+  #stx-shell-ai-panel.collapsed,
+  #ws-worktree-sidebar.collapsed,
+  #ws-viewer-sidebar.collapsed,
+  #ws-apps-sidebar.collapsed {
     width: 100% !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+    overflow-y: auto !important;
+  }
+
+  /* Show all child content in collapsed panes on mobile */
+  .workspace-three-col .collapsed > * {
+    display: revert !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
 
   /* --- Hide desktop-only elements --- */
