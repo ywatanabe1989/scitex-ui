@@ -191,6 +191,16 @@
     background: var(--workspace-border-hover, #8b949e) !important;
   }
 
+  /* ::before hit area: rotate from horizontal to vertical expansion */
+  .workspace-three-col .panel-resizer::before,
+  .workspace-three-col .split-resizer::before {
+    cursor: row-resize !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: -12px !important;
+    bottom: -12px !important;
+  }
+
   /* Hide v-resizers (vertical separators not needed in column layout) */
   .workspace-three-col .v-resizer {
     display: none !important;
