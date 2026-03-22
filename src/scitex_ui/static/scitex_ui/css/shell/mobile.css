@@ -169,13 +169,26 @@
     background: var(--workspace-border-hover, #8b949e) !important;
   }
 
-  /* Internal panel resizers: rotate from vertical to horizontal */
+  /* All panel resizers: rotate from vertical to horizontal */
   .workspace-three-col .panel-resizer,
   .workspace-three-col .split-resizer {
+    position: relative !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: auto !important;
     width: 100% !important;
-    height: 4px !important;
-    flex: 0 0 4px !important;
+    height: 6px !important;
+    flex: 0 0 6px !important;
     cursor: row-resize !important;
+    background: var(--workspace-bg-secondary, #161b22) !important;
+    border-top: 1px solid var(--border-default, #30363d) !important;
+    border-bottom: 1px solid var(--border-default, #30363d) !important;
+  }
+
+  .workspace-three-col .panel-resizer:hover,
+  .workspace-three-col .split-resizer:hover {
+    background: var(--workspace-border-hover, #8b949e) !important;
   }
 
   /* Hide v-resizers (vertical separators not needed in column layout) */

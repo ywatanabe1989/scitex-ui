@@ -153,6 +153,8 @@ export function initResizer(storagePrefix: string, config: PanelConfig): void {
   let wasCollapsed = false;
   let primaryCollapsed = false;
   let axis: AxisConfig;
+  /** On vertical axis, resize the pane wrapper instead of the sidebar */
+  let effectiveTarget: HTMLElement = targetPanel;
   let propagationTarget: {
     panel: HTMLElement;
     config: PanelConfig;
@@ -160,16 +162,27 @@ export function initResizer(storagePrefix: string, config: PanelConfig): void {
     startPos: number;
   } | null = null;
 
-  /** Detect axis from container at drag start (responsive to viewport changes) */
+  /** Detect axis from container at drag start (responsive to viewport changes).
+   *  When vertical (mobile), switch resize target to the pane wrapper
+   *  (e.g., .ws-worktree-pane) instead of the sidebar inside it.
+   */
   const resolveAxis = (): AxisConfig => {
     const container = resizer.closest(".workspace-three-col") as HTMLElement;
-    if (container) return detectAxis(container);
-    // Fallback: check if data attribute specifies axis
-    const explicit = resizer.dataset.axis;
-    if (explicit === "vertical" || explicit === "horizontal") {
-      return detectAxis(document.createElement("div")); // fallback horizontal
+    const detected = container
+      ? detectAxis(container)
+      : detectAxis(document.createElement("div"));
+
+    if (detected.orientation === "vertical") {
+      // On mobile, resize the pane wrapper (parent of sidebar), not the sidebar
+      const paneWrapper = targetPanel.closest(
+        ".ws-ai-pane, .ws-worktree-pane, .ws-viewer-pane, .ws-apps-pane",
+      ) as HTMLElement;
+      effectiveTarget = paneWrapper || targetPanel;
+    } else {
+      effectiveTarget = targetPanel;
     }
-    return detectAxis(document.createElement("div"));
+
+    return detected;
   };
 
   const disableTransitions = () => {
@@ -197,7 +210,7 @@ export function initResizer(storagePrefix: string, config: PanelConfig): void {
     if (config.fixedWidth) {
       isResizing = true;
       startPos = axis.pointerPos(e);
-      startSize = axis.size(targetPanel);
+      startSize = axis.size(effectiveTarget);
       primaryCollapsed = true;
 
       document.body.style.cursor = axis.cursor;
@@ -210,9 +223,9 @@ export function initResizer(storagePrefix: string, config: PanelConfig): void {
 
     if (wasCollapsed) {
       targetPanel.classList.remove("collapsed");
-      axis.setSize(targetPanel, config.minWidth);
-      targetPanel.style.flexShrink = "0";
-      targetPanel.style.flexGrow = "0";
+      axis.setSize(effectiveTarget, config.minWidth);
+      effectiveTarget.style.flexShrink = "0";
+      effectiveTarget.style.flexGrow = "0";
 
       if (config.toggleButtonId) {
         const toggleBtn = document.getElementById(config.toggleButtonId);
@@ -226,11 +239,11 @@ export function initResizer(storagePrefix: string, config: PanelConfig): void {
 
     isResizing = true;
     startPos = axis.pointerPos(e);
-    startSize = axis.size(targetPanel);
+    startSize = axis.size(effectiveTarget);
     document.body.style.cursor = axis.cursor;
     document.body.style.userSelect = "none";
     resizer.classList.add("active");
-    targetPanel.dataset.wprDragging = "true";
+    effectiveTarget.dataset.wprDragging = "true";
     disableTransitions();
     e.preventDefault();
   };
@@ -335,15 +348,15 @@ export function initResizer(storagePrefix: string, config: PanelConfig): void {
       return;
     }
 
-    // Normal resize of the primary panel
+    // Normal resize of the primary panel (effectiveTarget = pane wrapper on mobile)
     const delta = axis.pointerPos(e) - startPos;
     let newSize =
       config.resizeDirection === "left" ? startSize + delta : startSize - delta;
 
-    const maxSize = getMaxAllowedSize(targetPanel, axis);
+    const maxSize = getMaxAllowedSize(effectiveTarget, axis);
     if (newSize > maxSize) newSize = maxSize;
 
-    const flexContainer = targetPanel.closest(
+    const flexContainer = effectiveTarget.closest(
       ".workspace-three-col",
     ) as HTMLElement;
     if (flexContainer) {
@@ -376,9 +389,9 @@ export function initResizer(storagePrefix: string, config: PanelConfig): void {
       return;
     }
 
-    axis.setSize(targetPanel, newSize);
-    targetPanel.style.flexShrink = "0";
-    targetPanel.style.flexGrow = "0";
+    axis.setSize(effectiveTarget, newSize);
+    effectiveTarget.style.flexShrink = "0";
+    effectiveTarget.style.flexGrow = "0";
   };
 
   const handleMouseUp = () => {
@@ -391,7 +404,7 @@ export function initResizer(storagePrefix: string, config: PanelConfig): void {
     enableTransitions();
 
     requestAnimationFrame(() => {
-      delete targetPanel.dataset.wprDragging;
+      delete effectiveTarget.dataset.wprDragging;
     });
 
     if (propagationTarget) {
@@ -407,7 +420,7 @@ export function initResizer(storagePrefix: string, config: PanelConfig): void {
       return;
     }
 
-    const finalSize = axis.size(targetPanel);
+    const finalSize = axis.size(effectiveTarget);
 
     if (finalSize <= config.minWidth + 10) {
       collapsePanel(storagePrefix, config, targetPanel, axis);
