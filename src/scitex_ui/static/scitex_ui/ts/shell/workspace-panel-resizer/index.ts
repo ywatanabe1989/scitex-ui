@@ -174,6 +174,8 @@ export function autoInitPanels(): void {
         .querySelectorAll(".workspace-three-col, .workspace-shell")
         .forEach((el) => el.classList.add("panels-ready"));
       document.body.classList.remove("no-transition");
+      // Hide loading screen — all panels are initialized and visible
+      document.body.classList.add("app-ready");
     });
   });
 }
@@ -229,5 +231,12 @@ if (typeof document !== "undefined") {
   // Re-initialize panels after HTMX content swaps (e.g., writer loaded as partial)
   document.addEventListener("htmx:afterSettle", () => {
     initNewPanels();
+  });
+
+  // Fallback: hide loading screen on non-workspace pages (no panels to init)
+  window.addEventListener("load", () => {
+    if (!document.body.classList.contains("app-ready")) {
+      document.body.classList.add("app-ready");
+    }
   });
 }
