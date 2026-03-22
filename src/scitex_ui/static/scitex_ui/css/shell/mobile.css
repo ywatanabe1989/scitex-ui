@@ -1,101 +1,101 @@
 /**
  * @component Mobile Workspace Layout
- * @description Swipe-based pane navigation for mobile viewports (<=768px).
- *   Replaces the desktop five-column flex layout with a single visible pane
- *   plus a bottom tab bar for switching between panes.
+ * @description Rotates the desktop horizontal (row) layout to vertical (column)
+ *   on mobile viewports (<=768px). Reuses the existing curtain/collapse panel
+ *   system — panels stack top-to-bottom with their headers as tap targets.
  * @category Layouts
  * @darkmode true
  */
 
 /* ============================================================================
- * Mobile pane layout — all rules scoped inside @media (max-width: 768px)
+ * Mobile layout — rotate flex-direction: row → column
+ * All rules scoped inside @media (max-width: 768px).
  * Desktop layout is never affected.
  * ========================================================================== */
 
 @media (max-width: 768px) {
-  /* --- Container: becomes a stacking context for absolute panes --- */
+  /* --- Container: vertical stacking --- */
   .workspace-three-col {
-    position: relative;
-    overflow: hidden;
-    /* Leave room for header (44px on mobile) + bottom tab bar (56px) + safe area */
-    height: calc(100vh - 44px - 56px - env(safe-area-inset-bottom, 0px));
-    max-height: calc(100vh - 44px - 56px - env(safe-area-inset-bottom, 0px));
+    flex-direction: column !important;
+    height: calc(100vh - 44px - env(safe-area-inset-bottom, 0px));
+    max-height: calc(100vh - 44px - env(safe-area-inset-bottom, 0px));
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
   }
 
   /* Collapsed header variant */
   .global-header.collapsed ~ .workspace-three-col {
-    height: calc(100vh - 6px - 56px - env(safe-area-inset-bottom, 0px));
-    max-height: calc(100vh - 6px - 56px - env(safe-area-inset-bottom, 0px));
+    height: calc(100vh - 6px - env(safe-area-inset-bottom, 0px));
+    max-height: calc(100vh - 6px - env(safe-area-inset-bottom, 0px));
   }
 
-  /* --- All panes: full-screen stacked, hidden by default --- */
+  /* --- All panes: full-width, natural flow --- */
   .workspace-three-col > .ws-ai-pane,
   .workspace-three-col > .ws-worktree-pane,
   .workspace-three-col > .ws-viewer-pane,
   .workspace-three-col > .ws-apps-pane,
   .workspace-three-col > .ws-module-pane {
-    display: block !important; /* Override any display:none from other shell CSS */
-    position: absolute !important;
-    top: 0;
-    left: 0;
+    display: block !important;
     width: 100% !important;
-    height: 100% !important;
-    max-height: 100% !important;
+    max-width: 100% !important;
     flex: none !important;
-    transform: translateX(100%);
-    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    visibility: hidden;
-    z-index: 1;
-  }
-
-  /* Active pane: visible and in position */
-  .workspace-three-col > .mobile-active {
-    transform: translateX(0);
-    visibility: visible;
-    z-index: 2;
-  }
-
-  /* Swiping state: disable transition for real-time tracking */
-  .workspace-three-col > .mobile-swiping {
-    transition: none !important;
-    visibility: visible;
-  }
-
-  /* --- Force all panes uncollapsed on mobile --- */
-  /* Desktop collapse state (width: 40-48px, overflow: hidden) must not apply */
-  #stx-shell-ai-panel,
-  #ws-worktree-sidebar,
-  #ws-viewer-sidebar,
-  #ws-apps-sidebar {
-    width: 100% !important;
-    max-width: 100% !important;
-    overflow: visible !important;
-    overflow-y: auto !important;
-  }
-
-  /* Override .collapsed class entirely on mobile */
-  #stx-shell-ai-panel.collapsed,
-  #ws-worktree-sidebar.collapsed,
-  #ws-viewer-sidebar.collapsed,
-  #ws-apps-sidebar.collapsed {
-    width: 100% !important;
-    max-width: 100% !important;
-    overflow: visible !important;
-    overflow-y: auto !important;
-  }
-
-  /* Show all child content in collapsed panes on mobile */
-  .workspace-three-col .collapsed > * {
-    display: revert !important;
+    /* Override any desktop absolute positioning or transforms */
+    position: relative !important;
+    transform: none !important;
     visibility: visible !important;
-    opacity: 1 !important;
   }
 
-  /* --- Hide desktop-only elements --- */
-  .workspace-three-col .panel-resizer,
-  .workspace-three-col .panel-toggle-btn,
+  /* --- Panel sidebars: full width, vertical layout --- */
+  .workspace-three-col .stx-shell-sidebar {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: visible !important;
+  }
+
+  /* Expanded pane content gets reasonable height */
+  .workspace-three-col .stx-shell-sidebar:not(.collapsed) {
+    min-height: 300px;
+    max-height: 70vh;
+  }
+
+  .workspace-three-col .stx-shell-sidebar__content {
+    flex: 1 !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+  }
+
+  /* Collapsed panes: show header only (tap to expand) */
+  .workspace-three-col .stx-shell-sidebar.collapsed {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: hidden !important;
+  }
+
+  /* --- Module pane (main content): takes remaining space --- */
+  .workspace-three-col > .ws-module-pane {
+    flex: 1 !important;
+    min-height: 200px;
+  }
+
+  /* --- Hide desktop-only horizontal elements --- */
+  .workspace-three-col > .panel-resizer {
+    display: none !important;
+  }
+
+  /* Convert horizontal resizers to section dividers */
   .workspace-three-col .v-resizer {
     display: none !important;
+  }
+
+  /* --- Panel headers: full-width tap targets --- */
+  .workspace-three-col .stx-shell-sidebar__header {
+    min-height: 44px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border-default, #30363d);
   }
 
   /* --- Touch target minimums (Apple HIG: 44px) --- */
@@ -111,50 +111,7 @@
     min-width: 44px;
   }
 
-  /* --- Ensure pane inner containers fill height on mobile --- */
-  .workspace-three-col .stx-shell-sidebar {
-    height: 100% !important;
-    display: flex !important;
-    flex-direction: column !important;
-  }
-
-  .workspace-three-col .stx-shell-sidebar__content {
-    flex: 1 !important;
-    min-height: 0 !important;
-  }
-
-  /* --- Empty state messages for panes with no content --- */
-  .workspace-three-col > .mobile-active:empty::after,
-  .workspace-three-col > .mobile-active > .stx-shell-sidebar:empty::after {
-    content: "No content loaded. Use the tab bar to navigate.";
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    color: var(--text-muted, #8b949e);
-    font-size: 0.9rem;
-    text-align: center;
-    padding: 2rem;
-  }
-
-  /* Ensure viewer empty state is visible on mobile */
-  .ws-viewer-empty {
-    display: flex !important;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    color: var(--text-muted, #8b949e);
-    gap: 12px;
-    font-size: 0.95rem;
-  }
-
-  .ws-viewer-empty i {
-    font-size: 2.5rem;
-    opacity: 0.5;
-  }
-
-  /* --- Apps pane: horizontal scroll on mobile --- */
+  /* --- Apps pane: horizontal wrap on mobile --- */
   .ws-apps-nav {
     flex-direction: row !important;
     flex-wrap: wrap;
@@ -173,71 +130,19 @@
     display: inline !important;
     font-size: 0.7rem;
   }
-}
 
-/* ============================================================================
- * Bottom Tab Bar — fixed navigation for mobile workspace
- * ========================================================================== */
-
-.mobile-tab-bar {
-  display: none; /* hidden on desktop */
-}
-
-@media (max-width: 768px) {
-  .mobile-tab-bar {
-    display: flex;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 56px;
-    background: var(--bg-secondary, #161b22);
-    border-top: 1px solid var(--border-default, #30363d);
-    z-index: 1000;
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-    justify-content: space-around;
-    align-items: center;
-  }
-
-  .mobile-tab-bar__item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 2px;
-    flex: 1;
-    height: 100%;
-    padding: 4px 0;
-    background: none;
-    border: none;
-    color: var(--text-muted, #8b949e);
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-    min-height: 44px;
-    min-width: 44px;
-  }
-
-  .mobile-tab-bar__item i {
-    font-size: 1.1rem;
-  }
-
-  .mobile-tab-bar__item span {
-    font-size: 0.6rem;
-    line-height: 1;
-    white-space: nowrap;
-  }
-
-  .mobile-tab-bar__item.active {
-    color: var(--accent-color, #58a6ff);
-  }
-
-  .mobile-tab-bar__item:active {
-    opacity: 0.7;
-  }
-
-  /* Header/footer collapse toggles: hide on mobile */
+  /* --- Header/footer collapse toggles: hide on mobile --- */
   #header-collapse-toggle,
   #footer-collapse-toggle {
     display: none !important;
   }
+}
+
+/* ============================================================================
+ * Bottom Tab Bar — hidden (replaced by vertical stacking)
+ * Kept as display:none so the HTML doesn't affect layout.
+ * ========================================================================== */
+
+.mobile-tab-bar {
+  display: none;
 }
