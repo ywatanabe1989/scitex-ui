@@ -142,14 +142,16 @@
     min-width: 44px;
   }
 
-  /* --- Apps pane: horizontal row on mobile --- */
+  /* --- Apps pane: horizontal scrollable row on mobile --- */
   nav.selector-nav.ws-apps-nav {
     flex-direction: row !important;
-    flex-wrap: wrap !important;
-    overflow-y: auto !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
     padding: 8px !important;
     gap: 8px !important;
     height: auto !important;
+    -webkit-overflow-scrolling: touch;
   }
 
   nav.ws-apps-nav .selector-nav-item {
