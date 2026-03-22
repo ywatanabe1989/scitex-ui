@@ -14,13 +14,12 @@
  * ========================================================================== */
 
 @media (max-width: 768px) {
-  /* --- Container: vertical stacking --- */
+  /* --- Container: vertical stacking, no scroll (flex fills space) --- */
   .workspace-three-col {
     flex-direction: column !important;
     height: calc(100vh - 44px - env(safe-area-inset-bottom, 0px));
     max-height: calc(100vh - 44px - env(safe-area-inset-bottom, 0px));
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
+    overflow: hidden !important;
   }
 
   /* Collapsed header variant */
@@ -29,7 +28,7 @@
     max-height: calc(100vh - 6px - env(safe-area-inset-bottom, 0px));
   }
 
-  /* --- All panes: full-width, natural flow --- */
+  /* --- All panes: full-width, flex-grow to fill freed space --- */
   .workspace-three-col > .ws-ai-pane,
   .workspace-three-col > .ws-worktree-pane,
   .workspace-three-col > .ws-viewer-pane,
@@ -38,7 +37,8 @@
     display: block !important;
     width: 100% !important;
     max-width: 100% !important;
-    flex: none !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
     /* Override any desktop absolute positioning or transforms */
     position: relative !important;
     transform: none !important;
@@ -55,10 +55,11 @@
     overflow: visible !important;
   }
 
-  /* Expanded pane content gets reasonable height */
+  /* Expanded sidebar: flex-grow to fill space */
   .workspace-three-col .stx-shell-sidebar:not(.collapsed) {
-    min-height: 300px;
-    max-height: 70vh;
+    flex: 1 1 auto !important;
+    min-height: 100px;
+    overflow: hidden !important;
   }
 
   .workspace-three-col .stx-shell-sidebar__content {
@@ -67,18 +68,18 @@
     overflow-y: auto !important;
   }
 
-  /* Collapsed panes: show header only (tap to expand) */
+  /* Collapsed panes: header only, no flex-grow */
   .workspace-three-col .stx-shell-sidebar.collapsed {
+    flex: 0 0 auto !important;
     height: auto !important;
     min-height: 0 !important;
-    max-height: none !important;
     overflow: hidden !important;
   }
 
-  /* --- Module pane (main content): takes remaining space --- */
+  /* Module pane (main content): also flex-grows */
   .workspace-three-col > .ws-module-pane {
-    flex: 1 !important;
-    min-height: 200px;
+    flex: 1 1 auto !important;
+    min-height: 100px;
   }
 
   /* --- Hide desktop-only horizontal elements --- */
