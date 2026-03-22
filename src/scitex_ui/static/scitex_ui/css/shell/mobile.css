@@ -32,7 +32,7 @@
     max-height: calc(100vh - 6px - env(safe-area-inset-bottom, 0px));
   }
 
-  /* ── All panes: full-width, equal share of viewport ──────── */
+  /* ── All panes: common base styles ──────── */
   .workspace-three-col > .ws-ai-pane,
   .workspace-three-col > .ws-worktree-pane,
   .workspace-three-col > .ws-viewer-pane,
@@ -42,8 +42,6 @@
     flex-direction: column !important;
     width: 100% !important;
     max-width: 100% !important;
-    flex: 1 1 0% !important; /* JS uses inline !important which wins over CSS !important */
-    height: 0 !important;
     min-height: 44px !important;
     position: relative !important;
     transform: none !important;
@@ -51,11 +49,34 @@
     overflow: hidden !important;
   }
 
-  /* Apps pane: default 56px height but resizable like other panes */
+  /* ── Sidebar panes: fixed default sizes (accordion behavior) ──────── */
+  /* These have fixed heights; only module pane flex-grows.
+     JS inline !important from drag resize overrides these defaults. */
+  .workspace-three-col > .ws-ai-pane {
+    flex: 0 0 40% !important;
+  }
+
+  .workspace-three-col > .ws-worktree-pane {
+    flex: 0 0 44px !important; /* collapsed-height default — expands on uncollapse */
+  }
+
+  .workspace-three-col > .ws-viewer-pane {
+    flex: 0 0 44px !important; /* collapsed-height default — expands on uncollapse */
+  }
+
+  /* Apps pane: fixed 56px selector bar */
   .workspace-three-col > .ws-apps-pane {
     flex: 0 0 56px !important;
-    min-height: 44px !important;
     max-height: none !important;
+  }
+
+  /* Pane wrappers with EXPANDED sidebar: take reasonable share */
+  .workspace-three-col > .ws-worktree-pane:not(:has(.collapsed)) {
+    flex: 0 0 30% !important;
+  }
+
+  .workspace-three-col > .ws-viewer-pane:not(:has(.collapsed)) {
+    flex: 0 0 25% !important;
   }
 
   /* Pane wrappers with collapsed sidebar: shrink to header bar */
@@ -146,9 +167,9 @@
     display: none !important;
   }
 
-  /* ── Module pane (main content): absorbs all freed space ──────────── */
+  /* ── Module pane: the ONLY flex-growing element (accordion spring) ── */
   .workspace-three-col > .ws-module-pane {
-    flex: 10 1 auto !important;
+    flex: 1 1 0% !important;
     min-height: 100px;
   }
 
