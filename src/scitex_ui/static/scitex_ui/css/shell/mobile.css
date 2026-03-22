@@ -140,7 +140,10 @@
     gap: 8px !important;
     visibility: visible !important;
     opacity: 1 !important;
-    border-bottom: 1px solid var(--border-default, #30363d) !important;
+    /* Visually distinct from content: darker bg + stronger border */
+    background: var(--workspace-bg-secondary, #161b22) !important;
+    border-bottom: 2px solid var(--workspace-icon-primary, #059669) !important;
+    border-top: 1px solid var(--border-default, #30363d) !important;
   }
 
   .workspace-three-col .stx-shell-sidebar.collapsed .stx-shell-sidebar__title {
@@ -226,11 +229,13 @@
     display: none !important;
   }
 
-  /* ── Panel headers: full-width tap targets ──────────── */
+  /* ── Panel headers: full-width tap targets, visually distinct ── */
   .workspace-three-col .stx-shell-sidebar__header {
     min-height: 44px;
     cursor: pointer;
-    border-bottom: 1px solid var(--border-default, #30363d);
+    background: var(--workspace-bg-secondary, #161b22);
+    border-bottom: 2px solid var(--workspace-icon-primary, #059669);
+    border-top: 1px solid var(--border-default, #30363d);
   }
 
   /* ── Touch targets (Apple HIG: 44px) — header/nav only ── */
