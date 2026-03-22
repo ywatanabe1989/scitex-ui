@@ -119,6 +119,15 @@ function enableMobile(): void {
   const container = document.getElementById("workspace-three-col");
   if (!container) return;
 
+  // Force-uncollapse all panels (desktop collapse state from localStorage)
+  const collapsedPanels = container.querySelectorAll<HTMLElement>(
+    ".stx-shell-sidebar.collapsed",
+  );
+  collapsedPanels.forEach((panel) => {
+    panel.classList.remove("collapsed");
+    console.log(`[MobileGesture] Uncollapsed: ${panel.id}`);
+  });
+
   container.addEventListener("touchstart", onTouchStart, { passive: true });
   container.addEventListener("touchmove", onTouchMove, { passive: false });
   container.addEventListener("touchend", onTouchEnd, { passive: true });
