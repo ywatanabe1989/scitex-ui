@@ -235,9 +235,15 @@ function onVerticalResizeMove(e: MouseEvent | TouchEvent): void {
   e.preventDefault();
 
   const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
-  const dy = clientY - vResStartY;
-  const newPrevH = Math.max(44, vResPrevStartH + dy);
-  const newNextH = Math.max(44, vResNextStartH - dy);
+  // Clamp delta so neither pane goes below 44px
+  const MIN_PANE = 44;
+  let dy = clientY - vResStartY;
+  const maxUp = -(vResPrevStartH - MIN_PANE); // max drag up
+  const maxDown = vResNextStartH - MIN_PANE; // max drag down
+  dy = Math.max(maxUp, Math.min(maxDown, dy));
+
+  const newPrevH = vResPrevStartH + dy;
+  const newNextH = vResNextStartH - dy;
 
   vResPrevPane.style.setProperty("height", newPrevH + "px", "important");
   vResPrevPane.style.setProperty("flex", `0 0 ${newPrevH}px`, "important");
@@ -301,27 +307,15 @@ function enableMobile(): void {
   const container = document.getElementById("workspace-three-col");
   if (!container) return;
 
-  // Clear ALL inline flex/height/width styles from pane wrappers
-  // so CSS defaults (flex: 1 1 0% !important) distribute space equally.
-  // This prevents stale inline styles from previous drag sessions.
+  // Clear only mobile-specific inline styles from pane WRAPPERS (not sidebars).
+  // Pane wrappers get inline flex/height from mobile drag — clear on re-init.
+  // Do NOT touch sidebar inline styles — desktop resizer depends on them.
   const paneSelectors =
     ".ws-ai-pane, .ws-worktree-pane, .ws-viewer-pane, .ws-apps-pane, .ws-module-pane";
   container.querySelectorAll<HTMLElement>(paneSelectors).forEach((pane) => {
     pane.style.removeProperty("flex");
     pane.style.removeProperty("height");
-    pane.style.removeProperty("width");
-    pane.style.removeProperty("flex-shrink");
-    pane.style.removeProperty("flex-grow");
   });
-
-  // Also clear inline styles from sidebars (desktop resizer leftovers)
-  container
-    .querySelectorAll<HTMLElement>(".stx-shell-sidebar")
-    .forEach((sb) => {
-      sb.style.removeProperty("width");
-      sb.style.removeProperty("flex-shrink");
-      sb.style.removeProperty("flex-grow");
-    });
 
   // First: uncollapse all panels (clear desktop collapse state)
   container
@@ -370,6 +364,41 @@ function disableMobile(): void {
   container.removeEventListener("touchmove", onTouchMove);
   container.removeEventListener("touchend", onTouchEnd);
   container.removeEventListener("dblclick", onDblClick);
+
+  // Remove mobile drag listeners from headers and resizers
+  container
+    .querySelectorAll<HTMLElement>(".panel-resizer, .stx-shell-sidebar__header")
+    .forEach((el) => {
+      el.removeEventListener(
+        "mousedown",
+        onVerticalResizeStart as EventListener,
+      );
+      el.removeEventListener(
+        "touchstart",
+        onVerticalResizeStart as EventListener,
+      );
+      if (el.classList.contains("stx-shell-sidebar__header")) {
+        el.style.cursor = "";
+      }
+    });
+  document.removeEventListener(
+    "mousemove",
+    onVerticalResizeMove as EventListener,
+  );
+  document.removeEventListener("mouseup", onVerticalResizeEnd);
+  document.removeEventListener(
+    "touchmove",
+    onVerticalResizeMove as EventListener,
+  );
+  document.removeEventListener("touchend", onVerticalResizeEnd);
+
+  // Clear mobile inline styles from pane wrappers
+  const paneSelectors =
+    ".ws-ai-pane, .ws-worktree-pane, .ws-viewer-pane, .ws-apps-pane, .ws-module-pane";
+  container.querySelectorAll<HTMLElement>(paneSelectors).forEach((pane) => {
+    pane.style.removeProperty("flex");
+    pane.style.removeProperty("height");
+  });
 }
 
 // --- Init ---
