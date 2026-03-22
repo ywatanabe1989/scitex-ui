@@ -34,15 +34,27 @@
   .workspace-three-col > .ws-viewer-pane,
   .workspace-three-col > .ws-apps-pane,
   .workspace-three-col > .ws-module-pane {
-    display: block !important;
+    display: flex !important;
+    flex-direction: column !important;
     width: 100% !important;
     max-width: 100% !important;
-    flex: 1 1 auto !important;
+    flex: 1 1 0 !important;
     min-height: 0 !important;
     /* Override any desktop absolute positioning or transforms */
     position: relative !important;
     transform: none !important;
     visibility: visible !important;
+    overflow: hidden !important;
+  }
+
+  /* Pane wrappers containing a collapsed sidebar: shrink to header only */
+  .workspace-three-col > .ws-ai-pane:has(.collapsed),
+  .workspace-three-col > .ws-worktree-pane:has(.collapsed),
+  .workspace-three-col > .ws-viewer-pane:has(.collapsed),
+  .workspace-three-col > .ws-apps-pane:has(.collapsed) {
+    flex: 0 0 auto !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
   }
 
   /* --- Panel sidebars: full width, vertical layout --- */
