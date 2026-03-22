@@ -181,12 +181,11 @@
     border-bottom: 1px solid var(--border-default, #30363d);
   }
 
-  /* ── Touch targets (Apple HIG: 44px) ────────────────── */
-  .workspace-three-col button,
-  .workspace-three-col a.selector-nav-item,
-  .workspace-three-col select,
-  .workspace-three-col input[type="text"],
-  .workspace-three-col textarea {
+  /* ── Touch targets (Apple HIG: 44px) — header/nav only ── */
+  /* Scoped to headers and nav bars, NOT content areas (file tree items etc.) */
+  .workspace-three-col .stx-shell-sidebar__header button,
+  .workspace-three-col .mobile-tab-bar button,
+  .workspace-three-col a.selector-nav-item {
     min-height: 44px;
   }
 
