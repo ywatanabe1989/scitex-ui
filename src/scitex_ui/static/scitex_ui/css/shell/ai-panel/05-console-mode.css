@@ -122,7 +122,23 @@
 }
 
 .stx-shell-ai-jobs-list {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease;
+  padding: 0 0.5rem;
+}
+
+.stx-shell-ai-jobs-list.open {
   max-height: 200px;
   overflow-y: auto;
   padding: 0.25rem 0.5rem;
+}
+
+/* Unified status: clickable */
+.stx-shell-ai-status-unified {
+  cursor: pointer;
+}
+
+.stx-shell-ai-status-unified:hover {
+  color: var(--text-primary);
 }

@@ -32,7 +32,7 @@
     max-height: calc(100vh - 6px - env(safe-area-inset-bottom, 0px));
   }
 
-  /* ── All panes: full-width, equal share of viewport ──────── */
+  /* ── All panes: common base styles ──────── */
   .workspace-three-col > .ws-ai-pane,
   .workspace-three-col > .ws-worktree-pane,
   .workspace-three-col > .ws-viewer-pane,
@@ -42,8 +42,6 @@
     flex-direction: column !important;
     width: 100% !important;
     max-width: 100% !important;
-    flex: 1 1 0% !important; /* JS uses inline !important which wins over CSS !important */
-    height: 0 !important;
     min-height: 44px !important;
     position: relative !important;
     transform: none !important;
@@ -51,12 +49,34 @@
     overflow: hidden !important;
   }
 
-  /* Apps pane: fixed 56px height (rotated from desktop's fixed ~56px width) */
+  /* ── Sidebar panes: fixed default sizes (accordion behavior) ──────── */
+  /* These have fixed heights; only module pane flex-grows.
+     JS inline !important from drag resize overrides these defaults. */
+  .workspace-three-col > .ws-ai-pane {
+    flex: 0 0 40% !important;
+  }
+
+  .workspace-three-col > .ws-worktree-pane {
+    flex: 0 0 44px !important; /* collapsed-height default — expands on uncollapse */
+  }
+
+  .workspace-three-col > .ws-viewer-pane {
+    flex: 0 0 44px !important; /* collapsed-height default — expands on uncollapse */
+  }
+
+  /* Apps pane: fixed 56px selector bar */
   .workspace-three-col > .ws-apps-pane {
     flex: 0 0 56px !important;
-    height: 56px !important;
-    min-height: 56px !important;
-    max-height: 56px !important;
+    max-height: none !important;
+  }
+
+  /* Pane wrappers with EXPANDED sidebar: take reasonable share */
+  .workspace-three-col > .ws-worktree-pane:not(:has(.collapsed)) {
+    flex: 0 0 30% !important;
+  }
+
+  .workspace-three-col > .ws-viewer-pane:not(:has(.collapsed)) {
+    flex: 0 0 25% !important;
   }
 
   /* Pane wrappers with collapsed sidebar: shrink to header bar */
@@ -120,7 +140,10 @@
     gap: 8px !important;
     visibility: visible !important;
     opacity: 1 !important;
-    border-bottom: 1px solid var(--border-default, #30363d) !important;
+    /* Visually distinct from content: darker bg + stronger border */
+    background: var(--workspace-bg-secondary, #161b22) !important;
+    border-bottom: 2px solid var(--workspace-icon-primary, #059669) !important;
+    border-top: 1px solid var(--border-default, #30363d) !important;
   }
 
   .workspace-three-col .stx-shell-sidebar.collapsed .stx-shell-sidebar__title {
@@ -147,9 +170,9 @@
     display: none !important;
   }
 
-  /* ── Module pane (main content): flex-grows ──────────── */
+  /* ── Module pane: the ONLY flex-growing element (accordion spring) ── */
   .workspace-three-col > .ws-module-pane {
-    flex: 1 1 auto !important;
+    flex: 1 1 0% !important;
     min-height: 100px;
   }
 
@@ -206,11 +229,13 @@
     display: none !important;
   }
 
-  /* ── Panel headers: full-width tap targets ──────────── */
+  /* ── Panel headers: full-width tap targets, visually distinct ── */
   .workspace-three-col .stx-shell-sidebar__header {
     min-height: 44px;
     cursor: pointer;
-    border-bottom: 1px solid var(--border-default, #30363d);
+    background: var(--workspace-bg-secondary, #161b22);
+    border-bottom: 2px solid var(--workspace-icon-primary, #059669);
+    border-top: 1px solid var(--border-default, #30363d);
   }
 
   /* ── Touch targets (Apple HIG: 44px) — header/nav only ── */

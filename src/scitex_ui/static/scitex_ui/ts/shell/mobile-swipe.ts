@@ -44,8 +44,15 @@ function onTouchStart(e: TouchEvent): void {
 
 function onTouchMove(e: TouchEvent): void {
   if (!isMobile || touchFingers < 2 || !swipeTarget) return;
-  // Prevent scroll while two-finger swiping
-  e.preventDefault();
+  // Allow pinch zoom (two fingers spreading apart) — only prevent vertical two-finger swipe
+  if (e.touches.length >= 2) {
+    const dx = Math.abs(e.touches[0].clientX - e.touches[1].clientX);
+    const dy = Math.abs(e.touches[0].clientY - e.touches[1].clientY);
+    // If fingers are spreading (pinch zoom), don't prevent default
+    if (dx > 30) return;
+    // Only prevent if it's a vertical two-finger swipe
+    if (dy > 10) e.preventDefault();
+  }
 }
 
 function onTouchEnd(e: TouchEvent): void {
