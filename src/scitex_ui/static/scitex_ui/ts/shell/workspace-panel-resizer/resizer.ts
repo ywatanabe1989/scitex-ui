@@ -222,7 +222,15 @@ export function initResizer(storagePrefix: string, config: PanelConfig): void {
 
     if (wasCollapsed) {
       targetPanel.classList.remove("collapsed");
-      axis.setSize(effectiveTarget, config.minWidth);
+      // On vertical axis, minWidth (48px) is too small — use 1/4 of container as starting height
+      const uncollapseSize =
+        axis.orientation === "vertical"
+          ? Math.max(
+              150,
+              axis.size(effectiveTarget.parentElement || effectiveTarget) / 4,
+            )
+          : config.minWidth;
+      axis.setSize(effectiveTarget, uncollapseSize);
       axis.lockFlex(effectiveTarget);
 
       if (config.toggleButtonId) {
