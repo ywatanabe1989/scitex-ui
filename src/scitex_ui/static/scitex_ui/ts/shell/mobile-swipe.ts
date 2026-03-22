@@ -12,6 +12,7 @@
 
 const SWIPE_THRESHOLD = 40; // px — minimum vertical distance to trigger
 const MOBILE_QUERY = "(max-width: 768px)";
+const MOBILE_COLLAPSE_KEY = "scitex-mobile-collapsed-panes";
 
 let isMobile = false;
 
@@ -64,6 +65,7 @@ function onTouchEnd(e: TouchEvent): void {
           swipeTarget.querySelector<HTMLElement>(".panel-toggle-btn");
         if (toggleBtn) toggleBtn.click();
         console.log(`[MobileGesture] Collapsed: ${swipeTarget.id}`);
+        saveMobileCollapseState();
       }
     } else {
       // Swipe down → expand
@@ -72,12 +74,43 @@ function onTouchEnd(e: TouchEvent): void {
           swipeTarget.querySelector<HTMLElement>(".panel-toggle-btn");
         if (toggleBtn) toggleBtn.click();
         console.log(`[MobileGesture] Expanded: ${swipeTarget.id}`);
+        saveMobileCollapseState();
       }
     }
   }
 
   touchFingers = 0;
   swipeTarget = null;
+}
+
+// --- Persist collapse state ---
+
+function saveMobileCollapseState(): void {
+  const collapsed: string[] = [];
+  SIDEBAR_IDS.forEach((id) => {
+    const el = document.getElementById(id);
+    if (el?.classList.contains("collapsed")) {
+      collapsed.push(id);
+    }
+  });
+  localStorage.setItem(MOBILE_COLLAPSE_KEY, JSON.stringify(collapsed));
+}
+
+function restoreMobileCollapseState(): void {
+  try {
+    const saved = localStorage.getItem(MOBILE_COLLAPSE_KEY);
+    if (!saved) return;
+    const collapsed: string[] = JSON.parse(saved);
+    collapsed.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.classList.add("collapsed");
+        console.log(`[MobileGesture] Restored collapsed: ${id}`);
+      }
+    });
+  } catch {
+    // Ignore parse errors
+  }
 }
 
 // --- Double-click on pane header → toggle collapse ---
@@ -95,6 +128,7 @@ function onDblClick(e: MouseEvent): void {
   const toggleBtn = sidebar.querySelector<HTMLElement>(".panel-toggle-btn");
   if (toggleBtn) {
     toggleBtn.click();
+    saveMobileCollapseState();
     console.log(
       `[MobileGesture] Double-click toggle: ${sidebar.id} → ${sidebar.classList.contains("collapsed") ? "collapsed" : "expanded"}`,
     );
@@ -119,14 +153,16 @@ function enableMobile(): void {
   const container = document.getElementById("workspace-three-col");
   if (!container) return;
 
-  // Force-uncollapse all panels (desktop collapse state from localStorage)
+  // First: uncollapse all panels (clear desktop collapse state)
   const collapsedPanels = container.querySelectorAll<HTMLElement>(
     ".stx-shell-sidebar.collapsed",
   );
   collapsedPanels.forEach((panel) => {
     panel.classList.remove("collapsed");
-    console.log(`[MobileGesture] Uncollapsed: ${panel.id}`);
   });
+
+  // Then: restore mobile-specific collapse preferences
+  restoreMobileCollapseState();
 
   container.addEventListener("touchstart", onTouchStart, { passive: true });
   container.addEventListener("touchmove", onTouchMove, { passive: false });
