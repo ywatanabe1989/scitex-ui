@@ -1,20 +1,25 @@
 /**
  * @component Mobile Workspace Layout
- * @description Rotates the desktop horizontal (row) layout to vertical (column)
- *   on mobile viewports (<=768px). Reuses the existing curtain/collapse panel
- *   system — panels stack top-to-bottom with their headers as tap targets.
+ * @description Single source of truth for mobile (<=768px) workspace layout.
+ *   Rotates the desktop horizontal (row) layout to vertical (column).
+ *   Reuses the existing curtain/collapse panel system — panels stack
+ *   top-to-bottom with their headers as tap targets.
+ *
+ *   Desktop: flex-direction row  → panes side by side
+ *   Mobile:  flex-direction column → panes stacked vertically
+ *
+ *   Same rules, just rotated 90°.
  * @category Layouts
  * @darkmode true
  */
 
 /* ============================================================================
- * Mobile layout — rotate flex-direction: row → column
  * All rules scoped inside @media (max-width: 768px).
  * Desktop layout is never affected.
  * ========================================================================== */
 
 @media (max-width: 768px) {
-  /* --- Container: vertical stacking, no scroll (flex fills space) --- */
+  /* ── Container: vertical stacking ────────────────────────── */
   .workspace-three-col {
     flex-direction: column !important;
     height: calc(100vh - 44px - env(safe-area-inset-bottom, 0px));
@@ -22,13 +27,12 @@
     overflow: hidden !important;
   }
 
-  /* Collapsed header variant */
   .global-header.collapsed ~ .workspace-three-col {
     height: calc(100vh - 6px - env(safe-area-inset-bottom, 0px));
     max-height: calc(100vh - 6px - env(safe-area-inset-bottom, 0px));
   }
 
-  /* --- All panes: full-width, equal share of viewport --- */
+  /* ── All panes: full-width, equal share of viewport ──────── */
   .workspace-three-col > .ws-ai-pane,
   .workspace-three-col > .ws-worktree-pane,
   .workspace-three-col > .ws-viewer-pane,
@@ -39,29 +43,41 @@
     width: 100% !important;
     max-width: 100% !important;
     flex: 1 1 0% !important;
-    height: 0 !important; /* Force flex-basis to control height, not content */
-    min-height: 44px !important; /* At least show header */
-    /* Override any desktop absolute positioning or transforms */
+    height: 0 !important; /* flex-basis controls height, not content */
+    min-height: 44px !important;
     position: relative !important;
     transform: none !important;
     visibility: visible !important;
     overflow: hidden !important;
   }
 
-  /* Pane wrappers containing a collapsed sidebar: shrink to header bar */
+  /* Apps pane: fixed 56px height (rotated from desktop's fixed ~56px width) */
+  .workspace-three-col > .ws-apps-pane {
+    flex: 0 0 56px !important;
+    height: 56px !important;
+    min-height: 56px !important;
+    max-height: 56px !important;
+  }
+
+  /* Pane wrappers with collapsed sidebar: shrink to header bar */
   .workspace-three-col > .ws-ai-pane:has(.collapsed),
   .workspace-three-col > .ws-worktree-pane:has(.collapsed),
   .workspace-three-col > .ws-viewer-pane:has(.collapsed),
   .workspace-three-col > .ws-apps-pane:has(.collapsed) {
     flex: 0 0 auto !important;
     height: auto !important;
-    min-height: 44px !important; /* Show header bar, not hidden */
+    min-height: 44px !important;
     overflow: hidden !important;
   }
 
-  /* --- Panel sidebars: full width, vertical layout --- */
-  .workspace-three-col .stx-shell-sidebar {
+  /* ── Sidebars: full width (override desktop 48px collapsed width) ── */
+  .workspace-three-col .stx-shell-sidebar,
+  #stx-shell-ai-panel,
+  #ws-worktree-sidebar,
+  #ws-viewer-sidebar,
+  #ws-apps-sidebar {
     width: 100% !important;
+    min-width: 100% !important;
     max-width: 100% !important;
     height: auto !important;
     display: flex !important;
@@ -82,54 +98,75 @@
     overflow-y: auto !important;
   }
 
-  /* Collapsed sidebar: show header bar, hide content */
+  /* ── Collapsed sidebar: horizontal header bar ──────────── */
+  /* Override desktop's vertical icon strip (48px, column, 9px font) */
   .workspace-three-col .stx-shell-sidebar.collapsed {
+    width: 100% !important;
+    min-width: 100% !important;
     flex: 0 0 auto !important;
     height: auto !important;
     min-height: 0 !important;
     overflow: hidden !important;
   }
 
-  /* Collapsed sidebar header: always visible as a labeled bar */
   .workspace-three-col .stx-shell-sidebar.collapsed .stx-shell-sidebar__header {
     display: flex !important;
+    flex-direction: row !important;
+    height: auto !important;
+    min-height: 44px !important;
+    padding: 0 12px !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 8px !important;
     visibility: visible !important;
     opacity: 1 !important;
-    min-height: 44px;
-    border-bottom: 1px solid var(--border-default, #30363d);
+    border-bottom: 1px solid var(--border-default, #30363d) !important;
   }
 
-  /* Collapsed sidebar content: hidden */
+  .workspace-three-col .stx-shell-sidebar.collapsed .stx-shell-sidebar__title {
+    flex-direction: row !important;
+    font-size: 0.85rem !important;
+    gap: 6px !important;
+    margin: 0 !important;
+  }
+
+  .workspace-three-col
+    .stx-shell-sidebar.collapsed
+    .stx-shell-sidebar__title
+    i {
+    font-size: 1rem !important;
+  }
+
   .workspace-three-col
     .stx-shell-sidebar.collapsed
     .stx-shell-sidebar__content {
     display: none !important;
   }
 
-  /* Module pane (main content): also flex-grows */
+  .workspace-three-col .stx-shell-sidebar.collapsed .panel-toggle-btn {
+    display: none !important;
+  }
+
+  /* ── Module pane (main content): flex-grows ──────────── */
   .workspace-three-col > .ws-module-pane {
     flex: 1 1 auto !important;
     min-height: 100px;
   }
 
-  /* --- Hide desktop-only horizontal elements --- */
-  .workspace-three-col > .panel-resizer {
-    display: none !important;
-  }
-
-  /* Convert horizontal resizers to section dividers */
+  /* ── Hide desktop-only elements ──────────────────────── */
+  .workspace-three-col > .panel-resizer,
   .workspace-three-col .v-resizer {
     display: none !important;
   }
 
-  /* --- Panel headers: full-width tap targets --- */
+  /* ── Panel headers: full-width tap targets ──────────── */
   .workspace-three-col .stx-shell-sidebar__header {
     min-height: 44px;
     cursor: pointer;
     border-bottom: 1px solid var(--border-default, #30363d);
   }
 
-  /* --- Touch target minimums (Apple HIG: 44px) --- */
+  /* ── Touch targets (Apple HIG: 44px) ────────────────── */
   .workspace-three-col button,
   .workspace-three-col a.selector-nav-item,
   .workspace-three-col select,
@@ -142,30 +179,41 @@
     min-width: 44px;
   }
 
-  /* --- Apps pane: horizontal scrollable row on mobile --- */
-  nav.selector-nav.ws-apps-nav {
+  /* ── Selector Nav: rotate 90° ───────────────────────── */
+  /* Desktop: vertical strip (flex-direction: column, fixed width) */
+  /* Mobile:  horizontal bar (flex-direction: row, fixed height, scroll-x) */
+  .selector-nav {
     flex-direction: row !important;
     flex-wrap: nowrap !important;
     overflow-x: auto !important;
     overflow-y: hidden !important;
-    padding: 8px !important;
-    gap: 8px !important;
-    height: auto !important;
     -webkit-overflow-scrolling: touch;
+    height: 56px !important;
+    width: 100% !important;
+    padding: 0 4px !important;
+    gap: 0 !important;
   }
 
-  nav.ws-apps-nav .selector-nav-item {
-    width: auto !important;
+  .selector-nav-item {
     flex-direction: column !important;
-    padding: 8px 12px !important;
+    flex-shrink: 0 !important;
+    padding: 4px 10px !important;
+    min-width: 56px !important;
+    height: 100% !important;
   }
 
-  nav.ws-apps-nav .selector-nav-label {
-    display: inline !important;
-    font-size: 0.7rem !important;
+  /* Active indicator: bottom bar instead of right bar */
+  .selector-nav-item.active::after {
+    right: 20% !important;
+    left: 20% !important;
+    top: auto !important;
+    bottom: 0 !important;
+    width: auto !important;
+    height: 3px !important;
+    border-radius: 2px 2px 0 0 !important;
   }
 
-  /* --- Header/footer collapse toggles: hide on mobile --- */
+  /* ── Header/footer collapse toggles: hide ──────────── */
   #header-collapse-toggle,
   #footer-collapse-toggle {
     display: none !important;
@@ -174,7 +222,6 @@
 
 /* ============================================================================
  * Bottom Tab Bar — hidden (replaced by vertical stacking)
- * Kept as display:none so the HTML doesn't affect layout.
  * ========================================================================== */
 
 .mobile-tab-bar {
