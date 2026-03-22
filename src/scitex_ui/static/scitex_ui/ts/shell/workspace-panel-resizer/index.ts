@@ -18,6 +18,8 @@
  */
 
 export type { PanelConfig } from "./types";
+export type { AxisConfig } from "./axis";
+export { detectAxis, getAxis } from "./axis";
 import type { PanelConfig } from "./types";
 import { restoreCollapseState } from "./state";
 import { updateToggleIcon, initToggleClickHandler } from "./toggle";

@@ -1,31 +1,30 @@
 /** Drag-resize mouse event logic for WorkspacePanelResizer
  *
  * Features:
- * - Smart collapse: when panel is dragged below minWidth, it collapses instantly
- *   (not just on mouseUp)
+ * - Axis-agnostic: auto-detects horizontal (row) or vertical (column) layout
+ *   from the container's flex-direction. Desktop and mobile use the same logic.
+ * - Smart collapse: when panel is dragged below minSize, it collapses instantly
  * - Curtain propagation: remaining drag delta transfers to the next adjacent panel
- *   in the same direction, so dragging one panel past collapse continues resizing
- *   the panel behind it
- * - Bidirectional: works in both left-to-right and right-to-left drag directions
+ * - Bidirectional: works in both directions along the active axis
  */
 
 import type { PanelConfig } from "./types";
+import type { AxisConfig } from "./axis";
+import { detectAxis } from "./axis";
 import { saveWidth, restoreWidth } from "./state";
 import { updateToggleIcon } from "./toggle";
 import { magneticSnap, percentSnapPoints } from "../resizer/_snap";
 
-/** Shared collapse threshold — panel collapses when width drops to this */
-const COLLAPSE_WIDTH = 40;
+/** Shared collapse threshold — panel collapses when size drops to this */
+const COLLAPSE_SIZE = 40;
 
-/** Minimum width the module pane (flex:1, no resizer) must retain.
- *  Matches COLLAPSE_WIDTH so the module pane can shrink to collapse threshold. */
-const MIN_MODULE_WIDTH = 40;
+/** Minimum size the module pane (flex:1, no resizer) must retain. */
+const MIN_MODULE_SIZE = 40;
 
-/** Calculate the maximum width a panel can grow to without pushing siblings
- *  off-screen. Uses each sibling's ACTUAL current width (or MIN_MODULE_WIDTH
- *  for the module pane) so the cap reflects reality, not just minimums.
+/** Calculate the maximum size a panel can grow to without pushing siblings
+ *  off-screen. Uses each sibling's ACTUAL current size so the cap reflects reality.
  */
-function getMaxAllowedWidth(panel: HTMLElement): number {
+function getMaxAllowedSize(panel: HTMLElement, axis: AxisConfig): number {
   const paneEl =
     panel.closest(
       ".ws-ai-pane, .ws-worktree-pane, .ws-viewer-pane, .ws-apps-pane",
@@ -35,26 +34,24 @@ function getMaxAllowedWidth(panel: HTMLElement): number {
   const flexContainer = paneEl.closest(".workspace-three-col") as HTMLElement;
   if (!flexContainer) return Infinity;
 
-  const containerWidth = flexContainer.clientWidth;
+  const containerSize = axis.size(flexContainer);
   let reserved = 0;
 
   for (const child of Array.from(flexContainer.children) as HTMLElement[]) {
     if (child === paneEl) continue;
     if (child.classList.contains("ws-module-pane")) {
-      reserved += MIN_MODULE_WIDTH;
+      reserved += MIN_MODULE_SIZE;
     } else {
-      // Use actual width — if collapsed, that's already COLLAPSE_WIDTH via CSS
-      reserved += child.offsetWidth;
+      reserved += axis.size(child);
     }
   }
 
-  return containerWidth - reserved;
+  return containerSize - reserved;
 }
 
 /** Find the next resizable panel in the given direction.
- *  Walks through siblings, skipping panes that have no resizer (e.g.,
- *  the module pane). Collapsed panels are skipped by default, but
- *  included when curtain=true (for fixed-width curtain handles).
+ *  Walks through siblings, skipping panes that have no resizer.
+ *  Collapsed panels are skipped by default, but included when curtain=true.
  */
 function findAdjacentPanel(
   config: PanelConfig,
@@ -69,7 +66,6 @@ function findAdjacentPanel(
   );
   if (!paneContainer) return null;
 
-  // Walk siblings until we find a resizable panel
   let current: Element | null = paneContainer;
   while (current) {
     const sibling =
@@ -85,19 +81,16 @@ function findAdjacentPanel(
       ".stx-shell-sidebar",
     ) as HTMLElement;
 
-    // Skip panes without resizer or panel (e.g., module pane)
     if (!siblingResizer || !siblingPanel) {
       current = sibling;
       continue;
     }
 
-    // Skip collapsed panels unless curtain mode (curtain un-collapses them)
     if (siblingPanel.classList.contains("collapsed") && !curtain) {
       current = sibling;
       continue;
     }
 
-    // Found a resizable panel
     const sibConfig: PanelConfig = {
       resizerId: siblingResizer.id,
       targetPanel: `#${siblingPanel.id}`,
@@ -124,9 +117,10 @@ function collapsePanel(
   storagePrefix: string,
   config: PanelConfig,
   panel: HTMLElement,
+  axis: AxisConfig,
 ): void {
   panel.classList.add("collapsed");
-  panel.style.width = "";
+  axis.clearSize(panel);
   panel.style.flexShrink = "";
   panel.style.flexGrow = "";
 
@@ -154,20 +148,30 @@ export function initResizer(storagePrefix: string, config: PanelConfig): void {
   restoreWidth(storagePrefix, config, targetPanel);
 
   let isResizing = false;
-  let startX = 0;
-  let startWidth = 0;
+  let startPos = 0;
+  let startSize = 0;
   let wasCollapsed = false;
-  let primaryCollapsed = false; // true once primary panel collapses during drag
-  // Track propagation state: when the primary panel collapses during drag,
-  // we start resizing the adjacent panel
+  let primaryCollapsed = false;
+  let axis: AxisConfig;
   let propagationTarget: {
     panel: HTMLElement;
     config: PanelConfig;
-    startWidth: number;
-    startX: number;
+    startSize: number;
+    startPos: number;
   } | null = null;
 
-  /** Disable CSS transitions on all workspace sidebars during drag */
+  /** Detect axis from container at drag start (responsive to viewport changes) */
+  const resolveAxis = (): AxisConfig => {
+    const container = resizer.closest(".workspace-three-col") as HTMLElement;
+    if (container) return detectAxis(container);
+    // Fallback: check if data attribute specifies axis
+    const explicit = resizer.dataset.axis;
+    if (explicit === "vertical" || explicit === "horizontal") {
+      return detectAxis(document.createElement("div")); // fallback horizontal
+    }
+    return detectAxis(document.createElement("div"));
+  };
+
   const disableTransitions = () => {
     document
       .querySelectorAll<HTMLElement>(".stx-shell-sidebar")
@@ -176,7 +180,6 @@ export function initResizer(storagePrefix: string, config: PanelConfig): void {
       });
   };
 
-  /** Re-enable CSS transitions after drag ends */
   const enableTransitions = () => {
     document
       .querySelectorAll<HTMLElement>(".stx-shell-sidebar")
@@ -186,20 +189,18 @@ export function initResizer(storagePrefix: string, config: PanelConfig): void {
   };
 
   const handleMouseDown = (e: MouseEvent) => {
+    axis = resolveAxis();
     wasCollapsed = targetPanel.classList.contains("collapsed");
     propagationTarget = null;
     primaryCollapsed = false;
 
-    // Fixed-width panels skip collapse/expand — go straight to propagation
     if (config.fixedWidth) {
       isResizing = true;
-      startX = e.clientX;
-      startWidth = targetPanel.offsetWidth;
-      primaryCollapsed = true; // skip primary resize entirely
+      startPos = axis.pointerPos(e);
+      startSize = axis.size(targetPanel);
+      primaryCollapsed = true;
 
-      // Find adjacent panel to propagate to based on drag direction
-      // We'll determine actual direction in mousemove
-      document.body.style.cursor = "col-resize";
+      document.body.style.cursor = axis.cursor;
       document.body.style.userSelect = "none";
       resizer.classList.add("active");
       disableTransitions();
@@ -209,7 +210,7 @@ export function initResizer(storagePrefix: string, config: PanelConfig): void {
 
     if (wasCollapsed) {
       targetPanel.classList.remove("collapsed");
-      targetPanel.style.width = `${config.minWidth}px`;
+      axis.setSize(targetPanel, config.minWidth);
       targetPanel.style.flexShrink = "0";
       targetPanel.style.flexGrow = "0";
 
@@ -224,9 +225,9 @@ export function initResizer(storagePrefix: string, config: PanelConfig): void {
     }
 
     isResizing = true;
-    startX = e.clientX;
-    startWidth = targetPanel.offsetWidth;
-    document.body.style.cursor = "col-resize";
+    startPos = axis.pointerPos(e);
+    startSize = axis.size(targetPanel);
+    document.body.style.cursor = axis.cursor;
     document.body.style.userSelect = "none";
     resizer.classList.add("active");
     targetPanel.dataset.wprDragging = "true";
@@ -237,27 +238,20 @@ export function initResizer(storagePrefix: string, config: PanelConfig): void {
   const handleMouseMove = (e: MouseEvent) => {
     if (!isResizing) return;
 
-    // Curtain handle: fixed-width panel propagates to the resizeDirection side.
-    // Determine actual drag intent from delta sign to avoid un-collapsing
-    // panels that should stay collapsed (prevents content flash).
     if (config.fixedWidth && !propagationTarget) {
-      const delta = e.clientX - startX;
-      if (Math.abs(delta) < 3) return; // dead zone
+      const delta = axis.pointerPos(e) - startPos;
+      if (Math.abs(delta) < 3) return;
 
-      // Is the user shrinking (pushing panels closed) or growing (pulling open)?
       const isShrinking =
         config.resizeDirection === "left" ? delta < 0 : delta > 0;
       const curtainDir: "shrink-left" | "shrink-right" =
         config.resizeDirection === "left" ? "shrink-left" : "shrink-right";
 
-      // When shrinking: skip collapsed panels (curtain=false) — nothing to shrink.
-      // When growing: include collapsed panels (curtain=true) — un-collapse them.
       const adjacent = findAdjacentPanel(config, curtainDir, !isShrinking);
       if (adjacent) {
-        // Only un-collapse when growing (dragging to expand panels)
         if (!isShrinking && adjacent.panel.classList.contains("collapsed")) {
           adjacent.panel.classList.remove("collapsed");
-          adjacent.panel.style.width = `${adjacent.config.minWidth}px`;
+          axis.setSize(adjacent.panel, adjacent.config.minWidth);
           adjacent.panel.style.flexShrink = "0";
           adjacent.panel.style.flexGrow = "0";
           if (adjacent.config.toggleButtonId) {
@@ -278,36 +272,32 @@ export function initResizer(storagePrefix: string, config: PanelConfig): void {
         propagationTarget = {
           panel: adjacent.panel,
           config: adjacent.config,
-          startWidth: adjacent.panel.offsetWidth,
-          startX: e.clientX,
+          startSize: axis.size(adjacent.panel),
+          startPos: axis.pointerPos(e),
         };
       }
       return;
     }
 
-    // Once the primary panel has collapsed, only handle propagation
     if (primaryCollapsed && !propagationTarget) return;
 
-    // If we're in propagation mode, resize the adjacent panel instead
     if (propagationTarget) {
-      const propDelta = e.clientX - propagationTarget.startX;
-      let propNewWidth =
+      const propDelta = axis.pointerPos(e) - propagationTarget.startPos;
+      let propNewSize =
         config.resizeDirection === "left"
-          ? propagationTarget.startWidth + propDelta
-          : propagationTarget.startWidth - propDelta;
+          ? propagationTarget.startSize + propDelta
+          : propagationTarget.startSize - propDelta;
 
-      // Cap propagation target so it doesn't push siblings off-screen
-      const propMax = getMaxAllowedWidth(propagationTarget.panel);
-      if (propNewWidth > propMax) propNewWidth = propMax;
+      const propMax = getMaxAllowedSize(propagationTarget.panel, axis);
+      if (propNewSize > propMax) propNewSize = propMax;
 
-      // Magnetic snap propagation target to percentage points
       const propFlex = propagationTarget.panel.closest(
         ".workspace-three-col",
       ) as HTMLElement;
       if (propFlex) {
-        const propSnaps = percentSnapPoints(propFlex.clientWidth);
-        const propSnap = magneticSnap(propNewWidth, propSnaps);
-        propNewWidth = propSnap.value;
+        const propSnaps = percentSnapPoints(axis.size(propFlex));
+        const propSnap = magneticSnap(propNewSize, propSnaps);
+        propNewSize = propSnap.value;
         if (propSnap.snapped) {
           resizer.classList.add("snapped");
         } else {
@@ -315,15 +305,14 @@ export function initResizer(storagePrefix: string, config: PanelConfig): void {
         }
       }
 
-      if (propNewWidth < COLLAPSE_WIDTH) {
-        // Collapse propagation target too, then try next panel
+      if (propNewSize < COLLAPSE_SIZE) {
         collapsePanel(
           storagePrefix,
           propagationTarget.config,
           propagationTarget.panel,
+          axis,
         );
 
-        // Try to propagate further (domino cascade)
         const dragDir =
           config.resizeDirection === "left" ? "shrink-left" : "shrink-right";
         const next = findAdjacentPanel(propagationTarget.config, dragDir);
@@ -331,8 +320,8 @@ export function initResizer(storagePrefix: string, config: PanelConfig): void {
           propagationTarget = {
             panel: next.panel,
             config: next.config,
-            startWidth: next.panel.offsetWidth,
-            startX: e.clientX,
+            startSize: axis.size(next.panel),
+            startPos: axis.pointerPos(e),
           };
         } else {
           propagationTarget = null;
@@ -340,31 +329,27 @@ export function initResizer(storagePrefix: string, config: PanelConfig): void {
         return;
       }
 
-      propagationTarget.panel.style.width = `${propNewWidth}px`;
+      axis.setSize(propagationTarget.panel, propNewSize);
       propagationTarget.panel.style.flexShrink = "0";
       propagationTarget.panel.style.flexGrow = "0";
       return;
     }
 
     // Normal resize of the primary panel
-    const delta = e.clientX - startX;
-    let newWidth =
-      config.resizeDirection === "left"
-        ? startWidth + delta
-        : startWidth - delta;
+    const delta = axis.pointerPos(e) - startPos;
+    let newSize =
+      config.resizeDirection === "left" ? startSize + delta : startSize - delta;
 
-    // Cap width so siblings always fit on screen
-    const maxWidth = getMaxAllowedWidth(targetPanel);
-    if (newWidth > maxWidth) newWidth = maxWidth;
+    const maxSize = getMaxAllowedSize(targetPanel, axis);
+    if (newSize > maxSize) newSize = maxSize;
 
-    // Magnetic snap to percentage-based points
     const flexContainer = targetPanel.closest(
       ".workspace-three-col",
     ) as HTMLElement;
     if (flexContainer) {
-      const snaps = percentSnapPoints(flexContainer.clientWidth);
-      const snapResult = magneticSnap(newWidth, snaps);
-      newWidth = snapResult.value;
+      const snaps = percentSnapPoints(axis.size(flexContainer));
+      const snapResult = magneticSnap(newSize, snaps);
+      newSize = snapResult.value;
       if (snapResult.snapped) {
         resizer.classList.add("snapped");
       } else {
@@ -373,11 +358,10 @@ export function initResizer(storagePrefix: string, config: PanelConfig): void {
     }
 
     // Smart collapse: if dragged below threshold, collapse and propagate
-    if (newWidth < COLLAPSE_WIDTH) {
+    if (newSize < COLLAPSE_SIZE) {
       primaryCollapsed = true;
-      collapsePanel(storagePrefix, config, targetPanel);
+      collapsePanel(storagePrefix, config, targetPanel, axis);
 
-      // Start propagation to adjacent panel (domino cascade)
       const dragDir =
         config.resizeDirection === "left" ? "shrink-left" : "shrink-right";
       const adjacent = findAdjacentPanel(config, dragDir);
@@ -385,14 +369,14 @@ export function initResizer(storagePrefix: string, config: PanelConfig): void {
         propagationTarget = {
           panel: adjacent.panel,
           config: adjacent.config,
-          startWidth: adjacent.panel.offsetWidth,
-          startX: e.clientX,
+          startSize: axis.size(adjacent.panel),
+          startPos: axis.pointerPos(e),
         };
       }
       return;
     }
 
-    targetPanel.style.width = `${newWidth}px`;
+    axis.setSize(targetPanel, newSize);
     targetPanel.style.flexShrink = "0";
     targetPanel.style.flexGrow = "0";
   };
@@ -406,43 +390,70 @@ export function initResizer(storagePrefix: string, config: PanelConfig): void {
     resizer.classList.remove("snapped");
     enableTransitions();
 
-    // Clear drag flag after click event has been processed (rAF delay)
     requestAnimationFrame(() => {
       delete targetPanel.dataset.wprDragging;
     });
 
-    // Save propagation target width if we were propagating
     if (propagationTarget) {
-      const propWidth = propagationTarget.panel.offsetWidth;
-      if (propWidth > COLLAPSE_WIDTH + 10) {
-        saveWidth(storagePrefix, propagationTarget.config, propWidth);
+      const propSize = axis.size(propagationTarget.panel);
+      if (propSize > COLLAPSE_SIZE + 10) {
+        saveWidth(storagePrefix, propagationTarget.config, propSize);
       }
       propagationTarget = null;
     }
 
-    // If primary panel is already collapsed (from smart collapse during drag), done
     if (targetPanel.classList.contains("collapsed")) {
       wasCollapsed = false;
       return;
     }
 
-    const finalWidth = targetPanel.offsetWidth;
+    const finalSize = axis.size(targetPanel);
 
-    // Threshold-based collapse on mouseUp (backup for edge cases)
-    if (finalWidth <= config.minWidth + 10) {
-      collapsePanel(storagePrefix, config, targetPanel);
+    if (finalSize <= config.minWidth + 10) {
+      collapsePanel(storagePrefix, config, targetPanel, axis);
     } else {
-      saveWidth(storagePrefix, config, finalWidth);
+      saveWidth(storagePrefix, config, finalSize);
     }
 
     wasCollapsed = false;
   };
 
+  // --- Touch event adapters (same logic, touch → mouse mapping) ---
+  const handleTouchStart = (e: TouchEvent) => {
+    if (e.touches.length !== 1) return;
+    const touch = e.touches[0];
+    handleMouseDown({
+      clientX: touch.clientX,
+      clientY: touch.clientY,
+      preventDefault: () => e.preventDefault(),
+    } as MouseEvent);
+  };
+
+  const handleTouchMove = (e: TouchEvent) => {
+    if (!isResizing || e.touches.length < 1) return;
+    e.preventDefault();
+    const touch = e.touches[0];
+    handleMouseMove({
+      clientX: touch.clientX,
+      clientY: touch.clientY,
+    } as MouseEvent);
+  };
+
+  const handleTouchEnd = () => {
+    handleMouseUp();
+  };
+
+  // Mouse events (desktop)
   resizer.addEventListener("mousedown", handleMouseDown);
   document.addEventListener("mousemove", handleMouseMove);
   document.addEventListener("mouseup", handleMouseUp);
 
+  // Touch events (mobile) — passive: false to allow preventDefault
+  resizer.addEventListener("touchstart", handleTouchStart, { passive: false });
+  document.addEventListener("touchmove", handleTouchMove, { passive: false });
+  document.addEventListener("touchend", handleTouchEnd, { passive: true });
+
   console.log(
-    `[WorkspacePanelResizer] Initialized ${config.resizerId} (direction: ${config.resizeDirection})`,
+    `[WorkspacePanelResizer] Initialized ${config.resizerId} (direction: ${config.resizeDirection}, touch: enabled)`,
   );
 }

@@ -1,16 +1,22 @@
-/** Width and collapse state persistence helpers for WorkspacePanelResizer */
+/** Size and collapse state persistence helpers for WorkspacePanelResizer.
+ *
+ * These helpers save/restore the panel size (width or height) depending on
+ * the current axis. The storage key is shared — on desktop a panel saves its
+ * width; on mobile the same key stores height. This is fine because the
+ * resizer re-detects the axis on every drag start.
+ */
 
 import type { PanelConfig } from "./types";
 
 export function saveWidth(
   storagePrefix: string,
   config: PanelConfig,
-  width: number,
+  size: number,
 ): void {
   try {
-    localStorage.setItem(storagePrefix + config.storageKey, width.toString());
+    localStorage.setItem(storagePrefix + config.storageKey, size.toString());
   } catch (e) {
-    console.warn("[WorkspacePanelResizer] Failed to save width:", e);
+    console.warn("[WorkspacePanelResizer] Failed to save size:", e);
   }
 }
 
@@ -20,32 +26,42 @@ export function restoreWidth(
   panel: HTMLElement,
 ): void {
   try {
-    // Fixed-width panels keep their CSS width — never override from localStorage
+    // Fixed-width panels keep their CSS size — never override from localStorage
     if (config.fixedWidth) return;
 
     if (panel.classList.contains("collapsed")) {
       panel.style.width = "";
+      panel.style.height = "";
       panel.style.flexShrink = "";
       panel.style.flexGrow = "";
       console.log(
-        `[WorkspacePanelResizer] Panel ${config.storageKey} is collapsed, using CSS width`,
+        `[WorkspacePanelResizer] Panel ${config.storageKey} is collapsed, using CSS size`,
       );
       return;
     }
-    const savedWidth = localStorage.getItem(storagePrefix + config.storageKey);
-    if (savedWidth) {
-      const width = parseInt(savedWidth, 10);
-      if (width >= config.minWidth) {
-        panel.style.width = `${width}px`;
+    const savedSize = localStorage.getItem(storagePrefix + config.storageKey);
+    if (savedSize) {
+      const size = parseInt(savedSize, 10);
+      if (size >= config.minWidth) {
+        // Detect current axis from container
+        const container = panel.closest(".workspace-three-col") as HTMLElement;
+        const isVertical =
+          container && getComputedStyle(container).flexDirection === "column";
+
+        if (isVertical) {
+          panel.style.height = `${size}px`;
+        } else {
+          panel.style.width = `${size}px`;
+        }
         panel.style.flexShrink = "0";
         panel.style.flexGrow = "0";
         console.log(
-          `[WorkspacePanelResizer] Restored ${config.storageKey} to ${width}px`,
+          `[WorkspacePanelResizer] Restored ${config.storageKey} to ${size}px`,
         );
       }
     }
   } catch (e) {
-    console.warn("[WorkspacePanelResizer] Failed to restore width:", e);
+    console.warn("[WorkspacePanelResizer] Failed to restore size:", e);
   }
 }
 
@@ -56,14 +72,17 @@ export function getValidExpandWidth(
 ): number | null {
   const saved = localStorage.getItem(storagePrefix + config.storageKey);
   if (!saved) return null;
-  const width = parseInt(saved, 10);
-  if (width <= config.minWidth + 10) return null;
+  const size = parseInt(saved, 10);
+  if (size <= config.minWidth + 10) return null;
+
   const container = panel.parentElement;
   if (container) {
-    const maxW = container.offsetWidth * 0.8;
-    if (width > maxW && maxW > 100) return null;
+    const isVertical = getComputedStyle(container).flexDirection === "column";
+    const maxS =
+      (isVertical ? container.offsetHeight : container.offsetWidth) * 0.8;
+    if (size > maxS && maxS > 100) return null;
   }
-  return width;
+  return size;
 }
 
 export function restoreCollapseState(
@@ -82,6 +101,7 @@ export function restoreCollapseState(
     if (saved === "true") {
       panel.classList.add("collapsed");
       panel.style.width = "";
+      panel.style.height = "";
       panel.style.flexShrink = "";
       panel.style.flexGrow = "";
       if (toggleBtn) updateToggleIcon(toggleBtn, config.resizeDirection, true);

@@ -56,8 +56,9 @@ export function initToggleClickHandler(
   toggleBtn.dataset.wprToggleInit = "true";
 
   // Double-click on the sidebar header also toggles the panel
-  const sidebarHeader =
-    targetPanel.querySelector<HTMLElement>(".stx-shell-sidebar__header");
+  const sidebarHeader = targetPanel.querySelector<HTMLElement>(
+    ".stx-shell-sidebar__header",
+  );
   if (sidebarHeader) {
     sidebarHeader.addEventListener("dblclick", () => {
       toggleBtn.click();
@@ -72,22 +73,34 @@ export function initToggleClickHandler(
 
     if (isCollapsed) {
       targetPanel.style.width = "";
+      targetPanel.style.height = "";
       targetPanel.style.maxWidth = "";
+      targetPanel.style.maxHeight = "";
       targetPanel.style.flexShrink = "";
       targetPanel.style.flexGrow = "";
     } else {
-      const validWidth = getValidExpandWidth(
-        storagePrefix,
-        config,
-        targetPanel,
-      );
-      if (validWidth) {
-        targetPanel.style.width = `${validWidth}px`;
+      const validSize = getValidExpandWidth(storagePrefix, config, targetPanel);
+      if (validSize) {
+        // Detect axis from container
+        const container = targetPanel.closest(
+          ".workspace-three-col",
+        ) as HTMLElement;
+        const isVertical =
+          container && getComputedStyle(container).flexDirection === "column";
+        if (isVertical) {
+          targetPanel.style.height = `${validSize}px`;
+          targetPanel.style.width = "";
+        } else {
+          targetPanel.style.width = `${validSize}px`;
+          targetPanel.style.height = "";
+        }
         targetPanel.style.flexShrink = "0";
         targetPanel.style.flexGrow = "0";
       } else {
         targetPanel.style.width = "";
+        targetPanel.style.height = "";
         targetPanel.style.maxWidth = "";
+        targetPanel.style.maxHeight = "";
         targetPanel.style.flexShrink = "";
         targetPanel.style.flexGrow = "";
       }
@@ -98,7 +111,6 @@ export function initToggleClickHandler(
     if (config.collapseStorageKey) {
       localStorage.setItem(config.collapseStorageKey, isCollapsed.toString());
     }
-
   });
 
   console.log(
