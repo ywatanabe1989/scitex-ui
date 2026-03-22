@@ -150,9 +150,9 @@
 /* Hide everything in header except the toggle button and sidebar title */
 .stx-shell-sidebar.collapsed
   .stx-shell-sidebar__header
-  > *:not(.stx-shell-sidebar__toggle):not(.stx-shell-sidebar__toggle-btn):not(.panel-toggle-btn):not(
-    .stx-shell-sidebar__title
-  ) {
+  > *:not(.stx-shell-sidebar__toggle):not(.stx-shell-sidebar__toggle-btn):not(
+    .panel-toggle-btn
+  ):not(.stx-shell-sidebar__title) {
   display: none;
 }
 
@@ -197,7 +197,9 @@
   box-shadow: inset -3px 0 10px -4px var(--workspace-icon-primary);
 }
 [data-theme="light"] .stx-shell-sidebar.collapsed:hover,
-[data-theme="light"] .stx-shell-sidebar.collapsed:hover .stx-shell-sidebar__header {
+[data-theme="light"]
+  .stx-shell-sidebar.collapsed:hover
+  .stx-shell-sidebar__header {
   background: rgba(5, 150, 105, 0.06) !important;
 }
 
@@ -310,21 +312,4 @@
 
 /* No fallback needed — accent is always on #main-content::before */
 
-/* ===========================================================================
-   RESPONSIVE
-   =========================================================================== */
-
-@media (max-width: 768px) {
-  .stx-shell-sidebar {
-    position: absolute;
-    left: 0;
-    top: 0;
-    height: 100%;
-    z-index: 100;
-    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
-  }
-
-  .stx-shell-sidebar.collapsed {
-    display: none;
-  }
-}
+/* Mobile layout rules → mobile.css (single source of truth) */

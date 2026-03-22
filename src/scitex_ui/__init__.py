@@ -7,7 +7,7 @@ AppDirectoriesFinder when added to INSTALLED_APPS.
 Python API provides component metadata and registration.
 """
 
-__version__ = "0.3.1"
+__version__ = "0.4.1"
 
 from pathlib import Path as _Path
 

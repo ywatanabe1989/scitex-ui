@@ -206,19 +206,4 @@
   --stx-app-accent-tint: var(--app-accent-store-tint);
 }
 
-/* --- Responsive --- */
-
-@media (max-width: 768px) {
-  .stx-shell-sidebar {
-    position: absolute;
-    left: 0;
-    top: 0;
-    height: 100%;
-    z-index: 100;
-    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
-  }
-
-  .stx-shell-sidebar--collapsed {
-    display: none;
-  }
-}
+/* Mobile layout rules → mobile.css (single source of truth) */

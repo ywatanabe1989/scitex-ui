@@ -42,8 +42,8 @@
     flex-direction: column !important;
     width: 100% !important;
     max-width: 100% !important;
-    flex: 1 1 0% !important;
-    height: 0 !important; /* flex-basis controls height, not content */
+    flex: 1 1 0% !important; /* JS uses inline !important which wins over CSS !important */
+    height: 0 !important;
     min-height: 44px !important;
     position: relative !important;
     transform: none !important;
@@ -169,13 +169,36 @@
     background: var(--workspace-border-hover, #8b949e) !important;
   }
 
-  /* Internal panel resizers: rotate from vertical to horizontal */
+  /* All panel resizers: rotate from vertical to horizontal */
   .workspace-three-col .panel-resizer,
   .workspace-three-col .split-resizer {
+    position: relative !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: auto !important;
     width: 100% !important;
-    height: 4px !important;
-    flex: 0 0 4px !important;
+    height: 6px !important;
+    flex: 0 0 6px !important;
     cursor: row-resize !important;
+    background: var(--workspace-bg-secondary, #161b22) !important;
+    border-top: 1px solid var(--border-default, #30363d) !important;
+    border-bottom: 1px solid var(--border-default, #30363d) !important;
+  }
+
+  .workspace-three-col .panel-resizer:hover,
+  .workspace-three-col .split-resizer:hover {
+    background: var(--workspace-border-hover, #8b949e) !important;
+  }
+
+  /* ::before hit area: rotate from horizontal to vertical expansion */
+  .workspace-three-col .panel-resizer::before,
+  .workspace-three-col .split-resizer::before {
+    cursor: row-resize !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: -12px !important;
+    bottom: -12px !important;
   }
 
   /* Hide v-resizers (vertical separators not needed in column layout) */
@@ -236,8 +259,10 @@
     border-radius: 2px 2px 0 0 !important;
   }
 
-  /* ── Header/footer collapse toggles: hide ──────────── */
-  #header-collapse-toggle,
+  /* Header collapse toggle: visible on mobile (user can collapse header for more space) */
+  #header-collapse-toggle {
+    display: flex !important;
+  }
   #footer-collapse-toggle {
     display: none !important;
   }
