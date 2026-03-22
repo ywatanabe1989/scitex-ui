@@ -34,6 +34,7 @@
   .workspace-three-col > .ws-viewer-pane,
   .workspace-three-col > .ws-apps-pane,
   .workspace-three-col > .ws-module-pane {
+    display: block !important; /* Override any display:none from other shell CSS */
     position: absolute !important;
     top: 0;
     left: 0;
@@ -108,6 +109,49 @@
 
   .workspace-three-col a.selector-nav-item {
     min-width: 44px;
+  }
+
+  /* --- Ensure pane inner containers fill height on mobile --- */
+  .workspace-three-col .stx-shell-sidebar {
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .workspace-three-col .stx-shell-sidebar__content {
+    flex: 1 !important;
+    min-height: 0 !important;
+  }
+
+  /* --- Empty state messages for panes with no content --- */
+  .workspace-three-col > .mobile-active:empty::after,
+  .workspace-three-col > .mobile-active > .stx-shell-sidebar:empty::after {
+    content: "No content loaded. Use the tab bar to navigate.";
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--text-muted, #8b949e);
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 2rem;
+  }
+
+  /* Ensure viewer empty state is visible on mobile */
+  .ws-viewer-empty {
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--text-muted, #8b949e);
+    gap: 12px;
+    font-size: 0.95rem;
+  }
+
+  .ws-viewer-empty i {
+    font-size: 2.5rem;
+    opacity: 0.5;
   }
 
   /* --- Apps pane: horizontal scroll on mobile --- */
