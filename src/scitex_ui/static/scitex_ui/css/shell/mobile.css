@@ -28,7 +28,7 @@
     max-height: calc(100vh - 6px - env(safe-area-inset-bottom, 0px));
   }
 
-  /* --- All panes: full-width, flex-grow to fill freed space --- */
+  /* --- All panes: full-width, equal share of viewport --- */
   .workspace-three-col > .ws-ai-pane,
   .workspace-three-col > .ws-worktree-pane,
   .workspace-three-col > .ws-viewer-pane,
@@ -38,8 +38,9 @@
     flex-direction: column !important;
     width: 100% !important;
     max-width: 100% !important;
-    flex: 1 1 0 !important;
-    min-height: 0 !important;
+    flex: 1 1 0% !important;
+    height: 0 !important; /* Force flex-basis to control height, not content */
+    min-height: 44px !important; /* At least show header */
     /* Override any desktop absolute positioning or transforms */
     position: relative !important;
     transform: none !important;
