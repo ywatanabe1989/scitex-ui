@@ -235,34 +235,35 @@ function onVerticalResizeMove(e: MouseEvent | TouchEvent): void {
 function onVerticalResizeEnd(): void {
   if (!vResTarget) return;
 
-  // Collapse if dragged too small
-  if (vResPrevPane && vResPrevPane.offsetHeight < 60) {
-    const sidebar =
-      vResPrevPane.querySelector<HTMLElement>(".stx-shell-sidebar");
+  // Collapse panes dragged below 60px
+  const collapseIfSmall = (pane: HTMLElement | null) => {
+    if (!pane || pane.offsetHeight >= 60) return;
+    const sidebar = pane.querySelector<HTMLElement>(".stx-shell-sidebar");
     if (sidebar) {
       sidebar.classList.add("collapsed");
-      vResPrevPane.style.removeProperty("height");
-      vResPrevPane.style.removeProperty("flex");
+      pane.style.removeProperty("height");
+      pane.style.removeProperty("flex");
       saveMobileCollapseState();
     }
+  };
+  collapseIfSmall(vResPrevPane);
+  collapseIfSmall(vResNextPane);
+
+  // Convert pixel sizes to flex ratios so panes stay proportional
+  // and never overflow the viewport. Use the current heights as flex-grow values.
+  if (vResPrevPane && vResPrevPane.offsetHeight >= 60) {
+    const h = vResPrevPane.offsetHeight;
+    vResPrevPane.style.setProperty("flex", `${h} 1 0%`, "important");
+    vResPrevPane.style.removeProperty("height");
   }
-  if (vResNextPane && vResNextPane.offsetHeight < 60) {
-    const sidebar =
-      vResNextPane.querySelector<HTMLElement>(".stx-shell-sidebar");
-    if (sidebar) {
-      sidebar.classList.add("collapsed");
-      vResNextPane.style.removeProperty("height");
-      vResNextPane.style.removeProperty("flex");
-      saveMobileCollapseState();
-    }
+  if (vResNextPane && vResNextPane.offsetHeight >= 60) {
+    const h = vResNextPane.offsetHeight;
+    vResNextPane.style.setProperty("flex", `${h} 1 0%`, "important");
+    vResNextPane.style.removeProperty("height");
   }
 
   document.body.style.cursor = "";
   document.body.style.userSelect = "";
-
-  console.log(
-    `[MobileResize] End: prev=${vResPrevPane?.id}(${vResPrevPane?.offsetHeight}px) next=${vResNextPane?.id}(${vResNextPane?.offsetHeight}px)`,
-  );
 
   vResTarget = null;
   vResPrevPane = null;
@@ -287,13 +288,34 @@ function enableMobile(): void {
   const container = document.getElementById("workspace-three-col");
   if (!container) return;
 
-  // First: uncollapse all panels (clear desktop collapse state)
-  const collapsedPanels = container.querySelectorAll<HTMLElement>(
-    ".stx-shell-sidebar.collapsed",
-  );
-  collapsedPanels.forEach((panel) => {
-    panel.classList.remove("collapsed");
+  // Clear ALL inline flex/height/width styles from pane wrappers
+  // so CSS defaults (flex: 1 1 0% !important) distribute space equally.
+  // This prevents stale inline styles from previous drag sessions.
+  const paneSelectors =
+    ".ws-ai-pane, .ws-worktree-pane, .ws-viewer-pane, .ws-apps-pane, .ws-module-pane";
+  container.querySelectorAll<HTMLElement>(paneSelectors).forEach((pane) => {
+    pane.style.removeProperty("flex");
+    pane.style.removeProperty("height");
+    pane.style.removeProperty("width");
+    pane.style.removeProperty("flex-shrink");
+    pane.style.removeProperty("flex-grow");
   });
+
+  // Also clear inline styles from sidebars (desktop resizer leftovers)
+  container
+    .querySelectorAll<HTMLElement>(".stx-shell-sidebar")
+    .forEach((sb) => {
+      sb.style.removeProperty("width");
+      sb.style.removeProperty("flex-shrink");
+      sb.style.removeProperty("flex-grow");
+    });
+
+  // First: uncollapse all panels (clear desktop collapse state)
+  container
+    .querySelectorAll<HTMLElement>(".stx-shell-sidebar.collapsed")
+    .forEach((panel) => {
+      panel.classList.remove("collapsed");
+    });
 
   // Then: restore mobile-specific collapse preferences
   restoreMobileCollapseState();
