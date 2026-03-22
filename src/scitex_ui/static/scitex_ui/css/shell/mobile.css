@@ -169,7 +169,16 @@
     background: var(--workspace-border-hover, #8b949e) !important;
   }
 
-  /* Hide internal vertical resizers (inside panes) */
+  /* Internal panel resizers: rotate from vertical to horizontal */
+  .workspace-three-col .panel-resizer,
+  .workspace-three-col .split-resizer {
+    width: 100% !important;
+    height: 4px !important;
+    flex: 0 0 4px !important;
+    cursor: row-resize !important;
+  }
+
+  /* Hide v-resizers (vertical separators not needed in column layout) */
   .workspace-three-col .v-resizer {
     display: none !important;
   }
