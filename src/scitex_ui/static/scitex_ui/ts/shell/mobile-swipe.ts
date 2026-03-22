@@ -213,14 +213,15 @@ function onVerticalResizeStart(e: MouseEvent | TouchEvent): void {
   vResPrevStartH = vResPrevPane.offsetHeight;
   vResNextStartH = vResNextPane.offsetHeight;
 
-  // Uncollapse both panes if collapsed
-  const prevSidebar = vResPrevPane.querySelector<HTMLElement>(
-    ".stx-shell-sidebar.collapsed",
-  );
-  if (prevSidebar) {
-    prevSidebar.classList.remove("collapsed");
-    vResPrevStartH = Math.max(150, vResPrevStartH);
-  }
+  // Uncollapse sidebars so content becomes visible during drag.
+  // Don't change heights here — let mousemove handle all sizing
+  // so the border always follows the cursor with no jump.
+  [vResPrevPane, vResNextPane].forEach((pane) => {
+    const sidebar = pane.querySelector<HTMLElement>(
+      ".stx-shell-sidebar.collapsed",
+    );
+    if (sidebar) sidebar.classList.remove("collapsed");
+  });
 
   e.preventDefault();
   document.body.style.cursor = "row-resize";
