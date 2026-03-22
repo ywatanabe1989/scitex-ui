@@ -117,7 +117,7 @@ function createTerminal(
     fontSize: 13,
     fontFamily: "'JetBrains Mono', 'Monaco', 'Menlo', monospace",
     theme: getTerminalTheme(),
-    scrollback: 10000,
+    scrollback: 100000,
   });
 
   terminal.open(container);
@@ -195,8 +195,18 @@ function connectTerminal(inst: TerminalInstance): void {
     console.log("[standalone-terminal] Connected");
   };
 
+  // Write batching — accumulate WebSocket data and flush via rAF to reduce flicker
+  let writeBuf = "";
+  let writeRaf = 0;
   inst.ws.onmessage = (ev) => {
-    inst.terminal.write(ev.data);
+    writeBuf += ev.data;
+    if (!writeRaf) {
+      writeRaf = requestAnimationFrame(() => {
+        if (writeBuf) inst.terminal.write(writeBuf);
+        writeBuf = "";
+        writeRaf = 0;
+      });
+    }
   };
 
   inst.ws.onerror = () => {

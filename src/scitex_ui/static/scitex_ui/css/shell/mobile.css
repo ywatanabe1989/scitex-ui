@@ -51,12 +51,11 @@
     overflow: hidden !important;
   }
 
-  /* Apps pane: fixed 56px height (rotated from desktop's fixed ~56px width) */
+  /* Apps pane: default 56px height but resizable like other panes */
   .workspace-three-col > .ws-apps-pane {
     flex: 0 0 56px !important;
-    height: 56px !important;
-    min-height: 56px !important;
-    max-height: 56px !important;
+    min-height: 44px !important;
+    max-height: none !important;
   }
 
   /* Pane wrappers with collapsed sidebar: shrink to header bar */

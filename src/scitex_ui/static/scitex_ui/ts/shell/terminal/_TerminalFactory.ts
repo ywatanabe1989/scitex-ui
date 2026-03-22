@@ -111,7 +111,7 @@ export function createTerminalInstance(
     fontSize: 13,
     fontFamily: "'JetBrains Mono', 'Monaco', 'Menlo', monospace",
     theme: getTerminalTheme(),
-    scrollback: 10000,
+    scrollback: 100000,
   });
 
   terminal.open(container);
@@ -183,6 +183,9 @@ export function connectInstance(
     console.log("[TerminalFactory] Connected");
   };
 
+  // Write batching — accumulate WebSocket data and flush via rAF to reduce flicker
+  let writeBuf = "";
+  let writeRaf = 0;
   inst.ws.onmessage = (ev) => {
     let data: string = ev.data;
 
@@ -195,7 +198,16 @@ export function connectInstance(
 
     // OSC escape handling
     const afterOsc = processOscEscapes(data, oscHandlers);
-    if (afterOsc) inst.terminal.write(afterOsc);
+    if (afterOsc) {
+      writeBuf += afterOsc;
+      if (!writeRaf) {
+        writeRaf = requestAnimationFrame(() => {
+          if (writeBuf) inst.terminal.write(writeBuf);
+          writeBuf = "";
+          writeRaf = 0;
+        });
+      }
+    }
   };
 
   inst.ws.onerror = () => {
