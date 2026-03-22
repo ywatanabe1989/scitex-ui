@@ -183,15 +183,28 @@ function findAdjacentPanes(
 
 function onVerticalResizeStart(e: MouseEvent | TouchEvent): void {
   if (!isMobile) return;
-  const resizer = (e.target as HTMLElement).closest<HTMLElement>(
-    ".panel-resizer",
-  );
-  if (!resizer) return;
 
-  const panes = findAdjacentPanes(resizer);
+  // Accept both .panel-resizer and .stx-shell-sidebar__header as drag sources
+  const target = e.target as HTMLElement;
+  const resizer = target.closest<HTMLElement>(".panel-resizer");
+  const header = target.closest<HTMLElement>(".stx-shell-sidebar__header");
+  const dragSource = resizer || header;
+  if (!dragSource) return;
+
+  // For headers, find the pane wrapper directly
+  let panes: { prev: HTMLElement; next: HTMLElement } | null = null;
+  if (resizer) {
+    panes = findAdjacentPanes(resizer);
+  } else if (header) {
+    // Header drag: this pane is "next", previous sibling pane is "prev"
+    const paneWrapper = findPaneWrapper(header);
+    if (paneWrapper) {
+      panes = findAdjacentPanes(header);
+    }
+  }
   if (!panes) return;
 
-  vResTarget = resizer;
+  vResTarget = dragSource;
   vResPrevPane = panes.prev;
   vResNextPane = panes.next;
 
@@ -325,20 +338,20 @@ function enableMobile(): void {
   container.addEventListener("touchend", onTouchEnd, { passive: true });
   container.addEventListener("dblclick", onDblClick);
 
-  // Reciprocal vertical resize — mouse + touch on panel resizers
-  container
-    .querySelectorAll<HTMLElement>(".panel-resizer")
-    .forEach((resizer) => {
-      resizer.addEventListener(
-        "mousedown",
-        onVerticalResizeStart as EventListener,
-      );
-      resizer.addEventListener(
-        "touchstart",
-        onVerticalResizeStart as EventListener,
-        { passive: false },
-      );
+  // Reciprocal vertical resize — mouse + touch on panel resizers AND headers
+  const dragTargets = container.querySelectorAll<HTMLElement>(
+    ".panel-resizer, .stx-shell-sidebar__header",
+  );
+  dragTargets.forEach((el) => {
+    el.addEventListener("mousedown", onVerticalResizeStart as EventListener);
+    el.addEventListener("touchstart", onVerticalResizeStart as EventListener, {
+      passive: false,
     });
+    // Visual hint: headers are draggable on mobile
+    if (el.classList.contains("stx-shell-sidebar__header")) {
+      el.style.cursor = "row-resize";
+    }
+  });
   document.addEventListener("mousemove", onVerticalResizeMove as EventListener);
   document.addEventListener("mouseup", onVerticalResizeEnd);
   document.addEventListener(

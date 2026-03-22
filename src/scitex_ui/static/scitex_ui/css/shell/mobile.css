@@ -259,8 +259,10 @@
     border-radius: 2px 2px 0 0 !important;
   }
 
-  /* ── Header/footer collapse toggles: hide ──────────── */
-  #header-collapse-toggle,
+  /* Header collapse toggle: visible on mobile (user can collapse header for more space) */
+  #header-collapse-toggle {
+    display: flex !important;
+  }
   #footer-collapse-toggle {
     display: none !important;
   }
