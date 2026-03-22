@@ -146,9 +146,9 @@
     display: none !important;
   }
 
-  /* ── Module pane (main content): flex-grows ──────────── */
+  /* ── Module pane (main content): absorbs all freed space ──────────── */
   .workspace-three-col > .ws-module-pane {
-    flex: 1 1 auto !important;
+    flex: 10 1 auto !important;
     min-height: 100px;
   }
 
