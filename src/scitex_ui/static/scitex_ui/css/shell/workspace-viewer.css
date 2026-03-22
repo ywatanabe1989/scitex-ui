@@ -247,11 +247,7 @@
 }
 
 /* ============================================================
-   Responsive: hide on narrow viewports
+   Responsive: mobile pane switching handled by mobile.css
+   (Previously hid viewer with display:none — removed because
+    mobile-swipe.ts now manages pane visibility via .mobile-active)
    ============================================================ */
-
-@media (max-width: 768px) {
-  .ws-viewer-pane {
-    display: none;
-  }
-}
