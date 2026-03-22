@@ -25,6 +25,10 @@ export interface AxisConfig {
   sizeProp: "width" | "height";
   /** The CSS property name for max size ("maxWidth" or "maxHeight") */
   maxSizeProp: "maxWidth" | "maxHeight";
+  /** Lock flex so the element doesn't resize with siblings */
+  lockFlex(el: HTMLElement): void;
+  /** Unlock flex to restore CSS-controlled sizing */
+  unlockFlex(el: HTMLElement): void;
   /** Chevron classes for collapse direction */
   chevrons: {
     /** Icon class when panel is before resizer and collapsed */
@@ -51,6 +55,14 @@ const HORIZONTAL: AxisConfig = {
   },
   sizeProp: "width",
   maxSizeProp: "maxWidth",
+  lockFlex: (el) => {
+    el.style.flexShrink = "0";
+    el.style.flexGrow = "0";
+  },
+  unlockFlex: (el) => {
+    el.style.flexShrink = "";
+    el.style.flexGrow = "";
+  },
   chevrons: {
     beforeCollapsed: "fa-chevron-right",
     beforeExpanded: "fa-chevron-left",
@@ -65,13 +77,26 @@ const VERTICAL: AxisConfig = {
   pointerPos: (e) => ("clientY" in e ? e.clientY : (e as Touch).clientY),
   size: (el) => el.offsetHeight,
   setSize: (el, px) => {
-    el.style.height = `${px}px`;
+    // Must use !important to override mobile.css flex: 1 1 0% !important
+    el.style.setProperty("height", `${px}px`, "important");
+    el.style.setProperty("flex", `0 0 ${px}px`, "important");
   },
   clearSize: (el) => {
     el.style.height = "";
+    el.style.removeProperty("flex");
   },
   sizeProp: "height",
   maxSizeProp: "maxHeight",
+  lockFlex: (el) => {
+    // Must use !important to override mobile.css flex: 1 1 0% !important
+    el.style.setProperty("flex-shrink", "0", "important");
+    el.style.setProperty("flex-grow", "0", "important");
+  },
+  unlockFlex: (el) => {
+    el.style.removeProperty("flex-shrink");
+    el.style.removeProperty("flex-grow");
+    el.style.removeProperty("flex");
+  },
   chevrons: {
     beforeCollapsed: "fa-chevron-down",
     beforeExpanded: "fa-chevron-up",

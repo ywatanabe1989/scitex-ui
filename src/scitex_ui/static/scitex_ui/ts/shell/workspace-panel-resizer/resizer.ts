@@ -121,8 +121,7 @@ function collapsePanel(
 ): void {
   panel.classList.add("collapsed");
   axis.clearSize(panel);
-  panel.style.flexShrink = "";
-  panel.style.flexGrow = "";
+  axis.unlockFlex(panel);
 
   if (config.toggleButtonId) {
     const toggleBtn = document.getElementById(config.toggleButtonId);
@@ -224,8 +223,7 @@ export function initResizer(storagePrefix: string, config: PanelConfig): void {
     if (wasCollapsed) {
       targetPanel.classList.remove("collapsed");
       axis.setSize(effectiveTarget, config.minWidth);
-      effectiveTarget.style.flexShrink = "0";
-      effectiveTarget.style.flexGrow = "0";
+      axis.lockFlex(effectiveTarget);
 
       if (config.toggleButtonId) {
         const toggleBtn = document.getElementById(config.toggleButtonId);
@@ -265,8 +263,7 @@ export function initResizer(storagePrefix: string, config: PanelConfig): void {
         if (!isShrinking && adjacent.panel.classList.contains("collapsed")) {
           adjacent.panel.classList.remove("collapsed");
           axis.setSize(adjacent.panel, adjacent.config.minWidth);
-          adjacent.panel.style.flexShrink = "0";
-          adjacent.panel.style.flexGrow = "0";
+          axis.lockFlex(adjacent.panel);
           if (adjacent.config.toggleButtonId) {
             const toggleBtn = document.getElementById(
               adjacent.config.toggleButtonId,
@@ -343,8 +340,7 @@ export function initResizer(storagePrefix: string, config: PanelConfig): void {
       }
 
       axis.setSize(propagationTarget.panel, propNewSize);
-      propagationTarget.panel.style.flexShrink = "0";
-      propagationTarget.panel.style.flexGrow = "0";
+      axis.lockFlex(propagationTarget.panel);
       return;
     }
 
@@ -390,8 +386,7 @@ export function initResizer(storagePrefix: string, config: PanelConfig): void {
     }
 
     axis.setSize(effectiveTarget, newSize);
-    effectiveTarget.style.flexShrink = "0";
-    effectiveTarget.style.flexGrow = "0";
+    axis.lockFlex(effectiveTarget);
   };
 
   const handleMouseUp = () => {

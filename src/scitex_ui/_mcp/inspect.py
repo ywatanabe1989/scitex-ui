@@ -25,14 +25,27 @@ def _run_playwright_eval(js_code: str, timeout: int = 10) -> dict:
         )
         stdout = result.stdout.strip()
 
-        # playwright-cli eval prints the result on the first line(s) before "### Ran Playwright code"
-        lines = []
+        # playwright-cli eval output format: "### Result\n<value>\n### Ran Playwright code\n..."
+        # Extract the value between "### Result" and the next "###"
+        raw = ""
+        in_result = False
         for line in stdout.split("\n"):
-            if line.startswith("###") or line.startswith("```"):
+            if line.strip() == "### Result":
+                in_result = True
+                continue
+            if in_result and line.startswith("###"):
                 break
-            lines.append(line)
+            if in_result:
+                raw += line + "\n"
 
-        raw = "\n".join(lines).strip().strip('"')
+        raw = raw.strip()
+        # playwright-cli wraps string results in quotes: "{\\"key\\":val}"
+        # Parse as JSON string first to unescape, then parse the inner JSON
+        if raw.startswith('"') and raw.endswith('"'):
+            try:
+                raw = json.loads(raw)  # unquote + unescape
+            except json.JSONDecodeError:
+                raw = raw[1:-1]  # just strip quotes
         if not raw:
             return {
                 "success": False,
