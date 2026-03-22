@@ -48,13 +48,14 @@
     overflow: hidden !important;
   }
 
-  /* Pane wrappers containing a collapsed sidebar: shrink to header only */
+  /* Pane wrappers containing a collapsed sidebar: shrink to header bar */
   .workspace-three-col > .ws-ai-pane:has(.collapsed),
   .workspace-three-col > .ws-worktree-pane:has(.collapsed),
   .workspace-three-col > .ws-viewer-pane:has(.collapsed),
   .workspace-three-col > .ws-apps-pane:has(.collapsed) {
     flex: 0 0 auto !important;
-    min-height: 0 !important;
+    height: auto !important;
+    min-height: 44px !important; /* Show header bar, not hidden */
     overflow: hidden !important;
   }
 
@@ -81,12 +82,28 @@
     overflow-y: auto !important;
   }
 
-  /* Collapsed panes: header only, no flex-grow */
+  /* Collapsed sidebar: show header bar, hide content */
   .workspace-three-col .stx-shell-sidebar.collapsed {
     flex: 0 0 auto !important;
     height: auto !important;
     min-height: 0 !important;
     overflow: hidden !important;
+  }
+
+  /* Collapsed sidebar header: always visible as a labeled bar */
+  .workspace-three-col .stx-shell-sidebar.collapsed .stx-shell-sidebar__header {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    min-height: 44px;
+    border-bottom: 1px solid var(--border-default, #30363d);
+  }
+
+  /* Collapsed sidebar content: hidden */
+  .workspace-three-col
+    .stx-shell-sidebar.collapsed
+    .stx-shell-sidebar__content {
+    display: none !important;
   }
 
   /* Module pane (main content): also flex-grows */
