@@ -78,6 +78,17 @@ export function initToggleClickHandler(
       targetPanel.style.maxHeight = "";
       targetPanel.style.flexShrink = "";
       targetPanel.style.flexGrow = "";
+      // On mobile vertical layout, also clear pane wrapper's inline styles
+      // so CSS :has(.collapsed) rule can take effect
+      const paneWrapper = targetPanel.closest(
+        ".ws-ai-pane, .ws-worktree-pane, .ws-viewer-pane, .ws-apps-pane",
+      ) as HTMLElement | null;
+      if (paneWrapper) {
+        paneWrapper.style.flex = "";
+        paneWrapper.style.height = "";
+        paneWrapper.style.minHeight = "";
+        paneWrapper.style.maxHeight = "";
+      }
     } else {
       const validSize = getValidExpandWidth(storagePrefix, config, targetPanel);
       if (validSize) {
@@ -103,6 +114,19 @@ export function initToggleClickHandler(
         targetPanel.style.maxHeight = "";
         targetPanel.style.flexShrink = "";
         targetPanel.style.flexGrow = "";
+      }
+    }
+
+    // On expand, also clear pane wrapper inline styles to restore CSS flex defaults
+    if (!isCollapsed) {
+      const paneWrapper = targetPanel.closest(
+        ".ws-ai-pane, .ws-worktree-pane, .ws-viewer-pane, .ws-apps-pane",
+      ) as HTMLElement | null;
+      if (paneWrapper) {
+        paneWrapper.style.flex = "";
+        paneWrapper.style.height = "";
+        paneWrapper.style.minHeight = "";
+        paneWrapper.style.maxHeight = "";
       }
     }
 
