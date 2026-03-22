@@ -153,8 +153,23 @@
     min-height: 100px;
   }
 
-  /* ── Hide desktop-only elements ──────────────────────── */
-  .workspace-three-col > .panel-resizer,
+  /* ── Panel resizers: rotate to horizontal drag handles ── */
+  .workspace-three-col > .panel-resizer {
+    display: block !important;
+    width: 100% !important;
+    height: 6px !important;
+    flex: 0 0 6px !important;
+    cursor: row-resize !important;
+    background: var(--workspace-bg-secondary, #161b22) !important;
+    border-top: 1px solid var(--border-default, #30363d) !important;
+    border-bottom: 1px solid var(--border-default, #30363d) !important;
+  }
+
+  .workspace-three-col > .panel-resizer:hover {
+    background: var(--workspace-border-hover, #8b949e) !important;
+  }
+
+  /* Hide internal vertical resizers (inside panes) */
   .workspace-three-col .v-resizer {
     display: none !important;
   }
