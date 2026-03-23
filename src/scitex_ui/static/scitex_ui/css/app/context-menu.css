@@ -1,9 +1,11 @@
-/* ============================================================
-   Context Menu — reusable right-click dropdown menu
-   Used by: Sidebar apps, file browser, any right-click action
-   ============================================================ */
+/* =============================================================================
+ * SciTeX App — Context Menu
+ * =============================================================================
+ * Prefix: stx-app-context-menu
+ * Requires: shell/theme.css
+ * ============================================================================= */
 
-.stx-context-menu {
+.stx-app-context-menu {
   position: fixed;
   z-index: 1000;
   background: var(--bg-secondary, #161b22);
@@ -14,7 +16,7 @@
   min-width: 180px;
 }
 
-.stx-context-menu-item {
+.stx-app-context-menu__item {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -29,27 +31,27 @@
   text-align: left;
 }
 
-.stx-context-menu-item:hover {
+.stx-app-context-menu__item:hover {
   background: rgba(177, 186, 196, 0.08);
   color: var(--text-primary, #f0f6fc);
 }
 
-.stx-context-menu-item--danger {
+.stx-app-context-menu__item--danger {
   color: #f85149;
 }
 
-.stx-context-menu-item--danger:hover {
+.stx-app-context-menu__item--danger:hover {
   background: rgba(248, 81, 73, 0.1);
 }
 
-.stx-context-menu-item i {
+.stx-app-context-menu__item i {
   width: 16px;
   text-align: center;
   font-size: 12px;
   opacity: 0.7;
 }
 
-.stx-context-menu-divider {
+.stx-app-context-menu__divider {
   height: 1px;
   background: var(--border-default, #30363d);
   margin: 4px 8px;

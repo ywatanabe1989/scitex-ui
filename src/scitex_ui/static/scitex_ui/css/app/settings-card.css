@@ -1,17 +1,19 @@
-/* ============================================================
-   Settings Card — reusable card for settings/customize pages
-   Used by: Customize hub, MCP servers, feature toggles
-   ============================================================ */
+/* =============================================================================
+ * SciTeX App — Settings Card
+ * =============================================================================
+ * Prefix: stx-app-settings-card
+ * Requires: shell/theme.css
+ * ============================================================================= */
 
-/* Card grid container */
-.stx-settings-grid {
+/* Grid container */
+.stx-app-settings-grid {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
 /* Card — clickable row with icon, text, and optional action */
-.stx-settings-card {
+.stx-app-settings-card {
   display: flex;
   align-items: center;
   gap: 16px;
@@ -25,7 +27,7 @@
   cursor: pointer;
 }
 
-.stx-settings-card:hover {
+.stx-app-settings-card:hover {
   background: rgba(177, 186, 196, 0.08);
   border-color: var(--text-link, #58a6ff);
   text-decoration: none;
@@ -33,7 +35,7 @@
 }
 
 /* Card icon */
-.stx-settings-card-icon {
+.stx-app-settings-card__icon {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -47,39 +49,39 @@
 }
 
 /* Card body */
-.stx-settings-card-body {
+.stx-app-settings-card__body {
   flex: 1;
   min-width: 0;
 }
 
-.stx-settings-card-name {
+.stx-app-settings-card__name {
   font-size: 15px;
   font-weight: 500;
   color: var(--text-primary, #f0f6fc);
   margin: 0 0 2px;
 }
 
-.stx-settings-card-desc {
+.stx-app-settings-card__desc {
   font-size: 13px;
   color: var(--text-muted, #8b949e);
   margin: 0;
 }
 
 /* Card arrow (for navigation cards) */
-.stx-settings-card-arrow {
+.stx-app-settings-card__arrow {
   color: var(--text-muted, #8b949e);
   font-size: 12px;
   opacity: 0.5;
   flex-shrink: 0;
 }
 
-.stx-settings-card:hover .stx-settings-card-arrow {
+.stx-app-settings-card:hover .stx-app-settings-card__arrow {
   opacity: 1;
   color: var(--text-link, #58a6ff);
 }
 
 /* Section item (lighter, no border — for lists within a section) */
-.stx-settings-item {
+.stx-app-settings-item {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -88,6 +90,6 @@
   transition: background 120ms ease;
 }
 
-.stx-settings-item:hover {
+.stx-app-settings-item:hover {
   background: rgba(177, 186, 196, 0.06);
 }
