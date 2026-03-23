@@ -85,14 +85,71 @@
   flex-shrink: 0;
 }
 
-/* ── Detail content ── */
+/* ── Detail content (rendered markdown) ── */
 .stx-app-miller__detail-content {
   font-size: 13px;
-  line-height: 1.5;
+  line-height: 1.6;
   color: var(--text-secondary, #c9d1d9);
-  white-space: pre-wrap;
-  word-break: break-word;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.stx-app-miller__detail-content h1,
+.stx-app-miller__detail-content h2,
+.stx-app-miller__detail-content h3 {
+  color: var(--text-primary, #e6edf3);
+  margin: 16px 0 8px;
+}
+
+.stx-app-miller__detail-content h1 {
+  font-size: 18px;
+}
+.stx-app-miller__detail-content h2 {
+  font-size: 15px;
+}
+.stx-app-miller__detail-content h3 {
+  font-size: 14px;
+}
+
+.stx-app-miller__detail-content p {
+  margin: 0 0 12px;
+}
+
+.stx-app-miller__detail-content code {
+  background: var(--bg-tertiary, #161b22);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 12px;
   font-family: "JetBrains Mono", monospace;
+}
+
+.stx-app-miller__detail-content pre {
+  background: var(--bg-tertiary, #161b22);
+  padding: 12px;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 0 0 12px;
+}
+
+.stx-app-miller__detail-content pre code {
+  background: none;
+  padding: 0;
+}
+
+.stx-app-miller__detail-content ul,
+.stx-app-miller__detail-content ol {
+  padding-left: 20px;
+  margin: 0 0 12px;
+}
+
+.stx-app-miller__detail-content li {
+  margin: 4px 0;
+}
+
+.stx-app-miller__detail-content hr {
+  border: none;
+  border-top: 1px solid var(--border-primary, #30363d);
+  margin: 16px 0;
 }
 
 .stx-app-miller__detail-empty {
