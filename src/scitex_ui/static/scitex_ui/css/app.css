@@ -20,4 +20,6 @@
 @import "./app/package-docs-sidebar.css";
 @import "./app/recent-pane.css";
 @import "./app/selector-nav.css";
+@import "./app/settings-card.css";
+@import "./app/toggle-switch.css";
 @import "./app/tooltip.css";

@@ -1,0 +1,66 @@
+/* ============================================================
+   Toggle Switch — reusable on/off toggle component
+   Used by: Customize pages, settings, feature toggles
+   ============================================================ */
+
+.stx-toggle {
+  position: relative;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.stx-toggle-input {
+  display: none;
+}
+
+.stx-toggle-slider {
+  display: block;
+  width: 40px;
+  height: 22px;
+  background: rgba(110, 118, 129, 0.4);
+  border-radius: 11px;
+  position: relative;
+  transition: background 200ms ease;
+}
+
+.stx-toggle-slider::after {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 2px;
+  width: 18px;
+  height: 18px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 200ms ease;
+}
+
+.stx-toggle-input:checked + .stx-toggle-slider {
+  background: var(--text-link, #58a6ff);
+}
+
+.stx-toggle-input:checked + .stx-toggle-slider::after {
+  transform: translateX(18px);
+}
+
+/* Disabled state */
+.stx-toggle-input:disabled + .stx-toggle-slider {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Small variant */
+.stx-toggle--sm .stx-toggle-slider {
+  width: 32px;
+  height: 18px;
+  border-radius: 9px;
+}
+
+.stx-toggle--sm .stx-toggle-slider::after {
+  width: 14px;
+  height: 14px;
+}
+
+.stx-toggle--sm .stx-toggle-input:checked + .stx-toggle-slider::after {
+  transform: translateX(14px);
+}
