@@ -1,22 +1,20 @@
 /**
  * Sidebar Drawer Gesture — horizontal swipe to open/close.
  *
- * On mobile (<=768px):
- *  - Swipe right from left edge (< 30px): open sidebar drawer
+ *  - Swipe right from left edge (< 50px): open sidebar drawer
  *  - Swipe left on open sidebar: close sidebar drawer
  *
  * Works on iOS Safari, Android Chrome, and all touch-capable browsers.
  * Single-finger horizontal swipe only — does not interfere with
- * vertical scroll or two-finger gestures in mobile-swipe.ts.
+ * vertical scroll or two-finger gestures.
  */
 
-const SWIPE_THRESHOLD = 60; // px — minimum horizontal distance to trigger
-const EDGE_WIDTH = 30; // px — left edge zone for swipe-to-open
-const MOBILE_QUERY = "(max-width: 768px)";
+const SWIPE_THRESHOLD = 50; // px — minimum horizontal distance to trigger
+const EDGE_WIDTH = 50; // px — left edge zone for swipe-to-open
 
 let edgeSwipeStartX = -1;
 let sidebarSwipeStartX = -1;
-let drawerListenersActive = false;
+let listenersActive = false;
 
 function getSidebar(): HTMLElement | null {
   return document.getElementById("workspace-sidebar");
@@ -45,12 +43,21 @@ function closeDrawer(): void {
 function onEdgeTouchStart(e: TouchEvent): void {
   const x = e.touches[0].clientX;
   edgeSwipeStartX = x < EDGE_WIDTH ? x : -1;
+  if (edgeSwipeStartX >= 0) {
+    console.log(`[DrawerGesture] Edge touch start at x=${x}`);
+  }
 }
 
 function onEdgeTouchEnd(e: TouchEvent): void {
   if (edgeSwipeStartX < 0) return;
   const dx = e.changedTouches[0].clientX - edgeSwipeStartX;
-  if (dx > SWIPE_THRESHOLD) openDrawer();
+  console.log(
+    `[DrawerGesture] Edge swipe dx=${dx} (threshold=${SWIPE_THRESHOLD})`,
+  );
+  if (dx > SWIPE_THRESHOLD) {
+    console.log("[DrawerGesture] Opening drawer");
+    openDrawer();
+  }
   edgeSwipeStartX = -1;
 }
 
@@ -67,10 +74,10 @@ function onSidebarTouchEnd(e: TouchEvent): void {
   sidebarSwipeStartX = -1;
 }
 
-// --- Lifecycle ---
+// --- Init ---
 
-function enableDrawerGestures(): void {
-  if (drawerListenersActive) return;
+function init(): void {
+  if (listenersActive) return;
 
   document.addEventListener("touchstart", onEdgeTouchStart, { passive: true });
   document.addEventListener("touchend", onEdgeTouchEnd, { passive: true });
@@ -83,46 +90,13 @@ function enableDrawerGestures(): void {
     passive: true,
   });
 
-  drawerListenersActive = true;
-}
-
-function disableDrawerGestures(): void {
-  if (!drawerListenersActive) return;
-
-  document.removeEventListener("touchstart", onEdgeTouchStart);
-  document.removeEventListener("touchend", onEdgeTouchEnd);
-
-  const sidebarInner = document.getElementById("sidebar-inner");
-  sidebarInner?.removeEventListener("touchstart", onSidebarTouchStart);
-  sidebarInner?.removeEventListener("touchend", onSidebarTouchEnd);
-
-  // Close drawer when switching to desktop
-  closeDrawer();
-  drawerListenersActive = false;
-}
-
-// --- Init (called from mobile-swipe.ts or standalone) ---
-
-export function initSidebarDrawerGesture(): void {
-  const mql = window.matchMedia(MOBILE_QUERY);
-
-  function onMediaChange(e: MediaQueryList | MediaQueryListEvent): void {
-    if (e.matches) {
-      enableDrawerGestures();
-    } else {
-      disableDrawerGestures();
-    }
-  }
-
-  onMediaChange(mql);
-  mql.addEventListener("change", onMediaChange);
+  listenersActive = true;
+  console.log("[DrawerGesture] Initialized");
 }
 
 // Auto-init on DOM ready
 if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", () =>
-    initSidebarDrawerGesture(),
-  );
+  document.addEventListener("DOMContentLoaded", init);
 } else {
-  initSidebarDrawerGesture();
+  init();
 }
