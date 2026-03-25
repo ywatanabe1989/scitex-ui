@@ -23,3 +23,16 @@
   --base-line-height: 1.6;
   --heading-line-height: 1.2;
 }
+
+/* =============================================================================
+ * SciTeX Brand Typography
+ * =============================================================================
+ * The "e" in SciTeX is tilted -21° (inspired by Google's inclined "e").
+ * Usage: SciT<span class="brand-e">e</span>X
+ * ============================================================================= */
+.brand-e {
+  display: inline-block;
+  transform: rotate(-21deg);
+  transform-origin: 50% 70%;
+  color: inherit;
+}

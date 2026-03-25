@@ -1,0 +1,58 @@
+/* =============================================================================
+ * SciTeX App — Context Menu
+ * =============================================================================
+ * Prefix: stx-app-context-menu
+ * Requires: shell/theme.css
+ * ============================================================================= */
+
+.stx-app-context-menu {
+  position: fixed;
+  z-index: 1000;
+  background: var(--bg-secondary, #161b22);
+  border: 1px solid var(--border-default, #30363d);
+  border-radius: 8px;
+  padding: 4px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  min-width: 180px;
+}
+
+.stx-app-context-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  width: 100%;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  color: var(--text-secondary, #c9d1d9);
+  font-size: 13px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.stx-app-context-menu__item:hover {
+  background: rgba(177, 186, 196, 0.08);
+  color: var(--text-primary, #f0f6fc);
+}
+
+.stx-app-context-menu__item--danger {
+  color: #f85149;
+}
+
+.stx-app-context-menu__item--danger:hover {
+  background: rgba(248, 81, 73, 0.1);
+}
+
+.stx-app-context-menu__item i {
+  width: 16px;
+  text-align: center;
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.stx-app-context-menu__divider {
+  height: 1px;
+  background: var(--border-default, #30363d);
+  margin: 4px 8px;
+}

@@ -8,6 +8,7 @@ from ._dropdown import Dropdown  # noqa: F401
 from ._file_browser import FileBrowser  # noqa: F401
 from ._file_tabs import FileTabs  # noqa: F401
 from ._media_viewer import MediaViewer  # noqa: F401
+from ._monaco_editor import MonacoEditor  # noqa: F401
 from ._package_docs_sidebar import PackageDocsSidebar  # noqa: F401
 from ._resizer import Resizer  # noqa: F401
 from ._status_bar import StatusBar  # noqa: F401
