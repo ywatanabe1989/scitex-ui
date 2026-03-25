@@ -1,5 +1,4 @@
 ---
-name: scitex-ui
 description: Vanilla TS workspace shell framework + React app components for SciTeX apps. Use when building or customizing SciTeX workspace UIs, integrating shell panels, or using frontend components.
 allowed-tools: mcp__scitex__ui_*
 ---
