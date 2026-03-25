@@ -1,5 +1,4 @@
 ---
-name: shell-framework
 description: Vanilla TS workspace shell — modules, adapters, init flow, container IDs
 ---
 

@@ -1,5 +1,4 @@
 ---
-name: python-api
 description: Python API for scitex-ui — component registry, static path resolution, Django integration. Use when introspecting components or configuring Django.
 ---
 
