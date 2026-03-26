@@ -88,3 +88,34 @@ export type {
   RepoMonitorConfig,
   RecentFileEntry,
 } from "./repo-monitor";
+
+// Unified Resizer system (PointerEvent-based, with cascade and snap)
+export {
+  Resizer,
+  BaseResizer,
+  HorizontalResizer,
+  VerticalResizer,
+  autoInit as autoInitResizers,
+  initNewResizers,
+  magneticSnap,
+  percentSnapPoints,
+} from "./resizer";
+export type {
+  ResizerConfig,
+  ResizerDirection,
+  HorizontalConfig,
+  VerticalConfig,
+  BaseOpts,
+  PropagationTarget,
+} from "./resizer";
+
+// Workspace Panel Resizer (legacy, used by data-panel-resizer attributes)
+export {
+  WorkspacePanelResizer,
+  workspacePanelResizer,
+  autoInitPanels,
+  initNewPanels,
+} from "./workspace-panel-resizer";
+export type { PanelConfig } from "./workspace-panel-resizer";
+export type { AxisConfig } from "./workspace-panel-resizer";
+export { detectAxis, getAxis } from "./workspace-panel-resizer";
