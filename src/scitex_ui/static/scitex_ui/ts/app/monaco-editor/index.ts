@@ -8,7 +8,11 @@ export { MonacoEditor } from "./_MonacoEditor";
 export { MonacoDiffEditor } from "./_MonacoDiffEditor";
 
 // Types
-export type { MonacoEditorConfig, MonacoDiffEditorConfig } from "./types";
+export type {
+  MonacoEditorConfig,
+  MonacoDiffEditorConfig,
+  DiffHunk,
+} from "./types";
 export { LANGUAGE_MAP, detectLanguage } from "./types";
 
 // Defaults
