@@ -7,7 +7,10 @@ import scitex_ui
 class TestPublicAPI:
     def test_version(self):
         assert hasattr(scitex_ui, "__version__")
-        assert scitex_ui.__version__ == "0.1.0"
+        # Validate semver format rather than hardcoding a specific version
+        import re
+
+        assert re.match(r"^\d+\.\d+\.\d+", scitex_ui.__version__)
 
     def test_exports(self):
         assert hasattr(scitex_ui, "get_component")
