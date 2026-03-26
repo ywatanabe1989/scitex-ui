@@ -47,7 +47,7 @@ def get_docs_path() -> _Path:
     pathlib.Path
         e.g. ``/usr/lib/python3.11/.../scitex_ui/_docs``
     """
-    return _Path(__file__).parent / "_docs"
+    return _Path(__file__).parent / "_sphinx_html"
 
 
 __all__ = ["get_component", "list_components", "get_static_dir", "get_docs_path"]
