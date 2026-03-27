@@ -5,6 +5,14 @@ allowed-tools: mcp__scitex__ui_*
 
 # scitex-ui — Workspace Shell Framework
 
+## Installation
+
+```bash
+pip install scitex-ui
+# Development:
+pip install -e /home/ywatanabe/proj/scitex-ui
+```
+
 Reusable frontend framework for SciTeX workspace apps.
 **Shell = vanilla TypeScript. App content = React (optional).**
 
