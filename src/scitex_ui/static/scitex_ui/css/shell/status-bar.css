@@ -77,3 +77,22 @@
   height: 14px;
   background: var(--workspace-border-subtle, #dddcda);
 }
+
+/* Theme toggle — colored icon so the dual-state affordance is obvious.
+ * Previously the status-bar theme button used fa-sun / fa-moon pairs,
+ * which readers confused with a gear icon. fa-circle-half-stroke reads
+ * unambiguously as a toggle at any size.
+ */
+.stx-shell-status-bar [data-id="__theme-toggle"] i {
+  font-size: 13px;
+  transition: transform 0.25s ease;
+}
+html[data-theme="dark"] .stx-shell-status-bar [data-id="__theme-toggle"] i {
+  color: #f5b86a;  /* warm amber — signals switch-to-light */
+}
+html[data-theme="light"] .stx-shell-status-bar [data-id="__theme-toggle"] i {
+  color: #4a6fa5;  /* cool blue — signals switch-to-dark */
+}
+.stx-shell-status-bar [data-id="__theme-toggle"]:hover i {
+  transform: rotate(180deg);
+}
