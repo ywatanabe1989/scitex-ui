@@ -23,7 +23,7 @@ def _json(obj):
 
 @mcp.tool()
 def skills_list() -> str:
-    """List available skill pages for scitex-ui.
+    """Use when you need to see what detailed docs exist for scitex-ui (workspace shell framework, Django static assets, React components like DataTable/usePanelResize, TypeScript shell modules, CSS design tokens).
 
     Examples
     --------
@@ -40,7 +40,7 @@ def skills_list() -> str:
 
 @mcp.tool()
 def skills_get(name: Optional[str] = None) -> str:
-    """Get a skill page for scitex-ui. Without name, returns main SKILL.md.
+    """Use when you need to read a specific scitex-ui skill page covering the workspace shell framework, Django static assets, React components (DataTable, usePanelResize), TypeScript shell modules, or CSS design tokens. Without name, returns main SKILL.md.
 
     Parameters
     ----------

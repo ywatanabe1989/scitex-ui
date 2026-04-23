@@ -62,6 +62,17 @@ templates/         ← Django HTML templates
 
 ## MCP Tools
 
+Exposed via the umbrella `scitex` MCP server (registered by `scitex._mcp_tools.ui.register_ui_tools`):
+
+| Tool | Purpose |
+|------|---------|
+| `ui_inspect_element` | Introspect one DOM element in the live playwright-cli browser — bbox, computed styles, attrs, parent chain, matching CSS rules |
+| `ui_inspect_elements` | Bulk-inspect all elements matching a selector (with `limit`) |
+| `ui_notify` | Send a UI-level alert via scitex-notification (audio / desktop / email / webhook / Telegram / Twilio fallback) |
+| `ui_get_notification_config` | Show active notification config (fallback order, level routing, timeouts) |
+
+Standalone `scitex-ui` MCP server also exposes:
+
 | Tool | Purpose |
 |------|---------|
 | `skills_list` | List available skill pages |
