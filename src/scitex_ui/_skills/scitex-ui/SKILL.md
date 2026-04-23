@@ -8,33 +8,14 @@ allowed-tools: mcp__scitex__ui_*
 Reusable frontend framework for SciTeX workspace apps.
 **Shell = vanilla TypeScript. App content = React (optional).**
 
-## Installation & import (two equivalent paths)
-
-The same module is reachable via two install paths. Both forms work at
-runtime; which one a user has depends on their install choice.
+## Installation & import
 
 ```python
-# Standalone — pip install scitex-ui
-import scitex_ui
-scitex_ui.list_components(...)
-
-# Umbrella — pip install scitex
-import scitex.ui
-scitex.ui.list_components(...)
+import scitex_ui                # pip install scitex-ui
+# or:  import scitex.ui         # pip install scitex  (umbrella)
 ```
 
-`pip install scitex-ui` alone does NOT expose the `scitex` namespace;
-`import scitex.ui` raises `ModuleNotFoundError`. To use the
-`scitex.ui` form, also `pip install scitex`.
-
-See [../../general/02_interface-python-api.md] for the ecosystem-wide
-rule and empirical verification table.
-
-```bash
-pip install scitex-ui
-# Development:
-pip install -e /home/ywatanabe/proj/scitex-ui
-```
+See [../../general/02_interface-python-api.md] for the dual-install rule.
 
 ## Sub-skills
 
