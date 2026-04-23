@@ -1,3 +1,4 @@
+<!-- TODO: Split per checklist §4 (currently 10 KB) -->
 ---
 description: Frontend components reference — DataTable, FileBrowser, MediaViewer, Bridge infrastructure, CSS theme variables, usePanelResize
 ---
