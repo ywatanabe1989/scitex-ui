@@ -2,9 +2,18 @@
 description: Shared frontend framework for SciTeX web apps — vanilla TypeScript workspace shell (single source of truth) + optional React app components + Django static-asset integration. Ships `ts/shell/` (initShell, adapters, panel resize), `ts/app/` (vanilla app components), `react/app/` (`usePanelResize`, `DataTable`), `css/shell/` (design tokens, dark/light theme), and Django `templates/`. Python API — `list_components()` / `get_component(name)` / `register_component()` (component registry), `get_static_dir()` (build-tool static root — Vite/Webpack), `get_docs_path()` (bundled Sphinx HTML). Add `scitex_ui` to `INSTALLED_APPS` so `AppDirectoriesFinder` discovers CSS/TS. 4 MCP tools exposed via the scitex umbrella — `ui_inspect_element(selector)` / `ui_inspect_elements(selector)` (Playwright-based live DOM introspection — bbox, computed styles, text, attrs), `ui_notify(title, body, level)` (desktop/browser notification), `ui_get_notification_config()`. Drop-in replacement for hand-writing Django static directories + duplicating panel-resize hooks across apps + per-project CSS theme variables + manual Playwright DOM queries. Use whenever the user asks to "build a SciTeX workspace app", "add panel resizing", "share a React DataTable", "theme with design tokens", "set up Django static asset discovery for scitex-ui", "inspect a DOM element in the live app", "send a desktop notification from the web UI", "integrate the shell framework", or mentions workspace shell, initShell, usePanelResize, Bridge infrastructure, scitex-ui.
 allowed-tools: mcp__scitex__ui_*
 primary_interface: mixed
+interfaces:
+  python: 2
+  cli: 1
+  mcp: 2
+  skills: 2
+  hook: 0
+  http: 2
 ---
 
 # scitex-ui — Workspace Shell Framework
+
+> **Interfaces:** Python ⭐⭐ · CLI ⭐ · MCP ⭐⭐ · Skills ⭐⭐ · Hook — · HTTP ⭐⭐
 
 > **Primary interfaces (two).** Both CLI and Python (or MCP) see heavy daily use — pick whichever fits the task.
 
