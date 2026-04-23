@@ -29,7 +29,9 @@ See [../../general/02_interface-python-api.md] for the dual-install rule.
 ### Architecture (30–39)
 - [30_shell-framework.md](30_shell-framework.md) — Workspace shell framework overview
 - [31_shell-modules.md](31_shell-modules.md) — `initShell`, adapters, TypeScript shell module API
-- [32_frontend-components.md](32_frontend-components.md) — React app components, Bridge infrastructure, panel resize
+- [32_frontend-components.md](32_frontend-components.md) — React components quick start (DataTable, FileBrowser, MediaViewer)
+- [33_frontend-components-bridge.md](33_frontend-components-bridge.md) — Bridge infrastructure + usePanelResize
+- [34_frontend-components-theme.md](34_frontend-components-theme.md) — CSS theme, figrecipe reference, packaging
 
 ## Architecture
 
