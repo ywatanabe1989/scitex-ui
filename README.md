@@ -21,6 +21,14 @@
 
 ---
 
+## Problem and Solution
+
+
+| # | Problem | Solution |
+|---|---------|----------|
+| 1 | **Every scitex workspace app duplicates panel-resize / design-tokens / React hooks** -- drift + copy-paste | **Shared shell framework** -- vanilla TS `initShell` as single source of truth; React `usePanelResize` / `DataTable` as optional app components; CSS design tokens shared via Django static |
+| 2 | **Live UI introspection means writing custom Playwright scripts** -- common enough to deserve tooling | **MCP `ui_inspect_element(selector)`** -- bbox, computed styles, text, attrs — for agent-driven UI debugging |
+
 ## Problem
 
 The SciTeX ecosystem comprises multiple web applications (cloud dashboard, documentation hub, workspace editor) that share common frontend patterns — navigation sidebars, package browsers, status indicators. Without a shared component library, each application re-implements these patterns independently, leading to visual inconsistency and duplicated effort.
