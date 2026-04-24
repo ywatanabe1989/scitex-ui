@@ -172,14 +172,14 @@ else:
                     click.echo(f"    {desc}")
                 click.echo()
 
-    @mcp_group.command("installation")
+    @mcp_group.command("show-installation")
     @click.option("--json", "as_json", is_flag=True, help="Output as JSON.")
-    def mcp_installation(as_json):
+    def mcp_show_installation(as_json):
         """Show MCP server installation instructions.
 
         \b
         Examples:
-          scitex-ui mcp installation
+          scitex-ui mcp show-installation
         """
         import json as json_mod
 
@@ -202,6 +202,21 @@ else:
             click.echo()
             click.echo("Or start manually:")
             click.echo("  scitex-ui mcp start")
+
+    # Deprecation redirect: mcp installation -> mcp show-installation
+    @mcp_group.command(
+        "installation", hidden=True, context_settings={"ignore_unknown_options": True}
+    )
+    @click.pass_context
+    def mcp_installation_deprecated(ctx):
+        """(deprecated) Renamed to `show-installation`."""
+        click.echo(
+            "error: `scitex-ui mcp installation` was renamed to "
+            "`scitex-ui mcp show-installation`.\n"
+            "Re-run with: scitex-ui mcp show-installation",
+            err=True,
+        )
+        ctx.exit(2)
 
     main.add_command(mcp_group, "mcp")
 
