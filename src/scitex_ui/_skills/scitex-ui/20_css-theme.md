@@ -1,5 +1,4 @@
 ---
-name: css-theme
 description: CSS design tokens, semantic theme variables, dark/light mode. Use when styling SciTeX app components to match the workspace theme.
 ---
 

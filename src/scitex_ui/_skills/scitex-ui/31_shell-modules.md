@@ -1,5 +1,4 @@
 ---
-name: shell-modules
 description: TypeScript shell framework — initShell, adapters, ShellFileTree, toolbar, terminal, viewer, chat, repo-monitor. Use when wiring the workspace shell to a backend.
 ---
 

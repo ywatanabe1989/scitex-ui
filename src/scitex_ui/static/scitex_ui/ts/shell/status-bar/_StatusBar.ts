@@ -42,8 +42,11 @@ export class StatusBar extends BaseComponent<StatusBarConfig> {
       this.items.right.push({
         id: "__theme-toggle",
         text: "",
-        icon: isDark ? "fas fa-sun" : "fas fa-moon",
-        title: "Toggle theme",
+        // fa-circle-half-stroke is an unambiguous two-tone semicircle
+        // that signals a toggle. Previous fa-sun was often confused for
+        // a gear; fa-moon alone didn't hint at the dual-state affordance.
+        icon: "fas fa-circle-half-stroke",
+        title: `Theme: ${isDark ? "dark" : "light"} (click to switch)`,
         onClick: () => this.toggleTheme(),
       });
     }
@@ -99,7 +102,8 @@ export class StatusBar extends BaseComponent<StatusBarConfig> {
       /* noop */
     }
     this.updateItem("__theme-toggle", {
-      icon: next === "dark" ? "fas fa-sun" : "fas fa-moon",
+      icon: "fas fa-circle-half-stroke",
+      title: `Theme: ${next} (click to switch)`,
     });
   }
 
@@ -125,6 +129,7 @@ export class StatusBar extends BaseComponent<StatusBarConfig> {
         : document.createElement("span");
 
       node.className = item.onClick ? `${CLS}__btn` : `${CLS}__item`;
+      node.dataset.id = item.id;
       if (item.title) node.title = item.title;
 
       if (item.icon) {

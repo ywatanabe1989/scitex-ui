@@ -26,8 +26,11 @@
 @import "./app/sidebar-layout.css";
 @import "./app/toggle-switch.css";
 @import "./app/tooltip.css";
+@import "./primitives/colors.css";
 @import "./primitives/spacing.css";
 @import "./primitives/typography.css";
+@import "./primitives/typography-vars.css";
+@import "./primitives/variables.css";
 @import "./primitives/z-index.css";
 @import "./shell/11-shortcuts-modal.css";
 @import "./shell/ai-panel.css";

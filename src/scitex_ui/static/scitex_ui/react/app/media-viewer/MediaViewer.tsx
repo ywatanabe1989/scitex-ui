@@ -1,9 +1,12 @@
 /**
- * MediaViewer — React component for displaying non-text files.
+ * MediaViewer -- React component for displaying non-text files.
  * Mirrors: ts/app/media-viewer/_MediaViewer.ts
+ *
+ * Supports: Image (zoom/pan), PDF (iframe), Mermaid, Graphviz, Binary.
+ * CSV type is detected but not rendered -- handle externally via DataTable.
  */
 
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import type { BaseProps } from "../../_base/types";
 
 const CLS = "stx-app-media-viewer";
@@ -11,6 +14,7 @@ const CLS = "stx-app-media-viewer";
 export type MediaFileType =
   | "image"
   | "pdf"
+  | "csv"
   | "mermaid"
   | "graphviz"
   | "binary"
@@ -27,6 +31,9 @@ const IMAGE_EXT = new Set([
   ".ico",
 ]);
 const PDF_EXT = new Set([".pdf"]);
+const CSV_EXT = new Set([".csv", ".tsv"]);
+const MERMAID_EXT = new Set([".mmd", ".mermaid"]);
+const GRAPHVIZ_EXT = new Set([".dot", ".gv"]);
 const BINARY_EXT = new Set([
   ".zip",
   ".tar",
@@ -34,19 +41,35 @@ const BINARY_EXT = new Set([
   ".rar",
   ".7z",
   ".exe",
+  ".dll",
+  ".so",
+  ".dylib",
   ".mp3",
   ".mp4",
   ".wav",
+  ".avi",
+  ".mkv",
+  ".mov",
   ".doc",
   ".docx",
+  ".xls",
+  ".xlsx",
+  ".ppt",
+  ".pptx",
+  ".woff",
+  ".woff2",
+  ".ttf",
+  ".eot",
+  ".otf",
 ]);
 
 function detectType(path: string): MediaFileType {
   const ext = path.substring(path.lastIndexOf(".")).toLowerCase();
   if (IMAGE_EXT.has(ext)) return "image";
   if (PDF_EXT.has(ext)) return "pdf";
-  if (ext === ".mmd" || ext === ".mermaid") return "mermaid";
-  if (ext === ".dot" || ext === ".gv") return "graphviz";
+  if (CSV_EXT.has(ext)) return "csv";
+  if (MERMAID_EXT.has(ext)) return "mermaid";
+  if (GRAPHVIZ_EXT.has(ext)) return "graphviz";
   if (BINARY_EXT.has(ext)) return "binary";
   return "text";
 }
@@ -62,6 +85,111 @@ export interface MediaViewerProps extends BaseProps {
   onDownload?: (path: string) => void;
 }
 
+// ── Diagram sub-component (handles async loading) ─────────────────────
+
+const DiagramRenderer: React.FC<{
+  filePath: string;
+  type: "mermaid" | "graphviz";
+  getFileUrl: (path: string, raw?: boolean, download?: boolean) => string;
+}> = ({ filePath, type, getFileUrl }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const renderDiagram = async () => {
+      try {
+        const url = getFileUrl(filePath, true);
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const ct = response.headers.get("content-type") || "";
+        let code: string;
+        if (ct.includes("application/json")) {
+          const json = await response.json();
+          code = (json.content ?? "").trim();
+        } else {
+          code = (await response.text()).trim();
+        }
+
+        if (cancelled) return;
+
+        if (!code) {
+          setError("Empty diagram file");
+          setLoading(false);
+          return;
+        }
+
+        if (!containerRef.current) return;
+
+        if (type === "mermaid") {
+          const { default: mermaid } = await import("mermaid");
+          mermaid.initialize({
+            startOnLoad: false,
+            theme:
+              document.documentElement.getAttribute("data-theme") === "dark"
+                ? "dark"
+                : "default",
+            securityLevel: "loose",
+          });
+
+          const id = `mmd-${Date.now()}`;
+          const div = document.createElement("div");
+          div.className = "mermaid";
+          div.id = id;
+          div.textContent = code;
+          containerRef.current.innerHTML = "";
+          containerRef.current.appendChild(div);
+          await mermaid.run({ nodes: [div] });
+        } else {
+          const { Graphviz } = await import("@hpcc-js/wasm-graphviz");
+          const graphviz = await Graphviz.load();
+          const svg = graphviz.dot(code);
+          if (containerRef.current) {
+            containerRef.current.innerHTML = svg;
+          }
+        }
+
+        if (!cancelled) setLoading(false);
+      } catch (err) {
+        if (!cancelled) {
+          console.error(`[${type}Viewer] Render error:`, err);
+          setError(err instanceof Error ? err.message : String(err));
+          setLoading(false);
+        }
+      }
+    };
+
+    renderDiagram();
+    return () => {
+      cancelled = true;
+    };
+  }, [filePath, type, getFileUrl]);
+
+  if (error) {
+    return (
+      <div className={`${CLS}__error`}>
+        <i className="fas fa-exclamation-triangle" />
+        <p>Failed to render diagram: {error}</p>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className={`${CLS}__loading`}>
+        <i className="fas fa-spinner fa-spin" /> Loading {type} diagram...
+      </div>
+    );
+  }
+
+  return <div ref={containerRef} className={`${CLS}__diagram-rendered`} />;
+};
+
+// ── Main component ────────────────────────────────────────────────────
+
 export const MediaViewer: React.FC<MediaViewerProps> = ({
   filePath,
   fileType,
@@ -73,6 +201,7 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
   const type = fileType || detectType(filePath);
   const fileName = filePath.split("/").pop() || filePath;
   const [imgError, setImgError] = useState(false);
+  const diagramRef = useRef<HTMLDivElement>(null);
 
   // Zoom state for images
   const [scale, setScale] = useState(1);
@@ -90,7 +219,7 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
     onDownload?.(filePath);
   }, [filePath, fileName, getFileUrl, onDownload]);
 
-  if (type === "text") return null;
+  if (type === "text" || type === "csv") return null;
 
   const toolbar = (icon: string) => (
     <div className={`${CLS}__toolbar`}>
@@ -201,10 +330,12 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
           {toolbar(
             type === "mermaid" ? "fas fa-project-diagram" : "fas fa-sitemap",
           )}
-          <div className={`${CLS}__diagram-content`}>
-            <div className={`${CLS}__loading`}>
-              <i className="fas fa-spinner fa-spin" /> Loading {type} diagram...
-            </div>
+          <div ref={diagramRef} className={`${CLS}__diagram-content`}>
+            <DiagramRenderer
+              filePath={filePath}
+              type={type}
+              getFileUrl={getFileUrl}
+            />
           </div>
         </div>
       )}

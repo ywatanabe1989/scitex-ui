@@ -51,6 +51,9 @@
 @import "./shell/workspace-viewer-preview.css";
 @import "./shell/workspace-viewer.css";
 @import "./shell/workspace.css";
+@import "./primitives/colors.css";
 @import "./primitives/spacing.css";
 @import "./primitives/typography.css";
+@import "./primitives/typography-vars.css";
+@import "./primitives/variables.css";
 @import "./primitives/z-index.css";

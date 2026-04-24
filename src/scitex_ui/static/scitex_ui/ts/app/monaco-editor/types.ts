@@ -27,6 +27,32 @@ export interface MonacoDiffEditorConfig extends BaseComponentConfig {
   readOnly?: boolean;
   renderSideBySide?: boolean;
   theme?: string;
+  /** Show hunk navigation toolbar (prev/next buttons). Default false. */
+  enableHunkNavigation?: boolean;
+  /** Show accept/reject buttons per hunk. Requires enableHunkNavigation. Default false. */
+  enableHunkActions?: boolean;
+  /** Callback when a hunk is accepted (applied to the original). */
+  onHunkAccept?: (hunk: DiffHunk) => void;
+  /** Callback when a hunk is rejected (reverted in the modified). */
+  onHunkReject?: (hunk: DiffHunk) => void;
+  /** File path — used for language auto-detection. */
+  filePath?: string;
+}
+
+/** Represents a contiguous block of changes between original and modified. */
+export interface DiffHunk {
+  /** Zero-based index among all hunks. */
+  index: number;
+  /** Line range in the original model (1-based, inclusive). */
+  originalStartLine: number;
+  originalEndLine: number;
+  /** Line range in the modified model (1-based, inclusive). */
+  modifiedStartLine: number;
+  modifiedEndLine: number;
+  /** The original text in this range. */
+  originalText: string;
+  /** The modified text in this range. */
+  modifiedText: string;
 }
 
 // ── Language detection ───────────────────────────────────────────────
