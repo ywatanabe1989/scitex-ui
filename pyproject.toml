@@ -81,3 +81,6 @@ packages = ["src/scitex_ui"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 
+[tool.scitex-linter]
+library_dirs = ["src", "tests", "examples"]
+
