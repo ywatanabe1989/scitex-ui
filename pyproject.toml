@@ -34,7 +34,7 @@ classifiers = [
     "Topic :: Scientific/Engineering",
     "Topic :: Software Development :: User Interfaces",
 ]
-dependencies = []
+dependencies = ["django"]
 
 [project.scripts]
 scitex-ui = "scitex_ui._cli:main"
