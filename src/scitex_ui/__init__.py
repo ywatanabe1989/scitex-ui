@@ -7,8 +7,15 @@ AppDirectoriesFinder when added to INSTALLED_APPS.
 Python API provides component metadata and registration.
 """
 
-__version__ = "0.4.5"
-
+try:
+    from importlib.metadata import version as _v, PackageNotFoundError
+    try:
+        __version__ = _v("scitex-ui")
+    except PackageNotFoundError:
+        __version__ = "0.0.0+local"
+    del _v, PackageNotFoundError
+except ImportError:  # pragma: no cover — only on ancient Pythons
+    __version__ = "0.0.0+local"
 from pathlib import Path as _Path
 
 from ._registry import get_component, list_components
