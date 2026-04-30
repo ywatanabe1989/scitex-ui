@@ -1,5 +1,7 @@
 ---
 description: TypeScript shell framework — initShell, adapters, ShellFileTree, toolbar, terminal, viewer, chat, repo-monitor. Use when wiring the workspace shell to a backend.
+name: shell-modules
+tags: [scitex-ui, scitex-package]
 ---
 
 # scitex-ui Shell Modules

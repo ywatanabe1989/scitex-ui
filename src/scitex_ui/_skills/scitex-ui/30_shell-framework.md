@@ -1,5 +1,7 @@
 ---
 description: Vanilla TS workspace shell — modules, adapters, init flow, container IDs
+name: shell-framework
+tags: [scitex-ui, scitex-package]
 ---
 
 # Shell Framework Reference
