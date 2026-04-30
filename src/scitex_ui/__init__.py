@@ -7,6 +7,8 @@ AppDirectoriesFinder when added to INSTALLED_APPS.
 Python API provides component metadata and registration.
 """
 
+from __future__ import annotations
+
 try:
     from importlib.metadata import version as _v, PackageNotFoundError
     try:
@@ -57,6 +59,6 @@ def get_docs_path() -> _Path:
     return _Path(__file__).parent / "_sphinx_html"
 
 
-__all__ = ["get_component", "list_components", "get_static_dir", "get_docs_path"]
+__all__ = ["__version__", "get_component", "list_components", "get_static_dir", "get_docs_path"]
 
 # EOF
