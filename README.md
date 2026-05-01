@@ -188,7 +188,9 @@ scitex (orchestrator, templates, CLI, MCP)
 
 ## Part of SciTeX
 
-`scitex-ui` is part of [SciTeX](https://scitex.ai). When used within the SciTeX ecosystem, components automatically integrate with the SciTeX cloud dashboard and documentation hub.
+`scitex-ui` is part of [**SciTeX**](https://scitex.ai). Install via
+the umbrella with `pip install scitex[ui]` to use as
+`scitex.ui` (Python) or `scitex ui ...` (CLI).
 
 The SciTeX ecosystem follows the **Four Freedoms for researchers**, inspired by [the Free Software Definition](https://www.gnu.org/philosophy/free-sw.en.html):
 
