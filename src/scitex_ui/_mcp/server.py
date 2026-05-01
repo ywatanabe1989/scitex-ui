@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import json as _json_mod
-from typing import Optional
 
 from fastmcp import FastMCP
 
@@ -21,46 +20,68 @@ def _json(obj):
 # =============================================================================
 
 
+# §5 — skills introspection tools (per audit-mcp-tools convention)
 @mcp.tool()
-def skills_list() -> str:
-    """Use when you need to see what detailed docs exist for scitex-ui (workspace shell framework, Django static assets, React components like DataTable/usePanelResize, TypeScript shell modules, CSS design tokens).
+def ui_skills_list() -> str:
+    """List the names of every skill page shipped by scitex-ui.
 
-    Examples
-    --------
-    CLI equivalent: scitex-ui skills list
+    Returns
+    -------
+        JSON string with `{"success": true, "package": "scitex-ui",
+        "skills": ["01_python-api", "02_cli", ...]}`.
     """
     try:
-        from scitex_dev.skills import list_skills
+        from pathlib import Path
 
-        result = list_skills(package="scitex-ui")
-        return _json({"success": True, "skills": result.get("scitex-ui", [])})
-    except ImportError:
-        return _json({"success": False, "error": "scitex-dev not installed"})
+        skills_dir = Path(__file__).parent.parent / "_skills" / "scitex-ui"
+        names = sorted(p.stem for p in skills_dir.glob("*.md") if p.name != "SKILL.md")
+        return _json_mod.dumps(
+            {"success": True, "package": "scitex-ui", "skills": names},
+            indent=2,
+        )
+    except Exception as e:
+        return _json_mod.dumps({"success": False, "error": str(e)}, indent=2)
 
 
 @mcp.tool()
-def skills_get(name: Optional[str] = None) -> str:
-    """Use when you need to read a specific scitex-ui skill page covering the workspace shell framework, Django static assets, React components (DataTable, usePanelResize), TypeScript shell modules, or CSS design tokens. Without name, returns main SKILL.md.
+def ui_skills_get(name: str) -> str:
+    """Fetch the full Markdown content of one scitex-ui skill page.
 
-    Parameters
-    ----------
-    name : str, optional
-        Reference name (e.g., 'frontend-components'). If None, returns SKILL.md.
+    Args:
+        name: Skill page name without `.md`, e.g. `01_python-api`.
 
-    Examples
-    --------
-    CLI equivalent: scitex-ui skills get frontend-components
+    Returns
+    -------
+        JSON string with `{"success": true, "package": "scitex-ui",
+        "name": <name>, "content": <markdown>}`, or an error envelope.
     """
     try:
-        from scitex_dev.skills import get_skill
+        from pathlib import Path
 
-        content = get_skill(package="scitex-ui", name=name)
-        if content:
-            return _json({"success": True, "name": name, "content": content})
-        target = f"'{name}'" if name else "SKILL.md"
-        return _json({"success": False, "error": f"Skill {target} not found"})
-    except ImportError:
-        return _json({"success": False, "error": "scitex-dev not installed"})
+        skills_dir = Path(__file__).parent.parent / "_skills" / "scitex-ui"
+        target = skills_dir / f"{name}.md"
+        if not target.exists():
+            available = sorted(
+                p.stem for p in skills_dir.glob("*.md") if p.name != "SKILL.md"
+            )
+            return _json_mod.dumps(
+                {
+                    "success": False,
+                    "error": f"unknown skill {name!r}; available: {available}",
+                },
+                indent=2,
+            )
+        return _json_mod.dumps(
+            {
+                "success": True,
+                "package": "scitex-ui",
+                "name": name,
+                "content": target.read_text(encoding="utf-8"),
+            },
+            indent=2,
+        )
+    except Exception as e:
+        return _json_mod.dumps({"success": False, "error": str(e)}, indent=2)
 
 
 # =============================================================================
