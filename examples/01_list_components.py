@@ -7,27 +7,32 @@ Usage:
 
 from pathlib import Path
 
+import scitex as stx
+
 import scitex_ui
 
-OUTPUT_DIR = Path(__file__).parent / "01_list_components_out"
 
-
-def main() -> int:
-    OUTPUT_DIR.mkdir(exist_ok=True)
+@stx.session
+def main(
+    CONFIG=stx.session.INJECTED,
+    logger=stx.session.INJECTED,
+) -> int:
+    """List every registered component and dump a summary to SDIR_RUN."""
+    OUT = Path(CONFIG.SDIR_RUN)
 
     components = scitex_ui.list_components()
-    print(f"Registered components ({len(components)}):")
+    logger.info(f"Registered components ({len(components)}):")
 
     lines = []
     for name in components:
         meta = scitex_ui.get_component(name)
         info = f"  {name} v{meta.version} — {meta.description}"
-        print(info)
+        logger.info(info)
         lines.append(info)
 
-    output_file = OUTPUT_DIR / "components.txt"
+    output_file = OUT / "components.txt"
     output_file.write_text("\n".join(lines) + "\n")
-    print(f"\nSaved to {output_file}")
+    logger.info(f"Saved to {output_file}")
 
     return 0
 
