@@ -137,7 +137,7 @@ const browser = new FileBrowser({
 
 ## Three Interfaces
 
-<details>
+<details open>
 <summary><b>Python API</b></summary>
 
 | Function | Description |
