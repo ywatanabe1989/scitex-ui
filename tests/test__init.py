@@ -22,6 +22,7 @@ class TestPublicAPI:
 
     def test_all_contains_expected(self):
         expected = {
+            "__version__",
             "get_component",
             "list_components",
             "get_static_dir",
