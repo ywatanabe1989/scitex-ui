@@ -198,12 +198,14 @@ scitex (orchestrator, templates, CLI, MCP)
 the umbrella with `pip install scitex[ui]` to use as
 `scitex.ui` (Python) or `scitex ui ...` (CLI).
 
-The SciTeX ecosystem follows the **Four Freedoms for researchers**, inspired by [the Free Software Definition](https://www.gnu.org/philosophy/free-sw.en.html):
-
-- **Freedom 0** — Run the software for any research purpose.
-- **Freedom 1** — Study how the software works and adapt it to your needs.
-- **Freedom 2** — Redistribute copies to help fellow researchers.
-- **Freedom 3** — Distribute modified versions so the community benefits.
+>Four Freedoms for Research
+>
+>0. The freedom to **run** your research anywhere — your machine, your terms.
+>1. The freedom to **study** how every step works — from raw data to final manuscript.
+>2. The freedom to **redistribute** your workflows, not just your papers.
+>3. The freedom to **modify** any module and share improvements with the community.
+>
+>AGPL-3.0 — because we believe research infrastructure deserves the same freedoms as the software it runs on.
 
 ---
 
