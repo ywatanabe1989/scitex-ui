@@ -10,52 +10,25 @@
 [![License: AGPL v3](https://img.shields.io/badge/license-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 <!-- scitex-badges:end -->
 
-
-<p align="center">
-  <a href="https://scitex.ai">
-    <img src="docs/scitex-logo-blue-cropped.png" alt="SciTeX" width="400">
-  </a>
-</p>
-
-<p align="center"><b>Shared frontend UI components for the SciTeX ecosystem</b></p>
-
-<p align="center">
-  <a href="https://badge.fury.io/py/scitex-ui"><img src="https://badge.fury.io/py/scitex-ui.svg" alt="PyPI version"></a>
-  <a href="https://scitex-ui.readthedocs.io/"><img src="https://readthedocs.org/projects/scitex-ui/badge/?version=latest" alt="Documentation"></a>
-  <a href="https://github.com/ywatanabe1989/scitex-ui/actions/workflows/test.yml"><img src="https://github.com/ywatanabe1989/scitex-ui/actions/workflows/test.yml/badge.svg" alt="Tests"></a>
-  <a href="https://www.gnu.org/licenses/agpl-3.0"><img src="https://img.shields.io/badge/License-AGPL--3.0-blue.svg" alt="License: AGPL-3.0"></a>
-</p>
-
 <p align="center">
   <a href="https://scitex-ui.readthedocs.io/">Full Documentation</a> · <code>pip install scitex-ui</code>
 </p>
 
 ---
 
-> **Interfaces:** Python ⭐⭐ · CLI ⭐ · MCP ⭐⭐ · Skills ⭐⭐ · Hook — · HTTP ⭐⭐
-
 ## Problem and Solution
-
 
 | # | Problem | Solution |
 |---|---------|----------|
 | 1 | **Every scitex workspace app duplicates panel-resize / design-tokens / React hooks** -- drift + copy-paste | **Shared shell framework** -- vanilla TS `initShell` as single source of truth; React `usePanelResize` / `DataTable` as optional app components; CSS design tokens shared via Django static |
 | 2 | **Live UI introspection means writing custom Playwright scripts** -- common enough to deserve tooling | **MCP `ui_inspect_element(selector)`** -- bbox, computed styles, text, attrs — for agent-driven UI debugging |
 
-## Problem
-
-The SciTeX ecosystem comprises multiple web applications (cloud dashboard, documentation hub, workspace editor) that share common frontend patterns — navigation sidebars, package browsers, status indicators. Without a shared component library, each application re-implements these patterns independently, leading to visual inconsistency and duplicated effort.
-
-## Solution
-
-SciTeX UI provides a library of reusable TypeScript + CSS components designed for SciTeX web applications. Components are packaged as a Django app with static assets discoverable via `AppDirectoriesFinder`, and a Python registry for component metadata.
+## Architecture
 
 Each component ships with:
 - **TypeScript source** — framework-agnostic, vanilla DOM API
 - **CSS styles** — scoped via BEM-like class prefixes (`stx-shell-*`, `stx-app-*`)
 - **Python metadata** — version, file paths, descriptions
-
-### Architecture
 
 ```mermaid
 graph TB
