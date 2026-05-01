@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Quickstart for scitex-ui: list registered components and inspect static dirs."""
+"""Quickstart for scitex-ui: list registered components and inspect static dirs.
+
+Usage:
+    python quickstart.py
+"""
 
 from pathlib import Path
 
@@ -24,4 +28,4 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    main()
