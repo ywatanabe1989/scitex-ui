@@ -8,21 +8,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>API Reference &mdash; scitex-ui 0.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="../_static/documentation_options.js?v=01f34227"></script>
-      <script src="../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
       <script src="../_static/copybutton.js?v=f281be69"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="prev" title="Architecture" href="../architecture.html" /> 
+    <link rel="prev" title="&lt;no title&gt;" href="../app_developer_guide.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -47,11 +47,13 @@
               <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../components.html">Components</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../architecture.html">Architecture</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">API Reference</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#scitex_ui.get_component"><code class="docutils literal notranslate"><span class="pre">get_component()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scitex_ui.list_components"><code class="docutils literal notranslate"><span class="pre">list_components()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scitex_ui.get_static_dir"><code class="docutils literal notranslate"><span class="pre">get_static_dir()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scitex_ui.get_docs_path"><code class="docutils literal notranslate"><span class="pre">get_docs_path()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-scitex_ui._registry">Registry</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#scitex_ui._registry.register_component"><code class="docutils literal notranslate"><span class="pre">register_component()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#scitex_ui._registry.get_component"><code class="docutils literal notranslate"><span class="pre">get_component()</span></code></a></li>
@@ -176,6 +178,22 @@ scitex-ui source files at build time.</p>
 </dl>
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="scitex_ui.get_docs_path">
+<span class="sig-prename descclassname"><span class="pre">scitex_ui.</span></span><span class="sig-name descname"><span class="pre">get_docs_path</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scitex_ui.html#get_docs_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scitex_ui.get_docs_path" title="Link to this definition"></a></dt>
+<dd><p>Return the absolute path to scitex_ui’s bundled documentation directory.</p>
+<p>The directory contains <code class="docutils literal notranslate"><span class="pre">APP_DEVELOPER_GUIDE.md</span></code> and the Sphinx-built
+HTML docs. Works for both pip-installed packages and editable (dev) installs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>e.g. <code class="docutils literal notranslate"><span class="pre">/usr/lib/python3.11/.../scitex_ui/_docs</span></code></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pathlib.Path</p>
+</dd>
+</dl>
+</dd></dl>
+
 <section id="module-scitex_ui._registry">
 <span id="registry"></span><h2>Registry<a class="headerlink" href="#module-scitex_ui._registry" title="Link to this heading"></a></h2>
 <p>Component metadata registry.</p>
@@ -218,7 +236,7 @@ scitex-ui source files at build time.</p>
 <p>ThemeProvider component metadata.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="scitex_ui._components._theme_provider.ThemeProvider">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scitex_ui._components._theme_provider.</span></span><span class="sig-name descname"><span class="pre">ThemeProvider</span></span><a class="reference internal" href="../_modules/scitex_ui/_components/_theme_provider.html#ThemeProvider"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scitex_ui._components._theme_provider.ThemeProvider" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">scitex_ui._components._theme_provider.</span></span><span class="sig-name descname"><span class="pre">ThemeProvider</span></span><a class="reference internal" href="../_modules/scitex_ui/_components/_theme_provider.html#ThemeProvider"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scitex_ui._components._theme_provider.ThemeProvider" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Light/dark theme manager with semantic color tokens.</p>
 <p>Manages the data-theme attribute on &lt;html&gt;, persists preference
@@ -227,27 +245,27 @@ to localStorage, and provides toggle/set/get API.</p>
 CSS: scitex_ui/css/shell/theme.css</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="scitex_ui._components._theme_provider.ThemeProvider.name">
-<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'theme-provider'</span></em><a class="headerlink" href="#scitex_ui._components._theme_provider.ThemeProvider.name" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'theme-provider'</span></span><a class="headerlink" href="#scitex_ui._components._theme_provider.ThemeProvider.name" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="scitex_ui._components._theme_provider.ThemeProvider.version">
-<span class="sig-name descname"><span class="pre">version</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'0.1.0'</span></em><a class="headerlink" href="#scitex_ui._components._theme_provider.ThemeProvider.version" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">version</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'0.1.0'</span></span><a class="headerlink" href="#scitex_ui._components._theme_provider.ThemeProvider.version" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="scitex_ui._components._theme_provider.ThemeProvider.description">
-<span class="sig-name descname"><span class="pre">description</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Light/dark</span> <span class="pre">theme</span> <span class="pre">manager</span> <span class="pre">with</span> <span class="pre">semantic</span> <span class="pre">color</span> <span class="pre">tokens'</span></em><a class="headerlink" href="#scitex_ui._components._theme_provider.ThemeProvider.description" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">description</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Light/dark</span> <span class="pre">theme</span> <span class="pre">manager</span> <span class="pre">with</span> <span class="pre">semantic</span> <span class="pre">color</span> <span class="pre">tokens'</span></span><a class="headerlink" href="#scitex_ui._components._theme_provider.ThemeProvider.description" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="scitex_ui._components._theme_provider.ThemeProvider.ts_entry">
-<span class="sig-name descname"><span class="pre">ts_entry</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'scitex_ui/ts/shell/theme-provider/index'</span></em><a class="headerlink" href="#scitex_ui._components._theme_provider.ThemeProvider.ts_entry" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ts_entry</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'scitex_ui/ts/shell/theme-provider/index'</span></span><a class="headerlink" href="#scitex_ui._components._theme_provider.ThemeProvider.ts_entry" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="scitex_ui._components._theme_provider.ThemeProvider.css_file">
-<span class="sig-name descname"><span class="pre">css_file</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'scitex_ui/css/shell/theme.css'</span></em><a class="headerlink" href="#scitex_ui._components._theme_provider.ThemeProvider.css_file" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">css_file</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'scitex_ui/css/shell/theme.css'</span></span><a class="headerlink" href="#scitex_ui._components._theme_provider.ThemeProvider.css_file" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -255,7 +273,7 @@ CSS: scitex_ui/css/shell/theme.css</p>
 <p id="module-scitex_ui._components._app_shell">AppShell component metadata.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="scitex_ui._components._app_shell.AppShell">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scitex_ui._components._app_shell.</span></span><span class="sig-name descname"><span class="pre">AppShell</span></span><a class="reference internal" href="../_modules/scitex_ui/_components/_app_shell.html#AppShell"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scitex_ui._components._app_shell.AppShell" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">scitex_ui._components._app_shell.</span></span><span class="sig-name descname"><span class="pre">AppShell</span></span><a class="reference internal" href="../_modules/scitex_ui/_components/_app_shell.html#AppShell"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scitex_ui._components._app_shell.AppShell" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Workspace layout shell with collapsible sidebar.</p>
 <p>Creates the three-zone layout: sidebar, main content area,
@@ -264,27 +282,27 @@ and status bar slot. Supports app-specific accent colors.</p>
 CSS: scitex_ui/css/shell/app-shell.css</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="scitex_ui._components._app_shell.AppShell.name">
-<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'app-shell'</span></em><a class="headerlink" href="#scitex_ui._components._app_shell.AppShell.name" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'app-shell'</span></span><a class="headerlink" href="#scitex_ui._components._app_shell.AppShell.name" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="scitex_ui._components._app_shell.AppShell.version">
-<span class="sig-name descname"><span class="pre">version</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'0.1.0'</span></em><a class="headerlink" href="#scitex_ui._components._app_shell.AppShell.version" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">version</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'0.1.0'</span></span><a class="headerlink" href="#scitex_ui._components._app_shell.AppShell.version" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="scitex_ui._components._app_shell.AppShell.description">
-<span class="sig-name descname"><span class="pre">description</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Workspace</span> <span class="pre">layout</span> <span class="pre">shell</span> <span class="pre">with</span> <span class="pre">collapsible</span> <span class="pre">sidebar'</span></em><a class="headerlink" href="#scitex_ui._components._app_shell.AppShell.description" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">description</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Workspace</span> <span class="pre">layout</span> <span class="pre">shell</span> <span class="pre">with</span> <span class="pre">collapsible</span> <span class="pre">sidebar'</span></span><a class="headerlink" href="#scitex_ui._components._app_shell.AppShell.description" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="scitex_ui._components._app_shell.AppShell.ts_entry">
-<span class="sig-name descname"><span class="pre">ts_entry</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'scitex_ui/ts/shell/app-shell/index'</span></em><a class="headerlink" href="#scitex_ui._components._app_shell.AppShell.ts_entry" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ts_entry</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'scitex_ui/ts/shell/app-shell/index'</span></span><a class="headerlink" href="#scitex_ui._components._app_shell.AppShell.ts_entry" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="scitex_ui._components._app_shell.AppShell.css_file">
-<span class="sig-name descname"><span class="pre">css_file</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'scitex_ui/css/shell/app-shell.css'</span></em><a class="headerlink" href="#scitex_ui._components._app_shell.AppShell.css_file" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">css_file</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'scitex_ui/css/shell/app-shell.css'</span></span><a class="headerlink" href="#scitex_ui._components._app_shell.AppShell.css_file" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -292,7 +310,7 @@ CSS: scitex_ui/css/shell/app-shell.css</p>
 <p id="module-scitex_ui._components._status_bar">StatusBar component metadata.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="scitex_ui._components._status_bar.StatusBar">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scitex_ui._components._status_bar.</span></span><span class="sig-name descname"><span class="pre">StatusBar</span></span><a class="reference internal" href="../_modules/scitex_ui/_components/_status_bar.html#StatusBar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scitex_ui._components._status_bar.StatusBar" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">scitex_ui._components._status_bar.</span></span><span class="sig-name descname"><span class="pre">StatusBar</span></span><a class="reference internal" href="../_modules/scitex_ui/_components/_status_bar.html#StatusBar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scitex_ui._components._status_bar.StatusBar" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Bottom status bar with left/center/right sections.</p>
 <p>Displays status items with optional icons and click handlers.
@@ -301,27 +319,27 @@ Designed for workspace-level information display.</p>
 CSS: scitex_ui/css/shell/status-bar.css</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="scitex_ui._components._status_bar.StatusBar.name">
-<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'status-bar'</span></em><a class="headerlink" href="#scitex_ui._components._status_bar.StatusBar.name" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'status-bar'</span></span><a class="headerlink" href="#scitex_ui._components._status_bar.StatusBar.name" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="scitex_ui._components._status_bar.StatusBar.version">
-<span class="sig-name descname"><span class="pre">version</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'0.1.0'</span></em><a class="headerlink" href="#scitex_ui._components._status_bar.StatusBar.version" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">version</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'0.1.0'</span></span><a class="headerlink" href="#scitex_ui._components._status_bar.StatusBar.version" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="scitex_ui._components._status_bar.StatusBar.description">
-<span class="sig-name descname"><span class="pre">description</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Bottom</span> <span class="pre">status</span> <span class="pre">bar</span> <span class="pre">with</span> <span class="pre">left/center/right</span> <span class="pre">sections'</span></em><a class="headerlink" href="#scitex_ui._components._status_bar.StatusBar.description" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">description</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Bottom</span> <span class="pre">status</span> <span class="pre">bar</span> <span class="pre">with</span> <span class="pre">left/center/right</span> <span class="pre">sections'</span></span><a class="headerlink" href="#scitex_ui._components._status_bar.StatusBar.description" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="scitex_ui._components._status_bar.StatusBar.ts_entry">
-<span class="sig-name descname"><span class="pre">ts_entry</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'scitex_ui/ts/shell/status-bar/index'</span></em><a class="headerlink" href="#scitex_ui._components._status_bar.StatusBar.ts_entry" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ts_entry</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'scitex_ui/ts/shell/status-bar/index'</span></span><a class="headerlink" href="#scitex_ui._components._status_bar.StatusBar.ts_entry" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="scitex_ui._components._status_bar.StatusBar.css_file">
-<span class="sig-name descname"><span class="pre">css_file</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'scitex_ui/css/shell/status-bar.css'</span></em><a class="headerlink" href="#scitex_ui._components._status_bar.StatusBar.css_file" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">css_file</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'scitex_ui/css/shell/status-bar.css'</span></span><a class="headerlink" href="#scitex_ui._components._status_bar.StatusBar.css_file" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -329,7 +347,7 @@ CSS: scitex_ui/css/shell/status-bar.css</p>
 <p id="module-scitex_ui._components._file_browser">FileBrowser component metadata.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="scitex_ui._components._file_browser.FileBrowser">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scitex_ui._components._file_browser.</span></span><span class="sig-name descname"><span class="pre">FileBrowser</span></span><a class="reference internal" href="../_modules/scitex_ui/_components/_file_browser.html#FileBrowser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scitex_ui._components._file_browser.FileBrowser" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">scitex_ui._components._file_browser.</span></span><span class="sig-name descname"><span class="pre">FileBrowser</span></span><a class="reference internal" href="../_modules/scitex_ui/_components/_file_browser.html#FileBrowser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scitex_ui._components._file_browser.FileBrowser" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Tree view for navigating file hierarchies.</p>
 <p>Renders a collapsible file tree with directory expand/collapse,
@@ -338,27 +356,27 @@ file selection, and file-type icons.</p>
 CSS: scitex_ui/css/app/file-browser.css</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="scitex_ui._components._file_browser.FileBrowser.name">
-<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'file-browser'</span></em><a class="headerlink" href="#scitex_ui._components._file_browser.FileBrowser.name" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'file-browser'</span></span><a class="headerlink" href="#scitex_ui._components._file_browser.FileBrowser.name" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="scitex_ui._components._file_browser.FileBrowser.version">
-<span class="sig-name descname"><span class="pre">version</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'0.1.0'</span></em><a class="headerlink" href="#scitex_ui._components._file_browser.FileBrowser.version" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">version</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'0.1.0'</span></span><a class="headerlink" href="#scitex_ui._components._file_browser.FileBrowser.version" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="scitex_ui._components._file_browser.FileBrowser.description">
-<span class="sig-name descname"><span class="pre">description</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Tree</span> <span class="pre">view</span> <span class="pre">for</span> <span class="pre">navigating</span> <span class="pre">file</span> <span class="pre">hierarchies'</span></em><a class="headerlink" href="#scitex_ui._components._file_browser.FileBrowser.description" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">description</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Tree</span> <span class="pre">view</span> <span class="pre">for</span> <span class="pre">navigating</span> <span class="pre">file</span> <span class="pre">hierarchies'</span></span><a class="headerlink" href="#scitex_ui._components._file_browser.FileBrowser.description" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="scitex_ui._components._file_browser.FileBrowser.ts_entry">
-<span class="sig-name descname"><span class="pre">ts_entry</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'scitex_ui/ts/app/file-browser/index'</span></em><a class="headerlink" href="#scitex_ui._components._file_browser.FileBrowser.ts_entry" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ts_entry</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'scitex_ui/ts/app/file-browser/index'</span></span><a class="headerlink" href="#scitex_ui._components._file_browser.FileBrowser.ts_entry" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="scitex_ui._components._file_browser.FileBrowser.css_file">
-<span class="sig-name descname"><span class="pre">css_file</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'scitex_ui/css/app/file-browser.css'</span></em><a class="headerlink" href="#scitex_ui._components._file_browser.FileBrowser.css_file" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">css_file</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'scitex_ui/css/app/file-browser.css'</span></span><a class="headerlink" href="#scitex_ui._components._file_browser.FileBrowser.css_file" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -366,7 +384,7 @@ CSS: scitex_ui/css/app/file-browser.css</p>
 <p id="module-scitex_ui._components._package_docs_sidebar">PackageDocsSidebar component metadata.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="scitex_ui._components._package_docs_sidebar.PackageDocsSidebar">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scitex_ui._components._package_docs_sidebar.</span></span><span class="sig-name descname"><span class="pre">PackageDocsSidebar</span></span><a class="reference internal" href="../_modules/scitex_ui/_components/_package_docs_sidebar.html#PackageDocsSidebar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scitex_ui._components._package_docs_sidebar.PackageDocsSidebar" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">scitex_ui._components._package_docs_sidebar.</span></span><span class="sig-name descname"><span class="pre">PackageDocsSidebar</span></span><a class="reference internal" href="../_modules/scitex_ui/_components/_package_docs_sidebar.html#PackageDocsSidebar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scitex_ui._components._package_docs_sidebar.PackageDocsSidebar" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Navigable sidebar showing SciTeX Python package documentation.</p>
 <p>Fetches package data from a JSON API and renders a grouped,
@@ -376,32 +394,32 @@ CSS: scitex_ui/css/app/package-docs-sidebar.css
 API: /apps/docs/api/packages/</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="scitex_ui._components._package_docs_sidebar.PackageDocsSidebar.name">
-<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'package-docs-sidebar'</span></em><a class="headerlink" href="#scitex_ui._components._package_docs_sidebar.PackageDocsSidebar.name" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'package-docs-sidebar'</span></span><a class="headerlink" href="#scitex_ui._components._package_docs_sidebar.PackageDocsSidebar.name" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="scitex_ui._components._package_docs_sidebar.PackageDocsSidebar.version">
-<span class="sig-name descname"><span class="pre">version</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'0.1.0'</span></em><a class="headerlink" href="#scitex_ui._components._package_docs_sidebar.PackageDocsSidebar.version" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">version</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'0.1.0'</span></span><a class="headerlink" href="#scitex_ui._components._package_docs_sidebar.PackageDocsSidebar.version" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="scitex_ui._components._package_docs_sidebar.PackageDocsSidebar.description">
-<span class="sig-name descname"><span class="pre">description</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Navigable</span> <span class="pre">sidebar</span> <span class="pre">for</span> <span class="pre">Python</span> <span class="pre">package</span> <span class="pre">documentation'</span></em><a class="headerlink" href="#scitex_ui._components._package_docs_sidebar.PackageDocsSidebar.description" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">description</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Navigable</span> <span class="pre">sidebar</span> <span class="pre">for</span> <span class="pre">Python</span> <span class="pre">package</span> <span class="pre">documentation'</span></span><a class="headerlink" href="#scitex_ui._components._package_docs_sidebar.PackageDocsSidebar.description" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="scitex_ui._components._package_docs_sidebar.PackageDocsSidebar.api_endpoint">
-<span class="sig-name descname"><span class="pre">api_endpoint</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'/apps/docs/api/packages/'</span></em><a class="headerlink" href="#scitex_ui._components._package_docs_sidebar.PackageDocsSidebar.api_endpoint" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">api_endpoint</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'/apps/docs/api/packages/'</span></span><a class="headerlink" href="#scitex_ui._components._package_docs_sidebar.PackageDocsSidebar.api_endpoint" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="scitex_ui._components._package_docs_sidebar.PackageDocsSidebar.ts_entry">
-<span class="sig-name descname"><span class="pre">ts_entry</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'scitex_ui/ts/app/package-docs-sidebar/index'</span></em><a class="headerlink" href="#scitex_ui._components._package_docs_sidebar.PackageDocsSidebar.ts_entry" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ts_entry</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'scitex_ui/ts/app/package-docs-sidebar/index'</span></span><a class="headerlink" href="#scitex_ui._components._package_docs_sidebar.PackageDocsSidebar.ts_entry" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="scitex_ui._components._package_docs_sidebar.PackageDocsSidebar.css_file">
-<span class="sig-name descname"><span class="pre">css_file</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'scitex_ui/css/app/package-docs-sidebar.css'</span></em><a class="headerlink" href="#scitex_ui._components._package_docs_sidebar.PackageDocsSidebar.css_file" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">css_file</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'scitex_ui/css/app/package-docs-sidebar.css'</span></span><a class="headerlink" href="#scitex_ui._components._package_docs_sidebar.PackageDocsSidebar.css_file" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -413,7 +431,7 @@ API: /apps/docs/api/packages/</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../architecture.html" class="btn btn-neutral float-left" title="Architecture" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../app_developer_guide.html" class="btn btn-neutral float-left" title="&lt;no title&gt;" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>

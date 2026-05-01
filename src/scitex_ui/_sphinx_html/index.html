@@ -8,15 +8,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>scitex-ui &mdash; scitex-ui 0.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="_static/documentation_options.js?v=01f34227"></script>
-      <script src="_static/doctools.js?v=9bcbadda"></script>
-      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="_static/clipboard.min.js?v=a7894cd8"></script>
       <script src="_static/copybutton.js?v=f281be69"></script>
     <script src="_static/js/theme.js"></script>
@@ -47,6 +47,7 @@
               <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="components.html">Components</a></li>
 <li class="toctree-l1"><a class="reference internal" href="architecture.html">Architecture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/scitex_ui.html">API Reference</a></li>
 </ul>
@@ -78,6 +79,23 @@
   <section id="scitex-ui">
 <h1>scitex-ui<a class="headerlink" href="#scitex-ui" title="Link to this heading"></a></h1>
 <p>Shared frontend UI components for the SciTeX ecosystem.</p>
+<section id="role-in-scitex-ecosystem">
+<h2>Role in SciTeX Ecosystem<a class="headerlink" href="#role-in-scitex-ecosystem" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">scitex-ui</span></code> is the <strong>shared React/TypeScript component library</strong> for all SciTeX web
+applications. It provides shell components (workspace frame, sidebar, header) and app
+components (data-table, file-browser, selector-nav) with Shadow DOM isolation via
+<code class="docutils literal notranslate"><span class="pre">AppSandbox</span></code>.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>scitex (orchestrator, templates, CLI, MCP)
+  |-- scitex-app              -- runtime SDK for apps
+  |-- scitex-ui (this package) -- React/TS component library
+  +-- figrecipe               -- reference app (consumes scitex-ui)
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><strong>scitex</strong> (<a class="reference external" href="https://scitex-python.readthedocs.io/">docs</a>): Orchestrator that re-exports <code class="docutils literal notranslate"><span class="pre">scitex.ui</span></code></p></li>
+<li><p><strong>scitex-app</strong> (<a class="reference external" href="https://scitex-app.readthedocs.io/">docs</a>): Runtime SDK for app backends</p></li>
+<li><p><strong>figrecipe</strong> (<a class="reference external" href="https://figrecipe.readthedocs.io/">docs</a>): Reference app that consumes these components</p></li>
+</ul>
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
 <ul>
@@ -85,6 +103,13 @@
 <li class="toctree-l2"><a class="reference internal" href="quickstart.html#installation">Installation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="quickstart.html#django-setup">Django Setup</a></li>
 <li class="toctree-l2"><a class="reference internal" href="quickstart.html#python-api">Python API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="components.html">Components</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="components.html#shell-components">Shell Components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="components.html#app-components">App Components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="components.html#usage-typescript">Usage (TypeScript)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="components.html#css">CSS</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="architecture.html">Architecture</a><ul>
@@ -98,12 +123,14 @@
 <li class="toctree-l2"><a class="reference internal" href="api/scitex_ui.html#scitex_ui.get_component"><code class="docutils literal notranslate"><span class="pre">get_component()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/scitex_ui.html#scitex_ui.list_components"><code class="docutils literal notranslate"><span class="pre">list_components()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/scitex_ui.html#scitex_ui.get_static_dir"><code class="docutils literal notranslate"><span class="pre">get_static_dir()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/scitex_ui.html#scitex_ui.get_docs_path"><code class="docutils literal notranslate"><span class="pre">get_docs_path()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/scitex_ui.html#module-scitex_ui._registry">Registry</a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/scitex_ui.html#module-scitex_ui._components._theme_provider">Components</a></li>
 </ul>
 </li>
 </ul>
 </div>
+</section>
 </section>
 
 
