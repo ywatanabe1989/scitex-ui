@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "scitex-ui"
-version = "0.4.7"
+version = "0.4.8"
 description = "Shared frontend UI components for the SciTeX ecosystem"
 readme = "README.md"
 license = "AGPL-3.0-only"
@@ -34,15 +34,24 @@ classifiers = [
     "Topic :: Scientific/Engineering",
     "Topic :: Software Development :: User Interfaces",
 ]
-dependencies = []
+dependencies = ["django"]
 
 [project.scripts]
 scitex-ui = "scitex_ui._cli:main"
 
 [project.optional-dependencies]
-cli = ["click>=8.0.0", "scitex-dev"]
-mcp = ["fastmcp>=2.0.0"]
-dev = ["pytest>=7.0.0", "pytest-cov>=4.0.0", "scitex-dev"]
+cli = [
+    "click>=8.0.0",
+    "scitex-dev",
+]
+mcp = [
+    "fastmcp>=2.0.0",
+]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "scitex-dev",
+]
 docs = [
     "sphinx>=7.0",
     "sphinx-rtd-theme>=2.0",
@@ -51,16 +60,8 @@ docs = [
     "sphinx-autodoc-typehints>=1.25",
 ]
 all = [
-    "click>=8.0.0",
-    "fastmcp>=2.0.0",
-    "pytest>=7.0.0",
-    "pytest-cov>=4.0.0",
-    "scitex-dev",
-    "sphinx>=7.0",
-    "sphinx-rtd-theme>=2.0",
-    "myst-parser>=2.0",
-    "sphinx-copybutton>=0.5",
-    "sphinx-autodoc-typehints>=1.25",
+    "scitex-ui[cli]",
+    "scitex-ui[mcp]",
 ]
 
 [project.entry-points."scitex_dev.docs"]
@@ -79,4 +80,7 @@ packages = ["src/scitex_ui"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.scitex-linter]
+library_dirs = ["src", "tests", "examples"]
 

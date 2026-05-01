@@ -38,9 +38,22 @@ else:
     @click.option(
         "--help-recursive", is_flag=True, help="Show help for all subcommands."
     )
+    @click.option(
+        "--json",
+        "as_json",
+        is_flag=True,
+        help="Emit structured JSON output (propagates to subcommands that honour it).",
+    )
     @click.pass_context
-    def main(ctx, help_recursive):
-        """SciTeX UI — shared React/TypeScript components for the workspace."""
+    def main(ctx, help_recursive, as_json):
+        """SciTeX UI — shared React/TypeScript components for the workspace.
+
+        \b
+        Config is loaded with the SciTeX precedence chain:
+          config.yaml -> $SCITEX_UI_CONFIG -> ~/.scitex/ui/config.yaml -> defaults
+        """
+        ctx.ensure_object(dict)
+        ctx.obj["as_json"] = as_json
         if help_recursive:
             click.echo(ctx.get_help())
             click.echo()
@@ -67,13 +80,24 @@ else:
             click.echo(ctx.get_help())
 
     @mcp_group.command("start")
-    def mcp_start():
+    @click.option("--dry-run", is_flag=True, help="Print launch plan without starting.")
+    @click.option(
+        "-y",
+        "--yes",
+        is_flag=True,
+        help="Suppress interactive confirmation (assume yes).",
+    )
+    def mcp_start(dry_run, yes):
         """Start the scitex-ui MCP server.
 
         \b
         Examples:
-          scitex-ui mcp start
+          scitex-ui mcp-group start
+          scitex-ui mcp-group start --dry-run
         """
+        if dry_run:
+            click.echo("DRY RUN — would start scitex-ui MCP server (stdio transport)")
+            return
         try:
             from ._mcp.server import mcp as mcp_server
         except ImportError as e:
@@ -172,14 +196,14 @@ else:
                     click.echo(f"    {desc}")
                 click.echo()
 
-    @mcp_group.command("installation")
+    @mcp_group.command("show-installation")
     @click.option("--json", "as_json", is_flag=True, help="Output as JSON.")
-    def mcp_installation(as_json):
+    def mcp_show_installation(as_json):
         """Show MCP server installation instructions.
 
         \b
         Examples:
-          scitex-ui mcp installation
+          scitex-ui mcp show-installation
         """
         import json as json_mod
 
@@ -203,7 +227,69 @@ else:
             click.echo("Or start manually:")
             click.echo("  scitex-ui mcp start")
 
+    # Deprecation redirect: mcp installation -> mcp show-installation
+    @mcp_group.command(
+        "installation", hidden=True, context_settings={"ignore_unknown_options": True}
+    )
+    @click.pass_context
+    def mcp_installation_deprecated(ctx):
+        """(deprecated) Renamed to `show-installation`."""
+        click.echo(
+            "error: `scitex-ui mcp installation` was renamed to "
+            "`scitex-ui mcp show-installation`.\n"
+            "Re-run with: scitex-ui mcp show-installation",
+            err=True,
+        )
+        ctx.exit(2)
+
     main.add_command(mcp_group, "mcp")
+
+    # -- Introspection ------------------------------------------------------
+    @main.command("list-python-apis")
+    @click.option("-v", "--verbose", count=True, help="-v names, -vv +sigs, -vvv +docs")
+    @click.option("--json", "as_json", is_flag=True, help="Output as JSON.")
+    def list_python_apis(verbose, as_json):
+        """List public Python APIs in scitex-ui.
+
+        \b
+        Example:
+          $ scitex-ui list-python-apis
+          $ scitex-ui list-python-apis -vv
+          $ scitex-ui list-python-apis --json
+        """
+        import inspect
+
+        import scitex_ui
+
+        names = sorted(getattr(scitex_ui, "__all__", []))
+        apis = []
+        for name in names:
+            obj = getattr(scitex_ui, name, None)
+            if obj is None:
+                continue
+            entry = {"name": name, "type": type(obj).__name__}
+            if callable(obj):
+                try:
+                    entry["signature"] = str(inspect.signature(obj))
+                except (TypeError, ValueError):
+                    pass
+            doc = inspect.getdoc(obj) or ""
+            if doc:
+                entry["doc"] = doc.strip().split("\n")[0]
+            apis.append(entry)
+
+        if as_json:
+            import json as _json
+
+            click.echo(_json.dumps({"module": "scitex_ui", "apis": apis}, indent=2))
+            return
+
+        click.secho("scitex_ui Python APIs", fg="cyan", bold=True)
+        for api in apis:
+            sig = api.get("signature", "")
+            click.echo(f"  {click.style(api['name'], fg='green')}{sig}")
+            if verbose >= 2 and api.get("doc"):
+                click.echo(f"    {api['doc']}")
 
     # Wire shared subcommands from scitex-dev
     try:

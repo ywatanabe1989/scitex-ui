@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Tests for package initialization and public API."""
+# -*- coding: utf-8 -*-
+# File: /home/ywatanabe/proj/scitex-ui/tests/integration/test_public_api.py
+
+"""Cross-module integration: package initialization, public API surface,
+and the aggregate registration contract (every shipped component lands
+in `_registry`)."""
 
 import scitex_ui
 
@@ -22,6 +27,7 @@ class TestPublicAPI:
 
     def test_all_contains_expected(self):
         expected = {
+            "__version__",
             "get_component",
             "list_components",
             "get_static_dir",
@@ -44,3 +50,33 @@ class TestPublicAPI:
     def test_list_components_includes_sidebar(self):
         components = scitex_ui.list_components()
         assert "package-docs-sidebar" in components
+
+
+class TestAllComponentsRegistered:
+    """Importing scitex_ui must trigger registration of every component.
+
+    Lives in tests/integration/ because it spans every component module
+    in src/scitex_ui/_components/ — there is no single src counterpart.
+    """
+
+    def test_all_components_registered(self):
+        names = scitex_ui.list_components()
+        expected = {
+            "app-shell",
+            "confirm-modal",
+            "data-table",
+            "dropdown",
+            "file-browser",
+            "file-tabs",
+            "media-viewer",
+            "monaco-editor",
+            "package-docs-sidebar",
+            "resizer",
+            "status-bar",
+            "theme-provider",
+            "tooltip",
+        }
+        assert expected.issubset(set(names)), f"missing: {expected - set(names)}"
+
+
+# EOF

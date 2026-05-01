@@ -9,6 +9,8 @@ interfaces:
   skills: 2
   hook: 0
   http: 2
+name: scitex-ui
+tags: [scitex-ui, scitex-package]
 ---
 
 # scitex-ui — Workspace Shell Framework

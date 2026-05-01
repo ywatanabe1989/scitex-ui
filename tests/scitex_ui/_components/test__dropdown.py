@@ -1,0 +1,15 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# File: /home/ywatanabe/proj/scitex-ui/tests/scitex_ui/_components/test__dropdown.py
+
+"""Tests for scitex_ui._components._dropdown."""
+
+from scitex_ui._components._dropdown import Dropdown
+
+
+class TestDropdown:
+    def test_metadata_and_files(self, check_metadata):
+        check_metadata(Dropdown)
+
+
+# EOF

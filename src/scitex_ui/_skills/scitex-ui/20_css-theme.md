@@ -1,5 +1,7 @@
 ---
 description: CSS design tokens, semantic theme variables, dark/light mode. Use when styling SciTeX app components to match the workspace theme.
+name: css-theme
+tags: [scitex-ui, scitex-package]
 ---
 
 # scitex-ui CSS Theme

@@ -1,25 +1,41 @@
 #!/usr/bin/env python3
-"""Example: List all registered UI components and their metadata."""
+"""List all registered scitex-ui components and their metadata.
+
+Usage:
+    python 01_list_components.py
+"""
 
 from pathlib import Path
 
+import scitex as stx
+
 import scitex_ui
 
-OUTPUT_DIR = Path(__file__).parent / "01_list_components_out"
-OUTPUT_DIR.mkdir(exist_ok=True)
 
-# List all registered components
-components = scitex_ui.list_components()
-print(f"Registered components ({len(components)}):")
+@stx.session
+def main(
+    CONFIG=stx.session.INJECTED,
+    logger=stx.session.INJECTED,
+) -> int:
+    """List every registered component and dump a summary to SDIR_RUN."""
+    OUT = Path(CONFIG.SDIR_RUN)
 
-lines = []
-for name in components:
-    meta = scitex_ui.get_component(name)
-    info = f"  {name} v{meta.version} — {meta.description}"
-    print(info)
-    lines.append(info)
+    components = scitex_ui.list_components()
+    logger.info(f"Registered components ({len(components)}):")
 
-# Save output
-output_file = OUTPUT_DIR / "components.txt"
-output_file.write_text("\n".join(lines) + "\n")
-print(f"\nSaved to {output_file}")
+    lines = []
+    for name in components:
+        meta = scitex_ui.get_component(name)
+        info = f"  {name} v{meta.version} — {meta.description}"
+        logger.info(info)
+        lines.append(info)
+
+    output_file = OUT / "components.txt"
+    output_file.write_text("\n".join(lines) + "\n")
+    logger.info(f"Saved to {output_file}")
+
+    return 0
+
+
+if __name__ == "__main__":
+    main()

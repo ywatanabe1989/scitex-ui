@@ -1,5 +1,7 @@
 ---
 description: CSS theme variables, figrecipe reference implementation, WorkspaceResizeContext, and packaging requirements for bridge apps
+name: frontend-components-theme
+tags: [scitex-ui, scitex-package]
 ---
 
 # Frontend Components — Theme, Reference & Packaging

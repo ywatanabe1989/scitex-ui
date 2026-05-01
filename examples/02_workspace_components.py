@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
-"""Example: Inspect workspace frame component metadata."""
+"""Inspect workspace frame component metadata (theme, shell, browser, status).
+
+Usage:
+    python 02_workspace_components.py
+"""
 
 from pathlib import Path
 
-import scitex_ui
+import scitex as stx
 
-OUTPUT_DIR = Path(__file__).parent / "02_workspace_components_out"
-OUTPUT_DIR.mkdir(exist_ok=True)
+import scitex_ui
 
 WORKSPACE_COMPONENTS = [
     "theme-provider",
@@ -15,23 +18,36 @@ WORKSPACE_COMPONENTS = [
     "status-bar",
 ]
 
-lines = []
-print("Workspace Frame Components:")
-print("=" * 50)
 
-for name in WORKSPACE_COMPONENTS:
-    meta = scitex_ui.get_component(name)
-    if meta is None:
-        print(f"  {name}: NOT REGISTERED")
-        continue
-    line = f"  {name} v{meta.version}"
-    print(line)
-    print(f"    {meta.description}")
-    print(f"    CSS: {meta.css_file}")
-    print(f"    TS:  {meta.ts_entry}")
-    print()
-    lines.append(f"{name} v{meta.version} — {meta.description}")
+@stx.session
+def main(
+    CONFIG=stx.session.INJECTED,
+    logger=stx.session.INJECTED,
+) -> int:
+    """Inspect the workspace frame component subset and persist a summary."""
+    OUT = Path(CONFIG.SDIR_RUN)
 
-output_file = OUTPUT_DIR / "workspace_components.txt"
-output_file.write_text("\n".join(lines) + "\n")
-print(f"Saved to {output_file}")
+    lines = []
+    logger.info("Workspace Frame Components:")
+    logger.info("=" * 50)
+
+    for name in WORKSPACE_COMPONENTS:
+        meta = scitex_ui.get_component(name)
+        if meta is None:
+            logger.info(f"  {name}: NOT REGISTERED")
+            continue
+        logger.info(f"  {name} v{meta.version}")
+        logger.info(f"    {meta.description}")
+        logger.info(f"    CSS: {meta.css_file}")
+        logger.info(f"    TS:  {meta.ts_entry}")
+        lines.append(f"{name} v{meta.version} — {meta.description}")
+
+    output_file = OUT / "workspace_components.txt"
+    output_file.write_text("\n".join(lines) + "\n")
+    logger.info(f"Saved to {output_file}")
+
+    return 0
+
+
+if __name__ == "__main__":
+    main()

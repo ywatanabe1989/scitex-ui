@@ -1,0 +1,15 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# File: /home/ywatanabe/proj/scitex-ui/tests/scitex_ui/_components/test__data_table.py
+
+"""Tests for scitex_ui._components._data_table."""
+
+from scitex_ui._components._data_table import DataTable
+
+
+class TestDataTable:
+    def test_metadata_and_files(self, check_metadata):
+        check_metadata(DataTable)
+
+
+# EOF
