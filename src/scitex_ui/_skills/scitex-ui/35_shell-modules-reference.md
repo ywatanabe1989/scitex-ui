@@ -1,7 +1,8 @@
 ---
-description: Shell module reference — ShellFileTree, Toolbar, Terminal, Viewer, Chat. Companion to 31_shell-modules.md.
-name: shell-modules-reference
-tags: [scitex-ui, scitex-package]
+description: |
+  [TOPIC] Shell Modules Reference
+  [DETAILS] Shell module reference — ShellFileTree, Toolbar, Terminal, Viewer, Chat. Companion to 31_shell-modules.md..
+tags: [scitex-ui-shell-modules-reference]
 ---
 
 # Shell Modules Reference

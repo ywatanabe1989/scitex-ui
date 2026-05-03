@@ -1,7 +1,8 @@
 ---
-description: Shell module reference — AppShell, StatusBar, ThemeProvider, RepoMonitor, Shortcuts, Custom Events, Vendor Assets. Companion to 31_shell-modules.md.
-name: shell-modules-app-shell
-tags: [scitex-ui, scitex-package]
+description: |
+  [TOPIC] Shell Modules — App Shell, Status, Theme
+  [DETAILS] Shell module reference — AppShell, StatusBar, ThemeProvider, RepoMonitor, Shortcuts, Custom Events, Vendor Assets. Companion to 31_shell-modules.md..
+tags: [scitex-ui-shell-modules-app-shell]
 ---
 
 # Shell Modules — App Shell, Status, Theme

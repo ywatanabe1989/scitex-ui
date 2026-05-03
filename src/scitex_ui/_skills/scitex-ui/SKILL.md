@@ -1,5 +1,10 @@
 ---
-description: Shared frontend framework for SciTeX web apps — vanilla TS workspace shell + optional React components + Django static-asset integration. Ships `ts/shell/` (initShell, adapters, panel resize), `ts/app/`, `react/app/` (`usePanelResize`, `DataTable`), `css/shell/` (design tokens, dark/light), Django `templates/`. Python API — `list_components`, `get_component`, `register_component`, `get_static_dir`, `get_docs_path`. Add `scitex_ui` to `INSTALLED_APPS` for `AppDirectoriesFinder` CSS/TS discovery. 4 MCP tools — `ui_inspect_element(s)` (Playwright DOM introspection), `ui_notify`, `ui_get_notification_config`. Use when user asks to build a SciTeX workspace app, add panel resizing, share a React DataTable, theme with design tokens, set up Django static asset discovery, inspect a DOM element, or mentions initShell, usePanelResize, Bridge infrastructure.
+name: scitex-ui
+description: |
+  [WHAT] Shared frontend framework for SciTeX web apps — vanilla TS workspace shell + optional React components + Django static-asset integration.
+  [WHEN] Use when user asks to build a SciTeX workspace app, add panel resizing, share a React DataTable, theme with design tokens, set up Django static asset discovery, inspect a DOM element, or mentions initShell, usePanelResize, Bridge infrastructure.
+  [HOW] `pip install scitex-ui` then `import scitex_ui`; see leaf skills for details.
+tags: [scitex-ui]
 allowed-tools: mcp__scitex__ui_*
 primary_interface: mixed
 interfaces:
@@ -7,10 +12,7 @@ interfaces:
   cli: 1
   mcp: 2
   skills: 2
-  hook: 0
   http: 2
-name: scitex-ui
-tags: [scitex-ui, scitex-package]
 ---
 
 # scitex-ui — Workspace Shell Framework

@@ -1,7 +1,8 @@
 ---
-description: TypeScript shell framework — initShell entry point, ShellConfig, and adapter interfaces. Use when wiring the workspace shell to a backend.
-name: shell-modules
-tags: [scitex-ui, scitex-package]
+description: |
+  [TOPIC] scitex-ui Shell Modules
+  [DETAILS] TypeScript shell framework — initShell entry point, ShellConfig, and adapter interfaces. Use when wiring the workspace shell to a backend..
+tags: [scitex-ui-shell-modules]
 ---
 
 # scitex-ui Shell Modules
