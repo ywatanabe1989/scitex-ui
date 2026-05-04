@@ -35,9 +35,15 @@ See [../../general/02_interface-python-api.md] for the dual-install rule.
 
 ## Sub-skills
 
-### Core (01–09)
-- [01_python-api.md](01_python-api.md) — Python API: `list_components`, `get_component`, `get_static_dir`, Django integration
-- [02_cli.md](02_cli.md) — CLI commands: `scitex-ui mcp`, `docs`, `skills`
+### Mandatory (SK105–108)
+- [01_installation.md](01_installation.md) — pip install + Django static-asset wiring + smoke verify
+- [02_quick-start.md](02_quick-start.md) — wire shell into a Django template
+- [03_python-api.md](03_python-api.md) — Python registry + static-asset resolver
+- [04_cli-reference.md](04_cli-reference.md) — full `scitex-ui` subcommand surface
+
+### Legacy core (renumbered)
+- [12_python-api.md](12_python-api.md) — original Python API page (was 01)
+- [13_cli.md](13_cli.md) — original CLI page (was 02)
 
 ### Standards (20–29)
 - [20_css-theme.md](20_css-theme.md) — CSS design tokens, theme variables, dark/light mode
