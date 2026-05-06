@@ -307,10 +307,8 @@ else:
 # audit §4 — inject version into root --help
 try:
     from importlib.metadata import version as _v
-    main.help = (
-        f"scitex-ui (v{_v('scitex-ui')}) — "
-        + (main.help or "").lstrip()
-    )
+
+    main.help = f"scitex-ui (v{_v('scitex-ui')}) — " + (main.help or "").lstrip()
 except Exception:
     pass
 
@@ -319,3 +317,10 @@ except Exception:
 from ._skills import skills_group as _skills_group
 
 main.add_command(_skills_group, name="skills")
+
+try:
+    from scitex_dev._cli._completion import attach_shell_completion
+
+    attach_shell_completion(main, prog_name="scitex-ui")
+except Exception:
+    pass
