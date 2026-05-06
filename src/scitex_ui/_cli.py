@@ -302,3 +302,14 @@ else:
 
 
 # EOF
+
+
+# audit §4 — inject version into root --help
+try:
+    from importlib.metadata import version as _v
+    main.help = (
+        f"scitex-ui (v{_v('scitex-ui')}) — "
+        + (main.help or "").lstrip()
+    )
+except Exception:
+    pass
