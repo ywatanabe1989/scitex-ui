@@ -53,16 +53,16 @@ def test_ui_skills_list_returns_known_skills():
     assert payload["success"] is True
     assert payload["package"] == "scitex-ui"
     assert isinstance(payload["skills"], list)
-    # The repo ships at least the 01_python-api skill page.
-    assert "01_python-api" in payload["skills"]
+    # The repo ships at least the 03_python-api skill page.
+    assert "03_python-api" in payload["skills"]
 
 
 def test_ui_skills_get_known_page():
     fn = ui_skills_get.fn if hasattr(ui_skills_get, "fn") else ui_skills_get
-    raw = fn(name="01_python-api")
+    raw = fn(name="03_python-api")
     payload = json.loads(raw)
     assert payload["success"] is True
-    assert payload["name"] == "01_python-api"
+    assert payload["name"] == "03_python-api"
     assert isinstance(payload["content"], str)
     assert payload["content"].strip(), "skill content must be non-empty"
 
@@ -90,11 +90,11 @@ def test_call_tool_ui_skills_list_via_mcp():
 
 
 def test_call_tool_ui_skills_get_via_mcp():
-    result = asyncio.run(mcp.call_tool("ui_skills_get", {"name": "01_python-api"}))
+    result = asyncio.run(mcp.call_tool("ui_skills_get", {"name": "03_python-api"}))
     text = result.content[0].text
     payload = json.loads(text)
     assert payload["success"] is True
-    assert payload["name"] == "01_python-api"
+    assert payload["name"] == "03_python-api"
 
 
 # EOF
