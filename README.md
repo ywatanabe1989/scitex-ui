@@ -168,6 +168,42 @@ MCP (Model Context Protocol) tools for AI agents to discover and query available
 
 </details>
 
+## Demo
+
+The package ships runnable example pages under `examples/` showing each component category in isolation:
+
+| Example | What it shows |
+|---------|---------------|
+| **`01_list_components.py`** | Iterates the registry: prints every Shell + App component with its version, TS entry, and CSS path |
+| **`02_workspace_components.py`** | Mounts `ThemeProvider` + `AppShell` + `StatusBar` as a minimal workspace frame |
+
+```mermaid
+flowchart LR
+    subgraph Page ["Browser Page (#app)"]
+        Theme[ThemeProvider<br/>tokens injected]
+        Shell[AppShell<br/>sidebar + content]
+        Bar[StatusBar<br/>L | C | R]
+        FB[FileBrowser<br/>tree view]
+    end
+    Static[Django static<br/>scitex_ui/static/] --> Page
+    Reg[(Python registry<br/>get_component)] --> Static
+    style Theme fill:#4a90d9,stroke:#2c3e50,color:#fff
+    style Shell fill:#4a90d9,stroke:#2c3e50,color:#fff
+    style Bar  fill:#4a90d9,stroke:#2c3e50,color:#fff
+    style FB   fill:#27ae60,stroke:#2c3e50,color:#fff
+```
+
+<p align="center"><sub><b>Figure 2.</b> Demo. Components are discovered via the Python registry, then mounted in TypeScript against DOM containers. CSS is shipped as Django static assets.</sub></p>
+
+```bash
+# List every registered component
+python examples/01_list_components.py
+
+# Run the workspace-shell example (Django dev server)
+python examples/02_workspace_components.py
+# → open http://localhost:8000/ to see ThemeProvider + AppShell + StatusBar
+```
+
 ## Role in SciTeX Ecosystem
 
 `scitex-ui` is the **shared TypeScript + CSS component library** for all SciTeX web applications. It provides the visual building blocks that maintain consistency across the cloud dashboard, workspace editor, and third-party apps.
