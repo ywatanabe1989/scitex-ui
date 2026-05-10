@@ -7,7 +7,7 @@
 </p>
 
 <p align="center">
-  <a href="https://scitex-ui.readthedocs.io/">Full Documentation</a> · <code>pip install scitex-ui</code>
+  <a href="https://scitex-ui.readthedocs.io/">Full Documentation</a> · <code>uv pip install scitex-ui[all]</code>
 </p>
 
 <!-- scitex-badges:start -->
