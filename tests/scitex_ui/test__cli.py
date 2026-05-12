@@ -5,16 +5,12 @@ import json
 
 import pytest
 
-try:
-    from click.testing import CliRunner
+# click is an optional dep (scitex-ui[cli]); skip the whole module if it
+# isn't installed so pytest collection stays green (PA-303).
+pytest.importorskip("click")
 
-    from scitex_ui._cli import main
-
-    HAS_CLICK = True
-except ImportError:
-    HAS_CLICK = False
-
-pytestmark = pytest.mark.skipif(not HAS_CLICK, reason="click not installed")
+from click.testing import CliRunner  # noqa: E402
+from scitex_ui._cli import main  # noqa: E402
 
 
 @pytest.fixture

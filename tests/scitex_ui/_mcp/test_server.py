@@ -9,14 +9,11 @@ import json
 
 import pytest
 
-try:
-    from scitex_ui._mcp.server import mcp, ui_skills_get, ui_skills_list
+# fastmcp is an optional dep (scitex-ui[mcp]); skip the whole module if
+# it isn't installed so pytest collection stays green (PA-303).
+pytest.importorskip("fastmcp")
 
-    HAS_MCP = True
-except ImportError:  # pragma: no cover — fastmcp optional
-    HAS_MCP = False
-
-pytestmark = pytest.mark.skipif(not HAS_MCP, reason="fastmcp not installed")
+from scitex_ui._mcp.server import mcp, ui_skills_get, ui_skills_list  # noqa: E402
 
 
 # ---------------------------------------------------------------------------

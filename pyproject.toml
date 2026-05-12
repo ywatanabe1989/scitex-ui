@@ -48,6 +48,7 @@ mcp = [
     "fastmcp>=2.0.0",
 ]
 dev = [
+    "click>=8.0.0",  # tests/scitex_ui/test__cli.py
     "fastmcp>=2.0.0",
     "pytest-cov>=4.0.0",
     "pytest>=7.0.0",
@@ -81,6 +82,11 @@ packages = ["src/scitex_ui"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.coverage.run]
+parallel = true
+source = ["scitex_ui"]
+concurrency = ["multiprocessing", "thread"]
 
 [tool.scitex-linter]
 library_dirs = ["src", "tests", "examples"]
