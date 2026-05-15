@@ -1,0 +1,11 @@
+ID: 2026Y-05M-12D-15h00m37s_CbHh
+PID: 79210
+START_DATETIME: 2026-05-12 15:00:37.159283
+FILE: /work/examples/02_workspace_components.py
+SDIR_OUT: /work/examples/02_workspace_components_out
+SDIR_RUN: 
+    /work/examples/02_workspace_components_out/RUNNING/2026Y-05M-12D-15h00m37s_CbHh-main
+ARGS: {}
+EXIT_STATUS: 0
+END_DATETIME: 2026-05-12 15:00:39.207142
+RUN_DURATION: 00:00:02

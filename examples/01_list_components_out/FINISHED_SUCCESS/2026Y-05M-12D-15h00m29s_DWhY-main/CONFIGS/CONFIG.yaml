@@ -1,0 +1,11 @@
+ID: 2026Y-05M-12D-15h00m29s_DWhY
+PID: 69937
+START_DATETIME: 2026-05-12 15:00:29.665270
+FILE: /work/examples/01_list_components.py
+SDIR_OUT: /work/examples/01_list_components_out
+SDIR_RUN: 
+    /work/examples/01_list_components_out/RUNNING/2026Y-05M-12D-15h00m29s_DWhY-main
+ARGS: {}
+EXIT_STATUS: 0
+END_DATETIME: 2026-05-12 15:00:31.719927
+RUN_DURATION: 00:00:02
